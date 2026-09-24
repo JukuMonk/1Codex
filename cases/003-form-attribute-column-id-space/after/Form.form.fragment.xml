@@ -1,0 +1,28 @@
+<!-- CORRECT -->
+
+  <attributes>
+    <name>Объект</name>
+    <id>1</id>
+    …
+  </attributes>
+  <attributes>
+    <name>ТолькоНепривязанные</name>
+    <id>2</id>
+    …
+  </attributes>
+  <attributes>
+    <name>Строки</name>
+    <id>3</id>
+    <valueType><types>ValueTable</types></valueType>
+    …
+    <columns>
+      <name>Отметка</name>
+      <id>6</id>          ← продолжает общий ряд реквизитов
+      …
+    </columns>
+    <columns>
+      <name>Пункт</name>
+      <id>7</id>
+      …
+    </columns>
+  </attributes>

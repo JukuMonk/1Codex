@@ -1,0 +1,7 @@
+<!-- WRONG: так НЕ делать -->
+
+  <resources uuid="…">
+    <name>С</name>
+    …
+  <resources uuid="…">
+    <name>По</name>

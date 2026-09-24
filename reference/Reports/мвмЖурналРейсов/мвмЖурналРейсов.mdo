@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mdclass:Report xmlns:mdclass="http://g5.1c.ru/v8/dt/metadata/mdclass" uuid="3df8b844-99cb-48d5-8327-8109ac148b18">
+  <producedTypes>
+    <objectType typeId="a3d84527-a847-4e04-a57a-53557df13cdf" valueTypeId="d7905f0e-fe04-4040-8992-08c711832001"/>
+    <managerType typeId="3931fcb0-2b94-4530-944e-9ca018955db3" valueTypeId="cd89b5c6-f150-424c-a828-6b1f8dec6e74"/>
+  </producedTypes>
+  <name>мвмЖурналРейсов</name>
+  <synonym>
+    <key>ru</key>
+    <value>Журнал рейсов</value>
+  </synonym>
+  <useStandardCommands>true</useStandardCommands>
+  <defaultForm>CommonForm.ФормаОтчета</defaultForm>
+  <mainDataCompositionSchema>Report.мвмЖурналРейсов.Template.ОсновнаяСхемаКомпоновкиДанных</mainDataCompositionSchema>
+  <defaultSettingsForm>CommonForm.ФормаНастроекОтчета</defaultSettingsForm>
+  <defaultVariantForm>CommonForm.ФормаВариантаОтчета</defaultVariantForm>
+  <variantsStorage>SettingsStorage.ХранилищеВариантовОтчетов</variantsStorage>
+  <templates uuid="36314f5d-7a0a-41d7-8f3b-236ba14f2447">
+    <name>ОсновнаяСхемаКомпоновкиДанных</name>
+    <synonym>
+      <key>ru</key>
+      <value>Основная схема компоновки данных</value>
+    </synonym>
+    <templateType>DataCompositionSchema</templateType>
+  </templates>
+</mdclass:Report>

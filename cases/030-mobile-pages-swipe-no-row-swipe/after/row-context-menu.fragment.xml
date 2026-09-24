@@ -1,0 +1,13 @@
+<!-- CORRECT -->
+
+      <contextMenu>
+        <name>ТочкиКонтекстноеМеню</name>
+        <id>…</id>
+        <items xsi:type="form:Button">
+          <name>ОтметитьТочку</name>
+          …
+          <commandName>Form.Command.ОтметитьТочку</commandName>
+          …
+        </items>
+        <autoFill>true</autoFill>
+      </contextMenu>

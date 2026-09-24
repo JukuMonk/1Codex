@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mdclass:Subsystem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:core="http://g5.1c.ru/v8/dt/mcore" xmlns:mdclass="http://g5.1c.ru/v8/dt/metadata/mdclass" uuid="2826bb4d-4f38-4739-8bbd-00bfb38e0548">
+  <name>мвмСлужебноеЛогистики</name>
+  <synonym>
+    <key>ru</key>
+    <value>Служебное</value>
+  </synonym>
+  <includeInCommandInterface>false</includeInCommandInterface>
+  <explanation>
+    <key>ru</key>
+    <value>Кэш маршрутов и общие модули: в интерфейс не выводятся, нужны для прав и поиска по составу.</value>
+  </explanation>
+  <content>InformationRegister.мвмКэшМаршрутов</content>
+  <content>CommonModule.мвмМаршрутизация</content>
+  <content>CommonModule.мвмОформлениеКарты</content>
+  <content>CommonModule.мвмДемоДанные</content>
+  <content>CommonModule.мвмЗамерКомпоновки</content>
+  <content>CommonModule.мвмРейсыВодителя</content>
+  <content>CommonModule.мвмЧатВодителей</content>
+  <parentSubsystem>Subsystem.мвмЗаводскаяЛогистика</parentSubsystem>
+</mdclass:Subsystem>

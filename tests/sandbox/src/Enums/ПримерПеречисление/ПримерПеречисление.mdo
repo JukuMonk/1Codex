@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mdclass:Enum xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:core="http://g5.1c.ru/v8/dt/mcore" xmlns:mdclass="http://g5.1c.ru/v8/dt/metadata/mdclass" uuid="1cd459d0-fe4f-54d7-9267-6b761d8ba6ba">
+  <producedTypes>
+    <refType typeId="76cbce14-fb42-5398-a457-241b37999168" valueTypeId="12a22c16-578e-5a85-9422-f9f6e9f9581e"/>
+    <listType typeId="7d953540-5aa7-5cd6-b528-acf091d708c7" valueTypeId="7127edb2-8800-564c-96e8-0c90f1a197bd"/>
+    <managerType typeId="e7359275-f6f8-59fd-a7f2-b9b32d1c6395" valueTypeId="e68ad65d-434c-5429-89d3-fc52c74e114c"/>
+  </producedTypes>
+  <name>ПримерПеречисление</name>
+  <synonym>
+    <key>ru</key>
+    <value>Пример перечисления</value>
+  </synonym>
+  <comment>Имена значений сверять с .mdo, а не сочинять (Перечисления.X.Y в коде)</comment>
+  <standardAttributes>
+    <dataHistory>Use</dataHistory>
+    <name>Order</name>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+  </standardAttributes>
+  <standardAttributes>
+    <dataHistory>Use</dataHistory>
+    <name>Ref</name>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+  </standardAttributes>
+  <quickChoice>true</quickChoice>
+  <choiceMode>BothWays</choiceMode>
+  <enumValues uuid="83429c20-cea4-539e-a499-485b5b9c928c">
+    <name>Первое</name>
+    <synonym>
+      <key>ru</key>
+      <value>Первое значение</value>
+    </synonym>
+  </enumValues>
+  <enumValues uuid="18c1f558-bd63-5333-a7e3-1e70e9c802c5">
+    <name>Второе</name>
+    <synonym>
+      <key>ru</key>
+      <value>Второе значение</value>
+    </synonym>
+  </enumValues>
+  <enumValues uuid="82b60833-f2d6-57ee-bf76-e873d9b502e2">
+    <name>Третье</name>
+    <synonym>
+      <key>ru</key>
+      <value>Третье значение</value>
+    </synonym>
+  </enumValues>
+</mdclass:Enum>

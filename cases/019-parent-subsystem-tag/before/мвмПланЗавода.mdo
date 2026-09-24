@@ -1,0 +1,10 @@
+<!-- WRONG: так НЕ делать -->
+
+<?xml version="1.0" encoding="UTF-8"?>
+<mdclass:Subsystem xmlns:xsi=… xmlns:core=… xmlns:mdclass=… uuid="…">
+  <name>мвмПланЗавода</name>
+  <synonym><key>ru</key><value>План завода</value></synonym>
+  <includeInCommandInterface>true</includeInCommandInterface>
+  <content>Catalog.мвмУзлыКарты</content>
+  <content>Catalog.мвмПроездыКарты</content>
+</mdclass:Subsystem>

@@ -1,0 +1,8 @@
+<!-- CORRECT -->
+
+  <useStandardCommands>true</useStandardCommands>
+  <editType>InDialog</editType>
+  <defaultRecordForm>InformationRegister.X.Form.ФормаЗаписи</defaultRecordForm>
+  <defaultListForm>InformationRegister.X.Form.ФормаСписка</defaultListForm>
+  <dataLockControlMode>Managed</dataLockControlMode>
+  <dimensions uuid="…">

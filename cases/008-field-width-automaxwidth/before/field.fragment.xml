@@ -1,0 +1,6 @@
+<!-- WRONG: так НЕ делать -->
+
+      <extInfo xsi:type="form:InputFieldExtInfo">
+        <width>4</width>
+        <autoMaxHeight>true</autoMaxHeight>
+        <wrap>true</wrap>

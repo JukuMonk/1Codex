@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DataCompositionSchema xmlns="http://v8.1c.ru/8.1/data-composition-system/schema" xmlns:dcscom="http://v8.1c.ru/8.1/data-composition-system/common" xmlns:dcscor="http://v8.1c.ru/8.1/data-composition-system/core" xmlns:dcsset="http://v8.1c.ru/8.1/data-composition-system/settings" xmlns:v8="http://v8.1c.ru/8.1/data/core" xmlns:v8ui="http://v8.1c.ru/8.1/data/ui" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<dataSource>
+		<name>ИсточникДанных1</name>
+		<dataSourceType>Local</dataSourceType>
+	</dataSource>
+	<dataSet xsi:type="DataSetQuery">
+		<name>Данные</name>
+		<field xsi:type="DataSetFieldField">
+			<dataPath>Раздел</dataPath>
+			<field>Раздел</field>
+			<title xsi:type="v8:LocalStringType">
+				<v8:item>
+					<v8:lang>ru</v8:lang>
+					<v8:content>Раздел</v8:content>
+				</v8:item>
+			</title>
+		</field>
+		<field xsi:type="DataSetFieldField">
+			<dataPath>Объект</dataPath>
+			<field>Объект</field>
+			<title xsi:type="v8:LocalStringType">
+				<v8:item>
+					<v8:lang>ru</v8:lang>
+					<v8:content>Объект</v8:content>
+				</v8:item>
+			</title>
+		</field>
+		<field xsi:type="DataSetFieldField">
+			<dataPath>Замечание</dataPath>
+			<field>Замечание</field>
+			<title xsi:type="v8:LocalStringType">
+				<v8:item>
+					<v8:lang>ru</v8:lang>
+					<v8:content>Замечание</v8:content>
+				</v8:item>
+			</title>
+		</field>
+		<field xsi:type="DataSetFieldField">
+			<dataPath>Замечаний</dataPath>
+			<field>Замечаний</field>
+			<title xsi:type="v8:LocalStringType">
+				<v8:item>
+					<v8:lang>ru</v8:lang>
+					<v8:content>Замечаний</v8:content>
+				</v8:item>
+			</title>
+		</field>
+		<dataSource>ИсточникДанных1</dataSource>
+		<query>ВЫБРАТЬ РАЗРЕШЕННЫЕ
+	"1. Узлы плана" КАК Раздел,
+	Узлы.Ссылка КАК Объект,
+	"Не указан тип узла" КАК Замечание,
+	1 КАК Замечаний
+ИЗ
+	Справочник.мвмУзлыКарты КАК Узлы
+ГДЕ
+	НЕ Узлы.ПометкаУдаления
+	И Узлы.Тип = ЗНАЧЕНИЕ(Справочник.мвмТипыУзлов.ПустаяСсылка)
+
+ОБЪЕДИНИТЬ ВСЕ
+
+ВЫБРАТЬ
+	"1. Узлы плана" КАК Раздел,
+	Узлы.Ссылка КАК Объект,
+	"Узел стоит в нулевой точке плана" КАК Замечание,
+	1 КАК Замечаний
+ИЗ
+	Справочник.мвмУзлыКарты КАК Узлы
+ГДЕ
+	НЕ Узлы.ПометкаУдаления
+	И Узлы.X = 0
+	И Узлы.Y = 0
+
+ОБЪЕДИНИТЬ ВСЕ
+
+ВЫБРАТЬ
+	"2. Проезды" КАК Раздел,
+	Проезды.Ссылка КАК Объект,
+	"Не указан класс дороги" КАК Замечание,
+	1 КАК Замечаний
+ИЗ
+	Справочник.мвмПроездыКарты КАК Проезды
+ГДЕ
+	НЕ Проезды.ПометкаУдаления
+	И Проезды.Тип = ЗНАЧЕНИЕ(Справочник.мвмТипыПроездов.ПустаяСсылка)
+
+ОБЪЕДИНИТЬ ВСЕ
+
+ВЫБРАТЬ
+	"2. Проезды" КАК Раздел,
+	Проезды.Ссылка КАК Объект,
+	"Проезд не соединяет два узла" КАК Замечание,
+	1 КАК Замечаний
+ИЗ
+	Справочник.мвмПроездыКарты КАК Проезды
+ГДЕ
+	НЕ Проезды.ПометкаУдаления
+	И (Проезды.УзелА = ЗНАЧЕНИЕ(Справочник.мвмУзлыКарты.ПустаяСсылка)
+		ИЛИ Проезды.УзелБ = ЗНАЧЕНИЕ(Справочник.мвмУзлыКарты.ПустаяСсылка))
+
+ОБЪЕДИНИТЬ ВСЕ
+
+ВЫБРАТЬ
+	"2. Проезды" КАК Раздел,
+	Проезды.Ссылка КАК Объект,
+	"Скорость не задана ни у участка, ни у его класса" КАК Замечание,
+	1 КАК Замечаний
+ИЗ
+	Справочник.мвмПроездыКарты КАК Проезды
+ГДЕ
+	НЕ Проезды.ПометкаУдаления
+	И ЕСТЬNULL(Проезды.МаксСкорость, 0) = 0
+	И ЕСТЬNULL(Проезды.Тип.МаксСкорость, 0) = 0
+
+ОБЪЕДИНИТЬ ВСЕ
+
+ВЫБРАТЬ
+	"3. Классы дорог" КАК Раздел,
+	Типы.Ссылка КАК Объект,
+	"У класса нет ни одного ограничения" КАК Замечание,
+	1 КАК Замечаний
+ИЗ
+	Справочник.мвмТипыПроездов КАК Типы
+ГДЕ
+	НЕ Типы.ПометкаУдаления
+	И ЕСТЬNULL(Типы.МаксСкорость, 0) = 0
+	И ЕСТЬNULL(Типы.МаксВес, 0) = 0
+	И ЕСТЬNULL(Типы.МаксВысота, 0) = 0
+	И ЕСТЬNULL(Типы.МаксШирина, 0) = 0
+
+ОБЪЕДИНИТЬ ВСЕ
+
+ВЫБРАТЬ
+	"4. Геозоны" КАК Раздел,
+	Зоны.Ссылка КАК Объект,
+	"Не указан тип геозоны" КАК Замечание,
+	1 КАК Замечаний
+ИЗ
+	Справочник.уатГеозоны_уэ КАК Зоны
+ГДЕ
+	НЕ Зоны.ПометкаУдаления
+	И НЕ Зоны.ЭтоГруппа
+	И Зоны.Тип = ЗНАЧЕНИЕ(Справочник.мвмТипыГеозон.ПустаяСсылка)
+
+ОБЪЕДИНИТЬ ВСЕ
+
+ВЫБРАТЬ
+	"4. Геозоны" КАК Раздел,
+	Зоны.Ссылка КАК Объект,
+	"У зоны нет контура на плане" КАК Замечание,
+	1 КАК Замечаний
+ИЗ
+	Справочник.уатГеозоны_уэ КАК Зоны
+ГДЕ
+	НЕ Зоны.ПометкаУдаления
+	И НЕ Зоны.ЭтоГруппа
+	И НЕ Зоны.Ссылка В
+			(ВЫБРАТЬ РАЗЛИЧНЫЕ
+				Контур.Ссылка
+			ИЗ
+				Справочник.уатГеозоны_уэ.КонтурНаПлане КАК Контур)
+
+ОБЪЕДИНИТЬ ВСЕ
+
+ВЫБРАТЬ
+	"4. Геозоны" КАК Раздел,
+	Зоны.Ссылка КАК Объект,
+	"Зона ничего не ограничивает: ни скорости, ни веса" КАК Замечание,
+	1 КАК Замечаний
+ИЗ
+	Справочник.уатГеозоны_уэ КАК Зоны
+ГДЕ
+	НЕ Зоны.ПометкаУдаления
+	И НЕ Зоны.ЭтоГруппа
+	И ЕСТЬNULL(Зоны.МаксСкорость, 0) = 0
+	И ЕСТЬNULL(Зоны.МаксВес, 0) = 0
+	И ЕСТЬNULL(Зоны.МаксШирина, 0) = 0
+	И ЕСТЬNULL(Зоны.МаксВысота, 0) = 0
+
+ОБЪЕДИНИТЬ ВСЕ
+
+ВЫБРАТЬ
+	"6. Парк" КАК Раздел,
+	ТС.Ссылка КАК Объект,
+	"Машина без водителя: её рейсы не увидит АРМ водителя" КАК Замечание,
+	1 КАК Замечаний
+ИЗ
+	Справочник.уатТС КАК ТС
+ГДЕ
+	НЕ ТС.ПометкаУдаления
+	И НЕ ТС.ЭтоГруппа
+	И ТС.Водитель = ЗНАЧЕНИЕ(Справочник.ФизическиеЛица.ПустаяСсылка)
+
+ОБЪЕДИНИТЬ ВСЕ
+
+ВЫБРАТЬ
+	"5. Пункты назначения" КАК Раздел,
+	Пункты.Ссылка КАК Объект,
+	"Пункт не привязан к узлу плана" КАК Замечание,
+	1 КАК Замечаний
+ИЗ
+	Справочник.уатПунктыНазначения КАК Пункты
+ГДЕ
+	НЕ Пункты.ПометкаУдаления
+	И НЕ Пункты.ЭтоГруппа
+	И Пункты.мвмУзелКарты = ЗНАЧЕНИЕ(Справочник.мвмУзлыКарты.ПустаяСсылка)
+
+УПОРЯДОЧИТЬ ПО
+	Раздел,
+	Замечание</query>
+	</dataSet>
+	<totalField>
+		<dataPath>Замечаний</dataPath>
+		<expression>Сумма(Замечаний)</expression>
+	</totalField>
+	<settingsVariant>
+		<dcsset:name>Основной</dcsset:name>
+		<dcsset:presentation xsi:type="v8:LocalStringType">
+			<v8:item>
+				<v8:lang>ru</v8:lang>
+				<v8:content>Что на плане настроено не до конца</v8:content>
+			</v8:item>
+		</dcsset:presentation>
+		<dcsset:settings xmlns:style="http://v8.1c.ru/8.1/data/ui/style" xmlns:sys="http://v8.1c.ru/8.1/data/ui/fonts/system" xmlns:web="http://v8.1c.ru/8.1/data/ui/colors/web" xmlns:win="http://v8.1c.ru/8.1/data/ui/colors/windows">
+			<dcsset:selection>
+				<dcsset:item xsi:type="dcsset:SelectedItemField">
+					<dcsset:field>Объект</dcsset:field>
+				</dcsset:item>
+				<dcsset:item xsi:type="dcsset:SelectedItemField">
+					<dcsset:field>Замечание</dcsset:field>
+				</dcsset:item>
+			</dcsset:selection>
+			<dcsset:outputParameters>
+				<dcscor:item xsi:type="dcsset:SettingsParameterValue">
+					<dcscor:parameter>Заголовок</dcscor:parameter>
+					<dcscor:value xsi:type="v8:LocalStringType">
+						<v8:item>
+							<v8:lang>ru</v8:lang>
+							<v8:content>Что на плане настроено не до конца</v8:content>
+						</v8:item>
+					</dcscor:value>
+				</dcscor:item>
+				<dcscor:item xsi:type="dcsset:SettingsParameterValue">
+					<dcscor:parameter>ВыводитьЗаголовок</dcscor:parameter>
+					<dcscor:value xsi:type="dcsset:DataCompositionTextOutputType">Output</dcscor:value>
+				</dcscor:item>
+			</dcsset:outputParameters>
+			<dcsset:item xsi:type="dcsset:StructureItemGroup">
+				<dcsset:groupItems>
+					<dcsset:item xsi:type="dcsset:GroupItemField">
+						<dcsset:field>Раздел</dcsset:field>
+						<dcsset:groupType>Items</dcsset:groupType>
+						<dcsset:periodAdditionType>None</dcsset:periodAdditionType>
+						<dcsset:periodAdditionBegin xsi:type="xs:dateTime">0001-01-01T00:00:00</dcsset:periodAdditionBegin>
+						<dcsset:periodAdditionEnd xsi:type="xs:dateTime">0001-01-01T00:00:00</dcsset:periodAdditionEnd>
+					</dcsset:item>
+					<dcsset:item xsi:type="dcsset:GroupItemField">
+						<dcsset:field>Замечание</dcsset:field>
+						<dcsset:groupType>Items</dcsset:groupType>
+						<dcsset:periodAdditionType>None</dcsset:periodAdditionType>
+						<dcsset:periodAdditionBegin xsi:type="xs:dateTime">0001-01-01T00:00:00</dcsset:periodAdditionBegin>
+						<dcsset:periodAdditionEnd xsi:type="xs:dateTime">0001-01-01T00:00:00</dcsset:periodAdditionEnd>
+					</dcsset:item>
+				</dcsset:groupItems>
+				<dcsset:order>
+					<dcsset:item xsi:type="dcsset:OrderItemAuto"/>
+				</dcsset:order>
+				<dcsset:selection>
+					<dcsset:item xsi:type="dcsset:SelectedItemAuto"/>
+				</dcsset:selection>
+				<dcsset:item xsi:type="dcsset:StructureItemGroup">
+					<dcsset:order>
+						<dcsset:item xsi:type="dcsset:OrderItemAuto"/>
+					</dcsset:order>
+					<dcsset:selection>
+						<dcsset:item xsi:type="dcsset:SelectedItemAuto"/>
+					</dcsset:selection>
+				</dcsset:item>
+			</dcsset:item>
+		</dcsset:settings>
+	</settingsVariant>
+</DataCompositionSchema>

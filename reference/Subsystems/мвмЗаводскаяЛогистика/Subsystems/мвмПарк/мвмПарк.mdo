@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mdclass:Subsystem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:core="http://g5.1c.ru/v8/dt/mcore" xmlns:mdclass="http://g5.1c.ru/v8/dt/metadata/mdclass" uuid="6994bf6d-54ce-46c8-80cf-1e0a47cbaa69">
+  <name>мвмПарк</name>
+  <synonym>
+    <key>ru</key>
+    <value>Парк техники</value>
+  </synonym>
+  <includeInCommandInterface>true</includeInCommandInterface>
+  <explanation>
+    <key>ru</key>
+    <value>Машины и их кузова: по ним подбирается транспорт под заявку.</value>
+  </explanation>
+  <content>Catalog.уатТС</content>
+  <content>Catalog.уатТипыТС</content>
+  <parentSubsystem>Subsystem.мвмЗаводскаяЛогистика</parentSubsystem>
+</mdclass:Subsystem>

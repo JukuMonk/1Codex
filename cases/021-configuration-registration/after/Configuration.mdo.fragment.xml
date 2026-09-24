@@ -1,0 +1,5 @@
+<!-- CORRECT -->
+
+  <dataProcessors>DataProcessor.ЭлектронныеПеревозочныеДокументы</dataProcessors>
+  <dataProcessors>DataProcessor.мвмАРМДиспетчера</dataProcessors>
+  <informationRegisters>InformationRegister.ItobАктуальностьДанныхТерминалов</informationRegisters>

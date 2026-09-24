@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mdclass:DataProcessor xmlns:mdclass="http://g5.1c.ru/v8/dt/metadata/mdclass" uuid="f0b21122-5988-5fb9-9da6-eaa333d8d909">
+  <producedTypes>
+    <objectType typeId="3464c2d4-8ede-5d93-bae7-74bd70307a92" valueTypeId="450142cb-20e8-52a2-b97c-3b96ce858468"/>
+    <managerType typeId="59184023-599b-5d67-84c2-5f2a093b6570" valueTypeId="74ed635b-40f8-5285-80ba-7269365544ca"/>
+  </producedTypes>
+  <name>ПримерМобильная</name>
+  <synonym>
+    <key>ru</key>
+    <value>Пример мобильной формы</value>
+  </synonym>
+  <comment>Одна форма с двумя назначениями: телефон и проверка в тонком клиенте</comment>
+  <useStandardCommands>true</useStandardCommands>
+  <defaultForm>DataProcessor.ПримерМобильная.Form.ФормаМобильная</defaultForm>
+  <forms uuid="31d7806e-3c2e-5e19-bbcd-1033b74b1baa">
+    <name>ФормаМобильная</name>
+    <synonym>
+      <key>ru</key>
+      <value>Мои задачи</value>
+    </synonym>
+    <usePurposes>MobileDevice</usePurposes>
+    <usePurposes>PersonalComputer</usePurposes>
+  </forms>
+</mdclass:DataProcessor>

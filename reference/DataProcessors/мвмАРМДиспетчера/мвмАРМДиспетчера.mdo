@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mdclass:DataProcessor xmlns:mdclass="http://g5.1c.ru/v8/dt/metadata/mdclass" uuid="3fdbf62a-a408-4eb0-a4c5-ae47855c8feb">
+  <producedTypes>
+    <objectType typeId="38d9e808-de7f-4499-9296-fabc459faafc" valueTypeId="4d61c8d9-0978-4456-96fe-97b81c221d4a"/>
+    <managerType typeId="cf162cf1-ea4f-4e7a-8b4a-5e9233c7a7e9" valueTypeId="e18d1272-2ef0-49e6-84f0-c1a02666f3ce"/>
+  </producedTypes>
+  <name>мвмАРМДиспетчера</name>
+  <synonym>
+    <key>ru</key>
+    <value>АРМ Диспетчера</value>
+  </synonym>
+  <useStandardCommands>true</useStandardCommands>
+  <defaultForm>DataProcessor.мвмАРМДиспетчера.Form.Форма</defaultForm>
+  <forms uuid="6a8d0eb7-20a9-43c3-80dd-593c39cd29b4">
+    <name>Форма</name>
+    <synonym>
+      <key>ru</key>
+      <value>АРМ диспетчера</value>
+    </synonym>
+    <usePurposes>PersonalComputer</usePurposes>
+  </forms>
+  <forms uuid="516ba204-f41b-54ad-b3cd-a046b393aabe">
+    <name>ВыборПунктаНаКарте</name>
+    <synonym>
+      <key>ru</key>
+      <value>Выбор пункта на плане завода</value>
+    </synonym>
+    <usePurposes>PersonalComputer</usePurposes>
+  </forms>
+  <templates uuid="ad29f25a-4b3a-400c-9c56-ac35b10989fb">
+    <name>КартаHTML</name>
+    <synonym>
+      <key>ru</key>
+      <value>Карта, HTML</value>
+    </synonym>
+    <templateType>TextDocument</templateType>
+  </templates>
+  <templates uuid="b676ffe2-22e8-45c4-9659-12e4694c3580">
+    <name>Подложка</name>
+    <synonym>
+      <key>ru</key>
+      <value>Подложка</value>
+    </synonym>
+    <templateType>BinaryData</templateType>
+  </templates>
+</mdclass:DataProcessor>

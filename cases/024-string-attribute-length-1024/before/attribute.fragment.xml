@@ -1,0 +1,8 @@
+<!-- WRONG: так НЕ делать -->
+
+    <type>
+      <types>String</types>
+      <stringQualifiers>
+        <length>2000</length>
+      </stringQualifiers>
+    </type>

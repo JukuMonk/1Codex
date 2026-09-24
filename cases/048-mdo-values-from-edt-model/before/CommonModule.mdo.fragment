@@ -1,0 +1,6 @@
+<mdclass:CommonModule xmlns:mdclass="http://g5.1c.ru/v8/dt/metadata/mdclass" uuid="…">
+  <name>мвмМаршрутизацияПовтИсп</name>
+  <synonym><key>ru</key><value>Маршрутизация (повторное использование)</value></synonym>
+  <server>true</server>
+  <returnValuesReuse>DuringCall</returnValuesReuse>   <!-- нет в модели EDT: принято молча, кэша нет -->
+</mdclass:CommonModule>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mdclass:Configuration xmlns:mdclass="http://g5.1c.ru/v8/dt/metadata/mdclass" uuid="87939f15-c508-5fef-b58b-a97368ce0e36">
+  <name>Песочница</name>
+  <synonym>
+    <key>ru</key>
+    <value>Песочница skill pack</value>
+  </synonym>
+  <usePurposes>PersonalComputer</usePurposes>
+  <usePurposes>MobileDevice</usePurposes>
+  <scriptVariant>Russian</scriptVariant>
+  <compatibilityMode>8.3.24</compatibilityMode>
+  <subsystems>Subsystem.ПримерРаздел</subsystems>
+  <commonModules>CommonModule.ПримерОбщийМодуль</commonModules>
+  <commonPictures>CommonPicture.ПримерРаздел</commonPictures>
+  <roles>Role.ПримерРоль</roles>
+  <constants>Constant.ПримерУпрощённыйРежим</constants>
+  <catalogs>Catalog.ПримерСправочник</catalogs>
+  <documents>Document.ПримерДокумент</documents>
+  <enums>Enum.ПримерПеречисление</enums>
+  <reports>Report.ПримерОтчет</reports>
+  <reports>Report.ПримерОтчетПоПериоду</reports>
+  <dataProcessors>DataProcessor.ПримерОбработка</dataProcessors>
+  <dataProcessors>DataProcessor.ПримерМобильная</dataProcessors>
+  <dataProcessors>DataProcessor.ПримерКарта</dataProcessors>
+  <informationRegisters>InformationRegister.ПримерНедоступность</informationRegisters>
+  <accumulationRegisters>AccumulationRegister.ПримерОстатки</accumulationRegisters>
+</mdclass:Configuration>

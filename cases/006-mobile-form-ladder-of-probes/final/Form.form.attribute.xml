@@ -1,0 +1,11 @@
+<!-- CORRECT -->
+
+  <attributes>
+    <name>Точек</name>
+    …
+    <valueType>
+      <types>Number</types>
+      <numberQualifiers>
+        <precision>10</precision>
+      </numberQualifiers>
+    </valueType>

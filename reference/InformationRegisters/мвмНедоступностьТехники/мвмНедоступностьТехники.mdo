@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mdclass:InformationRegister xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:core="http://g5.1c.ru/v8/dt/mcore" xmlns:mdclass="http://g5.1c.ru/v8/dt/metadata/mdclass" uuid="553eee5d-0ebe-4845-8e4e-21892bc20893">
+  <producedTypes>
+    <selectionType typeId="517f1240-0928-4d06-8b96-8b55e8e28a72" valueTypeId="9a93ccf1-96e4-48f9-b369-20905771b2bd"/>
+    <listType typeId="22e564f4-4e09-472a-a92b-185e94c0a4ef" valueTypeId="636653d5-e014-4c92-835b-af6f3fa823a3"/>
+    <managerType typeId="0443e67b-bbd0-4717-93af-533eff8e4304" valueTypeId="62ca93e7-525b-4bda-aa14-be113f3234e1"/>
+    <recordSetType typeId="0c100758-cae0-49f8-a724-33200012769b" valueTypeId="f2134d85-999a-49da-b83c-e97ebfb7eda1"/>
+    <recordKeyType typeId="934f1282-66fa-4d78-b1f9-9a8282b76ab5" valueTypeId="950453e7-0fc7-498a-821b-cc2e2a5ab1cd"/>
+    <recordType typeId="8ab4cd2c-8a23-4876-9eb1-f29062bc9ef9" valueTypeId="fe48b281-771f-4dea-a9a0-e9a3fc953b71"/>
+    <recordManagerType typeId="b8c8695b-a0ea-40fa-ac38-7f3b715af529" valueTypeId="132b1127-e0e5-4c52-80fe-aca3712e656d"/>
+  </producedTypes>
+  <name>мвмНедоступностьТехники</name>
+  <synonym>
+    <key>ru</key>
+    <value>Недоступность техники</value>
+  </synonym>
+  <comment>Машина недоступна для назначения: причина и срок. Пишет диспетчер из АРМ; подбор и автораздача исключают.</comment>
+  <useStandardCommands>true</useStandardCommands>
+  <editType>InDialog</editType>
+  <defaultRecordForm>InformationRegister.мвмНедоступностьТехники.Form.ФормаЗаписи</defaultRecordForm>
+  <defaultListForm>InformationRegister.мвмНедоступностьТехники.Form.ФормаСписка</defaultListForm>
+  <dataLockControlMode>Managed</dataLockControlMode>
+  <dimensions uuid="9372d0a1-8dee-4437-94ef-3f641438435a">
+    <name>Машина</name>
+    <synonym>
+      <key>ru</key>
+      <value>Машина</value>
+    </synonym>
+    <type>
+      <types>CatalogRef.уатТС</types>
+    </type>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <dataHistory>Use</dataHistory>
+    <mainFilter>true</mainFilter>
+  </dimensions>
+  <resources uuid="a0f74962-813c-4d12-9c03-9039822140eb">
+    <name>НедоступнаС</name>
+    <synonym>
+      <key>ru</key>
+      <value>Недоступна с</value>
+    </synonym>
+    <type>
+      <types>Date</types>
+      <dateQualifiers>
+        <dateFractions>DateTime</dateFractions>
+      </dateQualifiers>
+    </type>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <dataHistory>Use</dataHistory>
+  </resources>
+  <resources uuid="685984e9-02b3-4401-a9fc-f64e8940866e">
+    <name>НедоступнаПо</name>
+    <synonym>
+      <key>ru</key>
+      <value>Недоступна по</value>
+    </synonym>
+    <type>
+      <types>Date</types>
+      <dateQualifiers>
+        <dateFractions>DateTime</dateFractions>
+      </dateQualifiers>
+    </type>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <dataHistory>Use</dataHistory>
+  </resources>
+  <resources uuid="fa5e1c65-c706-41b3-b395-eb8d6614bc04">
+    <name>Причина</name>
+    <synonym>
+      <key>ru</key>
+      <value>Причина</value>
+    </synonym>
+    <type>
+      <types>String</types>
+      <stringQualifiers>
+        <length>100</length>
+      </stringQualifiers>
+    </type>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <dataHistory>Use</dataHistory>
+  </resources>
+  <forms uuid="a264fe95-28eb-4321-8048-fab712f94f45">
+    <name>ФормаЗаписи</name>
+    <synonym>
+      <key>ru</key>
+      <value>Форма записи</value>
+    </synonym>
+    <usePurposes>PersonalComputer</usePurposes>
+    <usePurposes>MobileDevice</usePurposes>
+  </forms>
+  <forms uuid="128176ea-65fa-4cb7-aef6-28437d762c87">
+    <name>ФормаСписка</name>
+    <synonym>
+      <key>ru</key>
+      <value>Форма списка</value>
+    </synonym>
+    <usePurposes>PersonalComputer</usePurposes>
+    <usePurposes>MobileDevice</usePurposes>
+  </forms>
+</mdclass:InformationRegister>

@@ -1,0 +1,9 @@
+function deleteGeo(зона) {
+  if (!confirm('Удалить геозону «' + зона.name + '»?')) return;   // модальный диалог: очередь моста копится
+  удалитьГеозону(зона);
+}
+попап.on('add', function () {
+  setTimeout(function () {                                          // в поле 1С не навешивается
+    document.getElementById('gcDel').onclick = function () { deleteGeo(зона); };
+  }, 0);
+});

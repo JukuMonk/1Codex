@@ -1,0 +1,7 @@
+<!-- WRONG: так НЕ делать -->
+
+      <title>
+        <key>ru</key>
+        <value>Поиск</value>
+      </title>
+      <extendedTooltip>

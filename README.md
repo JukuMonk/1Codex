@@ -1,0 +1,95 @@
+# 1c-edt-skill
+
+Автономный набор для программирования конфигураций 1С:Предприятие через
+**1C:EDT** силами модели (Claude, GPT Codex и т.п.): знания, рабочие примеры,
+разобранные ошибки, инструменты сборки и проверки. Точка входа для модели —
+`CLAUDE.md` (алгоритм и принцип **WORKING EXAMPLE > ABSTRACT KNOWLEDGE >
+MODEL MEMORY**); для человека — этот файл.
+
+## Откуда взято
+
+Из одного реального внедрения: доработки типовой 1С:ТЛЭиУА КОРП 1.1.36
+(платформа 8.3.24) в проекте EDT — 26 своих объектов (справочники,
+регистры, обработки с обычной, мобильной и HTML-формой, 9 отчётов, роль,
+раздел с 12 группами, общие модули), 80 генераторов на Python, ~350 коммитов
+двух репозиториев (около 250 в проекте инструментов и около 110 в проекте
+EDT). Кейсы — это реальные ошибки с реальными сообщениями платформы и EDT,
+их неверные и верные исправления с номерами коммитов.
+
+## Структура
+
+```
+CLAUDE.md               инструкция для модели: принцип, алгоритм 10 шагов, запреты
+README.md               этот файл
+knowledge/              14 тем: конкретные правила «что / почему / когда / чего нельзя / пример / кейс»
+  common-errors.md      каталог ошибок по симптому
+  validation.md         уровни проверки и отчёт
+examples/               рабочие образцы с нейтральными именами (Пример…), README у каждого
+  metadata/             enum, catalog, constant, information-register, accumulation-register,
+                        document, common-module, data-processor, report, role, subsystem,
+                        configuration-registration
+  forms/                simple-item-form, list-form, record-form, html-field-form
+  mobile/mobile-form/   мобильная форма (телефон + тонкий клиент)
+  reports/              отчёт с параметрами периода и группировкой
+  skd/                  указатель по схемам компоновки
+  bsl/                  8 фрагментов модулей
+cases/NNN-slug/         62 кейса: task.md, before/, after/, lessons.md, attempt-*/
+reference/              боевые файлы проекта-источника как есть + INDEX.md, edt-format-guide.md,
+                        generators/ (техника идемпотентных правок)
+index/                  topics.md (по темам), patterns.md («хочу сделать X»), cases.md
+tests/                  tasks.md (24 задачи с критериями), expected/ (решения и сломанные фикстуры),
+                        sandbox/ (все примеры как проект для инструментов)
+tools/                  edt_lib.py, check_project.py, check_bsl.py, scaffold.py,
+                        make_examples.py, make_sandbox.py, check_links.py, _cases_*.py
+```
+
+## Легенда confidence
+
+- **HIGH** — правило подтверждено падением и исправлением в базе/EDT, или
+  структура снята с файла, работающего в бою.
+- **MEDIUM** — работает, но причина не доказана, или образец снят с типового
+  объекта и проверен только структурно (регистр накопления, документ, часть
+  СКД, `&НаКлиентеНаСервере`).
+- **LOW** — направление без проверки (доставка без EDT, периодические
+  регистры, модуль проведения документа).
+
+## Инструменты (Python 3, стандартная библиотека; Pillow — только для картинки раздела)
+
+```bash
+python tools/check_project.py <корень проекта EDT> [--prefix мвм] [--quiet]   # структурные проверки, exit 1 при ошибках
+python tools/check_bsl.py <Module.bsl> [--common] [--hier Спр1,Спр2]          # ловушки BSL и запросов
+python tools/scaffold.py <корень EDT> <вид> <ИмяВПримере> <НовоеИмя> [--synonym "…"]
+python tools/make_examples.py                                                 # пересобрать examples/ из edt_lib
+python tools/make_sandbox.py                                                  # собрать tests/sandbox/ из examples/
+python tools/check_project.py tests/sandbox                                   # самопроверка набора: 0 ошибок
+python tools/check_links.py [--sensitive]                                     # ссылки между md-файлами; поиск адресов/учётных данных
+```
+
+Виды для `scaffold`: `catalog`, `enum`, `constant`, `information-register`,
+`accumulation-register`, `document`, `common-module`, `data-processor`,
+`report`, `role`, `subsystem`, `mobile` (из `examples/mobile`), `html`
+(из `examples/forms/html-field-form`).
+
+## Как пользоваться с моделью
+
+Набор устанавливается как skill Claude Code: папка целиком копируется в
+`~/.claude/skills/1c-edt-skill/` (в ней лежит `SKILL.md` с описанием и
+условиями срабатывания), после чего модель подхватывает его сама при
+задачах про EDT/BSL/.mdo/Form.form. Обновление — повторное копирование.
+
+1. Положить папку рядом с проектом (или внутрь как `1c-edt-skill/`) и указать
+   модели прочитать `1c-edt-skill/CLAUDE.md` первым.
+2. Задачу формулировать через `index/patterns.md`: «сделай как в examples/…,
+   правила — knowledge/…».
+3. Требовать отчёт по `knowledge/validation.md` §5: какой уровень проверки
+   пройден.
+4. Новая ошибка — новый кейс тем же коммитом (шаблон — любой из `cases/`).
+
+## Ограничения
+
+- Версия EDT/платформы источника: 8.3.24, ТЛЭиУА 1.1.36. Другая версия —
+  сверять образцы с типовыми объектами целевой конфигурации.
+- Своих документов, регистров накопления, периодических регистров, RLS,
+  планов видов характеристик, бизнес-процессов в источнике не было —
+  соответствующие примеры MEDIUM/LOW или отсутствуют.
+- Инструменты проверки структурные: прогон в базе они не заменяют.

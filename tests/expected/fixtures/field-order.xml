@@ -1,0 +1,45 @@
+<!-- Фикстура к T12: поле, написанное «по памяти», а не как пишет EDT.
+     Дефекты: title не на месте, handlers не на месте, visible=false вместо
+     удалённого тега (поле должно быть скрыто), умолчания autoMaxWidth=false и
+     showTitle... Эталон — ../T12.md. -->
+    <items xsi:type="form:FormField">
+      <name>Комментарий</name>
+      <id>12</id>
+      <visible>false</visible>
+      <enabled>true</enabled>
+      <userVisible>
+        <common>true</common>
+      </userVisible>
+      <dataPath xsi:type="form:DataPath">
+        <segments>Объект.Комментарий</segments>
+      </dataPath>
+      <extendedTooltip>
+        <name>КомментарийРасширеннаяПодсказка</name>
+        <id>13</id>
+      </extendedTooltip>
+      <contextMenu>
+        <name>КомментарийКонтекстноеМеню</name>
+        <id>14</id>
+      </contextMenu>
+      <title>
+        <key>ru</key>
+        <value>Комментарий</value>
+      </title>
+      <type>InputField</type>
+      <handlers>
+        <event>OnChange</event>
+        <name>КомментарийПриИзменении</name>
+      </handlers>
+      <editMode>EnterOnInput</editMode>
+      <showInHeader>true</showInHeader>
+      <headerHorizontalAlign>Left</headerHorizontalAlign>
+      <showInFooter>true</showInFooter>
+      <extInfo xsi:type="form:InputFieldExtInfo">
+        <autoMaxWidth>false</autoMaxWidth>
+        <autoMaxHeight>true</autoMaxHeight>
+        <wrap>true</wrap>
+        <chooseType>true</chooseType>
+        <typeDomainEnabled>true</typeDomainEnabled>
+        <textEdit>true</textEdit>
+      </extInfo>
+    </items>

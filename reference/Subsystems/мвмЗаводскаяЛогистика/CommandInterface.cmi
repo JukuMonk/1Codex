@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cmi:CommandInterface xmlns:cmi="http://g5.1c.ru/v8/dt/cmi">
+  <commandsOrder>
+    <orderFragments>
+      <group>NavigationPanelImportant</group>
+      <commands>DataProcessor.мвмАРМДиспетчера.StandardCommand.Open</commands>
+      <commands>DataProcessor.мвмАРМДиспетчераV2.StandardCommand.Open</commands>
+      <commands>DataProcessor.мвмМоиРейсы.StandardCommand.Open</commands>
+    </orderFragments>
+  </commandsOrder>
+  <subsystemsOrder>
+    <subsystems>Subsystem.мвмЗаводскаяЛогистика.Subsystem.мвмГрафПроездов</subsystems>
+    <subsystems>Subsystem.мвмЗаводскаяЛогистика.Subsystem.мвмГеозоныПлана</subsystems>
+    <subsystems>Subsystem.мвмЗаводскаяЛогистика.Subsystem.мвмОформлениеПлана</subsystems>
+    <subsystems>Subsystem.мвмЗаводскаяЛогистика.Subsystem.мвмВедениеПлана</subsystems>
+    <subsystems>Subsystem.мвмЗаводскаяЛогистика.Subsystem.мвмЗаявкиИРейсы</subsystems>
+    <subsystems>Subsystem.мвмЗаводскаяЛогистика.Subsystem.мвмОтчётыПоРаботе</subsystems>
+    <subsystems>Subsystem.мвмЗаводскаяЛогистика.Subsystem.мвмРасписания</subsystems>
+    <subsystems>Subsystem.мвмЗаводскаяЛогистика.Subsystem.мвмПарк</subsystems>
+    <subsystems>Subsystem.мвмЗаводскаяЛогистика.Subsystem.мвмГрузы</subsystems>
+    <subsystems>Subsystem.мвмЗаводскаяЛогистика.Subsystem.мвмСтруктураЗавода</subsystems>
+    <subsystems>Subsystem.мвмЗаводскаяЛогистика.Subsystem.мвмНастройкиЛогистики</subsystems>
+    <subsystems>Subsystem.мвмЗаводскаяЛогистика.Subsystem.мвмСлужебноеЛогистики</subsystems>
+  </subsystemsOrder>
+</cmi:CommandInterface>

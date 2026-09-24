@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mdclass:Constant xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:core="http://g5.1c.ru/v8/dt/mcore" xmlns:mdclass="http://g5.1c.ru/v8/dt/metadata/mdclass" uuid="bfe47e6b-f1fc-5b40-b18c-c7dba9199461">
+  <producedTypes>
+    <managerType typeId="b406b57c-3464-5e90-9fb1-2553625b0f70" valueTypeId="800a73cc-4051-5943-8cde-d9adea38bf21"/>
+    <valueManagerType typeId="5d7f045e-ad8f-52ec-bc2e-95a5695a81f0" valueTypeId="19f40ead-0495-5f4d-be2f-50e14f06f355"/>
+    <valueKeyType typeId="7e2f0eb5-cd78-5e02-80f8-afb6ab539504" valueTypeId="7ea73e06-3acc-5ed1-96cd-4d9249a513e5"/>
+  </producedTypes>
+  <name>мвмУпрощённаяФормаЗаявки</name>
+  <synonym>
+    <key>ru</key>
+    <value>Упрощённая форма заявки</value>
+  </synonym>
+  <comment>Заводская логистика: заказ на ТС открывается упрощённой формой</comment>
+  <type>
+    <types>Boolean</types>
+  </type>
+  <explanation>
+    <key>ru</key>
+    <value>Заказ на ТС открывается упрощённым: без финансов, услуг и подвала, с детализацией по грузовым местам и доставкой «склад — склад».</value>
+  </explanation>
+  <minValue xsi:type="core:UndefinedValue"/>
+  <maxValue xsi:type="core:UndefinedValue"/>
+  <dataLockControlMode>Managed</dataLockControlMode>
+</mdclass:Constant>

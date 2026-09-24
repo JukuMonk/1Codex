@@ -1,0 +1,11 @@
+  <attributes uuid="…">
+    <name>мвмУзелКарты</name>
+    <synonym><key>ru</key><value>Узел плана</value></synonym>
+    <type><types>CatalogRef.мвмУзлыКарты</types></type>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <indexing>Index</indexing>                       <!-- после fillValue, перед fullTextSearch -->
+    <fullTextSearch>Use</fullTextSearch>
+    <dataHistory>Use</dataHistory>
+  </attributes>

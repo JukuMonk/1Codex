@@ -1,0 +1,7 @@
+<!-- WRONG: так НЕ делать -->
+
+      <type>UsualGroup</type>
+      <extInfo xsi:type="form:UsualGroupExtInfo">
+        <group>AlwaysHorizontal</group>
+        <horizontalAlign>Left</horizontalAlign>
+      </extInfo>

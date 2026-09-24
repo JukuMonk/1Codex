@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mdclass:InformationRegister xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:core="http://g5.1c.ru/v8/dt/mcore" xmlns:mdclass="http://g5.1c.ru/v8/dt/metadata/mdclass" uuid="0c0784e1-3502-443b-bc4e-eb78ad00e143">
+  <producedTypes>
+    <selectionType typeId="d530551e-f1ce-4b72-b06f-62590b0750e4" valueTypeId="b4b42cf7-555e-4a8a-a3c8-dc82cfef2deb"/>
+    <listType typeId="74cb62f6-e567-4694-8262-cabcf3746614" valueTypeId="d2d5a30f-17c2-4799-8dfc-e676f86bf9ff"/>
+    <managerType typeId="5e436dbd-a99b-49d8-8252-0b6fae922dea" valueTypeId="2c903c51-43b5-4f43-9ddb-b09246e4fc31"/>
+    <recordSetType typeId="4dfce7a8-1c17-4aa5-b9ce-3ec76d0fe2c1" valueTypeId="4aa65a71-06dc-4ce9-a76a-7d00d7be8581"/>
+    <recordKeyType typeId="4dd0a1cb-fee8-42ee-89da-611f7de006d9" valueTypeId="ed3eb5ae-7155-45df-ae27-4cd3599c3537"/>
+    <recordType typeId="aea5340a-5d64-4e00-995f-daff0e242fdb" valueTypeId="9698bdcf-0baa-4091-8cd9-74e6e21352be"/>
+    <recordManagerType typeId="e34e0557-0bb7-4e32-82e3-b625dfe697a8" valueTypeId="ff61ebc1-25ad-444f-962f-90b0360a1594"/>
+  </producedTypes>
+  <name>мвмКэшМаршрутов</name>
+  <synonym>
+    <key>ru</key>
+    <value>Кэш маршрутов</value>
+  </synonym>
+  <comment>Рассчитанные кратчайшие пути. Очищается при записи карты.</comment>
+  <useStandardCommands>true</useStandardCommands>
+  <editType>InDialog</editType>
+  <dataLockControlMode>Managed</dataLockControlMode>
+  <dimensions uuid="2791e1f1-a36e-4013-95f7-c211c50af304">
+    <name>УзелОт</name>
+    <synonym>
+      <key>ru</key>
+      <value>Узел отправления</value>
+    </synonym>
+    <type>
+      <types>CatalogRef.мвмУзлыКарты</types>
+    </type>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <dataHistory>Use</dataHistory>
+    <mainFilter>true</mainFilter>
+  </dimensions>
+  <dimensions uuid="029f0a07-ff02-4409-9035-c7aa032c0a0c">
+    <name>УзелДо</name>
+    <synonym>
+      <key>ru</key>
+      <value>Узел назначения</value>
+    </synonym>
+    <type>
+      <types>CatalogRef.мвмУзлыКарты</types>
+    </type>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <dataHistory>Use</dataHistory>
+    <mainFilter>true</mainFilter>
+  </dimensions>
+  <dimensions uuid="d508975d-e0fa-4d4a-a055-c3f15e22bf36">
+    <name>ТипТС</name>
+    <synonym>
+      <key>ru</key>
+      <value>Тип ТС</value>
+    </synonym>
+    <type>
+      <types>CatalogRef.уатТипыТС</types>
+    </type>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <dataHistory>Use</dataHistory>
+    <mainFilter>true</mainFilter>
+  </dimensions>
+  <dimensions uuid="2de71fa5-1c1a-4488-8ddf-f1e714dd5c00">
+    <name>Габариты</name>
+    <synonym>
+      <key>ru</key>
+      <value>Габариты машины</value>
+    </synonym>
+    <type>
+      <types>String</types>
+      <stringQualifiers>
+        <length>40</length>
+      </stringQualifiers>
+    </type>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <dataHistory>Use</dataHistory>
+    <mainFilter>true</mainFilter>
+  </dimensions>
+  <resources uuid="87762e11-30ea-496e-84cb-65fc1c7d03ab">
+    <name>Найден</name>
+    <synonym>
+      <key>ru</key>
+      <value>Маршрут найден</value>
+    </synonym>
+    <type>
+      <types>Boolean</types>
+    </type>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <dataHistory>Use</dataHistory>
+  </resources>
+  <resources uuid="90cf101d-10fa-4834-867b-13cb3809738a">
+    <name>Длина</name>
+    <synonym>
+      <key>ru</key>
+      <value>Длина, единиц плана</value>
+    </synonym>
+    <type>
+      <types>Number</types>
+      <numberQualifiers>
+        <precision>15</precision>
+        <scale>3</scale>
+      </numberQualifiers>
+    </type>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <dataHistory>Use</dataHistory>
+  </resources>
+  <resources uuid="106f874b-585e-41a7-9b9f-1f777327764a">
+    <name>Время</name>
+    <synonym>
+      <key>ru</key>
+      <value>Время в пути, мин</value>
+    </synonym>
+    <type>
+      <types>Number</types>
+      <numberQualifiers>
+        <precision>15</precision>
+        <scale>3</scale>
+      </numberQualifiers>
+    </type>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <dataHistory>Use</dataHistory>
+  </resources>
+  <resources uuid="405b13db-780e-499a-af61-5bd9ccbf5d9a">
+    <name>Путь</name>
+    <synonym>
+      <key>ru</key>
+      <value>Путь: узлы через запятую</value>
+    </synonym>
+    <type>
+      <types>String</types>
+      <stringQualifiers/>
+    </type>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <dataHistory>Use</dataHistory>
+  </resources>
+</mdclass:InformationRegister>

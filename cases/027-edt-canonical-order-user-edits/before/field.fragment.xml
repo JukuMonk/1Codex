@@ -1,0 +1,17 @@
+<!-- WRONG: так НЕ делать -->
+
+    <items xsi:type="form:FormField">
+      <name>мвмПоискСклад</name>
+      <id>…</id>
+      <visible>true</visible>
+      <enabled>true</enabled>
+      <userVisible><common>true</common></userVisible>
+      <dataPath …><segments>мвмПоискСклад</segments></dataPath>
+      <title><key>ru</key><value>Склад</value></title>          ← не там
+      <extendedTooltip>…</extendedTooltip>
+      <contextMenu>…</contextMenu>
+      <handlers><event>OnChange</event><name>…</name></handlers> ← не там
+      <type>InputField</type>
+      …
+      <extInfo xsi:type="form:InputFieldExtInfo">
+        <autoMaxWidth>false</autoMaxWidth>                        ← умолчание не пишется

@@ -1,0 +1,7 @@
+<!-- WRONG: так НЕ делать -->
+
+  <dcsset:item xsi:type="dcsset:FilterItemComparison">
+    <dcsset:use>false</dcsset:use>
+    <dcsset:left xsi:type="dcscor:Field">Раздел</dcsset:left>
+    <dcsset:comparisonType>Equal</dcsset:comparisonType>
+    <dcsset:right xsi:type="dcscor:DesignTimeValue"></dcsset:right>   ← строка

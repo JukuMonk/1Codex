@@ -1,0 +1,48 @@
+<!-- CORRECT -->
+
+    <items xsi:type="form:Table">
+      <name>Строки</name>
+      <id>10</id>
+      …колонки…
+      <autoCommandBar>
+        <name>СтрокиКоманднаяПанель</name>
+        <id>31</id>
+        <horizontalAlign>Left</horizontalAlign>
+        <autoFill>true</autoFill>
+      </autoCommandBar>
+      <searchStringAddition>
+        <name>СтрокиСтрокаПоиска</name>
+        <id>32</id>
+        <extendedTooltip>…</extendedTooltip>
+        <contextMenu>…</contextMenu>
+        <source>Строки</source>
+        <extInfo xsi:type="form:SearchStringAdditionExtInfo">
+          <autoMaxWidth>true</autoMaxWidth>
+        </extInfo>
+      </searchStringAddition>
+      <viewStatusAddition>… <type>ViewStatusAddition</type> …</viewStatusAddition>
+      <searchControlAddition>… <type>SearchControlAddition</type> …</searchControlAddition>
+      <extendedTooltip>…</extendedTooltip>
+      <contextMenu>…</contextMenu>
+      <changeRowSet>false</changeRowSet>
+      <changeRowOrder>false</changeRowOrder>
+      <autoMaxWidth>true</autoMaxWidth>
+      <autoMaxHeight>true</autoMaxHeight>
+      <autoMaxRowsCount>true</autoMaxRowsCount>
+      <selectionMode>MultiRow</selectionMode>
+      <header>true</header>
+      <headerHeight>1</headerHeight>
+      <footerHeight>1</footerHeight>
+      <horizontalScrollBar>AutoUse</horizontalScrollBar>
+      <verticalScrollBar>AutoUse</verticalScrollBar>
+      <horizontalLines>true</horizontalLines>
+      <verticalLines>true</verticalLines>
+      <autoInsertNewRow>false</autoInsertNewRow>
+      <searchOnInput>Auto</searchOnInput>
+      <initialListView>Auto</initialListView>
+      <horizontalStretch>true</horizontalStretch>
+      <verticalStretch>true</verticalStretch>
+      <enableStartDrag>false</enableStartDrag>
+      <enableDrag>false</enableDrag>
+      <rowFilter xsi:type="core:UndefinedValue"/>
+    </items>
