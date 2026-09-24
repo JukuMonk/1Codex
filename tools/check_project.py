@@ -12,7 +12,11 @@
   * .mdo проходит check_mdo (длина строк, дубли uuid и имён);
   * uuid объектов не повторяются по проекту;
   * форма с MobileDevice есть → у корня включено назначение MobileDevice (case 005);
-  * модули форм и общих модулей проходят check_bsl.
+  * модули форм и общих модулей проходят check_bsl;
+  * псевдонимы таблиц в запросах модулей и схем компоновки не совпадают с
+    именами табличных частей объектов запроса (case 062);
+  * реквизиты формы не читаются в процедурах без контекста (case 060),
+    команды формы не названы ключевыми словами (case 057).
 
 Запуск:  python tools/check_project.py <корень проекта EDT> [--prefix мвм] [--quiet]
   --prefix  проверять только объекты с этим префиксом имени (свои, а не типовые);
@@ -66,6 +70,18 @@ def main():
             if os.path.isdir(os.path.join(d, name)):
                 objects.append((kind, name, os.path.join(d, name)))
 
+    # табличные части любого объекта проекта — по требованию (case 062);
+    # читаем .mdo только тех объектов, что встретились в запросах
+    _ts_cache = {}
+
+    def tabular_of(kind, oname):
+        key = (kind, oname)
+        if key not in _ts_cache:
+            folder_ = lib.FOLDERS.get(kind)
+            path = os.path.join(src, folder_, oname, oname + '.mdo') if folder_ else ''
+            _ts_cache[key] = lib.tabular_sections_of_mdo(read(path)) if path and os.path.exists(path) else None
+        return _ts_cache[key]
+
     seen_uuid = {}
     for kind, name, folder in objects:
         fq = '%s.%s' % (kind, name)
@@ -106,7 +122,7 @@ def main():
             if mtext is not None:
                 if lib.has_bom(mpath):
                     warnings.append('%s/%s: у Module.bsl BOM (EDT терпит, но исходники без BOM)' % (fq, fname))
-                for p in lib.check_bsl(mtext, is_form_module=True):
+                for p in lib.check_bsl(mtext, is_form_module=True, tabular_of=tabular_of):
                     (warnings if p.startswith('предупреждение') else errors).append('%s/%s/Module.bsl: %s' % (fq, fname, p))
         if os.path.isdir(forms_dir):
             for fname in os.listdir(forms_dir):
@@ -124,7 +140,7 @@ def main():
             if not os.path.exists(mpath):
                 errors.append('%s: нет Module.bsl' % fq)
             else:
-                for p in lib.check_bsl(read(mpath), is_form_module=False):
+                for p in lib.check_bsl(read(mpath), is_form_module=False, tabular_of=tabular_of):
                     (warnings if p.startswith('предупреждение') else errors).append('%s/Module.bsl: %s' % (fq, p))
         # подсистемы: состав и дочерние
         if kind == 'Subsystem':
@@ -134,6 +150,17 @@ def main():
             m = re.search(r'<mainDataCompositionSchema>Report\.\w+\.Template\.(\w+)</mainDataCompositionSchema>', text)
             if m and not os.path.exists(os.path.join(folder, 'Templates', m.group(1), 'Template.dcs')):
                 errors.append('%s: нет Templates/%s/Template.dcs' % (fq, m.group(1)))
+            # запросы схем компоновки: псевдонимы против ТЧ (case 062)
+            tdir = os.path.join(folder, 'Templates')
+            if os.path.isdir(tdir):
+                for tname in os.listdir(tdir):
+                    dcs = os.path.join(tdir, tname, 'Template.dcs')
+                    if not os.path.exists(dcs):
+                        continue
+                    for q in re.findall(r'<query>(.*?)</query>', read(dcs), re.S):
+                        q = q.replace('&lt;', '<').replace('&gt;', '>').replace('&quot;', '"').replace('&amp;', '&')
+                        for p in lib.check_query_aliases(q, tabular_of):
+                            errors.append('%s/%s.dcs: %s' % (fq, tname, p))
 
     # объекты из Configuration.mdo, которых нет на диске
     for fq in sorted(registered):

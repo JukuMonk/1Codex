@@ -1605,7 +1605,7 @@ def _unfold_query_line(s):
     return s.replace('""', '"')
 
 
-def check_bsl(text, is_form_module=True, hierarchical_catalogs=()):
+def check_bsl(text, is_form_module=True, hierarchical_catalogs=(), tabular_of=None):
     """Список претензий к модулю. Каждая — то, что 1С показывает только в
     бою, а компилятор пропускает. Номера кейсов — в скобках."""
     problems = []
@@ -1680,6 +1680,11 @@ def check_bsl(text, is_form_module=True, hierarchical_catalogs=()):
                 if cat in hierarchical_catalogs and ('%s.ЭтоГруппа' % alias) not in piece:
                     problems.append('строка %d: «%s» иерархический, а группы не отсеяны — у группы '
                                     'реквизиты NULL (case 017)' % (text.count('\n', 0, m.start()) + 1, cat))
+    # 4b) псевдоним таблицы против табличных частей объектов запроса (case 062)
+    if tabular_of is not None:
+        for q in queries_in_module(text):
+            for p in check_query_aliases(q, tabular_of):
+                problems.append('запрос: ' + p)
     # 5) имена процедур: глобальные методы (case 047) и ключевые слова (case 057)
     for m in re.finditer(r'^\s*(?:Процедура|Функция)\s+([А-Яа-яЁёA-Za-z_][А-Яа-яЁёA-Za-z_0-9]*)', clean, re.M):
         name = m.group(1)
@@ -1719,6 +1724,120 @@ def check_bsl(text, is_form_module=True, hierarchical_catalogs=()):
         if 'ВЫРАЗИТЬ' not in m.group(2) and re.search(r'[А-Яа-я]+\.(Наименование|Название|Комментарий|Описание)', m.group(2)):
             problems.append('предупреждение: %s по строковому полю — если длина 0 (неограниченная), '
                             '«Неверные параметры»: оберните ВЫРАЗИТЬ(… КАК СТРОКА(150)) (case 031)' % m.group(1))
+    return problems
+
+
+# ------------------------------------------------ запросы: псевдоним и ТЧ (case 062)
+QUERY_KINDS = {'Справочник': 'Catalog', 'Документ': 'Document', 'РегистрСведений': 'InformationRegister',
+               'РегистрНакопления': 'AccumulationRegister', 'ПланВидовХарактеристик': 'ChartOfCharacteristicTypes'}
+
+
+def tabular_sections_of_mdo(text):
+    """Имена табличных частей объекта из его .mdo."""
+    names = []
+    for m in re.finditer(r'<tabularSections uuid="[^"]+">\s*<name>([^<]+)</name>', text):
+        names.append(m.group(1))
+    return set(names)
+
+
+def queries_in_module(text):
+    """Тексты запросов модуля (строки «|…» подряд) как список строк."""
+    queries, buf = [], []
+    for line in text.split('\n'):
+        s = line.strip()
+        if s.startswith('|'):
+            buf.append(s[1:])
+            continue
+        if buf:
+            queries.append('\n'.join(buf)); buf = []
+    if buf:
+        queries.append('\n'.join(buf))
+    return queries
+
+
+def check_query_aliases(query, tabular_of):
+    """Псевдоним таблицы (источника или подзапроса) совпал с именем табличной
+    части объекта из того же запроса — в бою «Неоднозначное поле "X.Ссылка"»:
+    платформа не отличает псевдоним от ТЧ (case 062). tabular_of(kind, name)
+    возвращает множество имён ТЧ объекта или None, если объект неизвестен."""
+    problems = []
+    sources = {}
+    for m in re.finditer(r'\b(?:ИЗ|СОЕДИНЕНИЕ)\s+([А-Яа-яЁёA-Za-z_]+)\.([А-Яа-яЁёA-Za-z_0-9]+)'
+                         r'(?:\.([А-Яа-яЁёA-Za-z_0-9]+))?\s*(?:\(|\s)\s*(?:КАК\s+)?'
+                         r'([А-Яа-яЁёA-Za-z_][А-Яа-яЁёA-Za-z_0-9]*)?', query, re.I):
+        kind, obj, third, alias = m.groups()
+        if alias:
+            sources[alias] = (kind, obj, third or '')
+    if not sources:
+        return problems
+    aliases = set(sources) | set(re.findall(
+        r'\)\s*КАК\s+([А-Яа-яЁёA-Za-z_][А-Яа-яЁёA-Za-z_0-9]*)', query, re.I))
+    for alias, (kind, obj, _t) in list(sources.items()):
+        ts = tabular_of(QUERY_KINDS.get(kind, kind), obj)
+        if not ts:
+            continue
+        for name in sorted(aliases & ts):
+            if sources.get(name) == (kind, obj, name):
+                continue          # сама таблица ТЧ под своим именем — законно
+            msg = ('псевдоним таблицы «%s» совпадает с именем табличной части %s.%s — '
+                   '«Неоднозначное поле "%s.Ссылка"»; переименуйте псевдоним (case 062)'
+                   % (name, kind, obj, name))
+            if msg not in problems:
+                problems.append(msg)
+    return problems
+
+
+def check_form_attributes_in_no_context(module_text, attr_names):
+    """Реквизит формы в процедуре &НаСервереБезКонтекста — «Переменная не
+    определена» в бою: формы там нет (case 060). Параметры и локальные
+    присваивания процедуры реквизитом не считаются; текст запросов и
+    комментарии пропускаются."""
+    problems = []
+    directive, proc, params, locals_, body = '', '', set(), set(), []
+    lines = module_text.split(CRLF if CRLF in module_text else '\n')
+
+    def flush():
+        if 'БезКонтекста' not in directive or not proc:
+            return
+        for n, s in body:
+            st = s.strip()
+            if st.startswith(('//', '|', '"')):
+                continue
+            code = re.sub(r'"[^"]*"', '""', st.split('//')[0])
+            for a in attr_names:
+                if a in params or a in locals_:
+                    continue
+                if re.search(r'(?<![\wА-Яа-яЁё.])%s(?![\wА-Яа-яЁё(])' % re.escape(a), code):
+                    problems.append('строка %d: реквизит формы «%s» в процедуре без контекста «%s» — '
+                                    '«Переменная не определена»; передайте параметром (case 060)'
+                                    % (n, a, proc))
+                    break
+
+    for n, raw in enumerate(lines, 1):
+        s = raw.strip()
+        if s.startswith('&'):
+            flush()
+            directive, proc, params, locals_, body = s, '', set(), set(), []
+            continue
+        m = re.match(r'^(?:Процедура|Функция)\s+(\w+)\s*\(([^)]*)\)', s)
+        if m:
+            proc = m.group(1)
+            params = {p.strip().split('=')[0].strip().replace('Знач ', '').strip()
+                      for p in m.group(2).split(',') if p.strip()}
+            continue
+        if s.startswith(('КонецПроцедуры', 'КонецФункции')):
+            flush()
+            directive, proc, params, locals_, body = '', '', set(), set(), []
+            continue
+        if proc:
+            mm = re.match(r'^([А-Яа-яЁёA-Za-z_][\wА-Яа-яЁё]*)\s*=[^=]', s)
+            if mm:
+                locals_.add(mm.group(1))
+            mm = re.match(r'^Для\s+(?:Каждого\s+)?([А-Яа-яЁёA-Za-z_][\wА-Яа-яЁё]*)', s)
+            if mm:
+                locals_.add(mm.group(1))
+            body.append((n, raw))
+    flush()
     return problems
 
 
@@ -1787,6 +1906,13 @@ def check_form(text, module_text=None, mdo_text=None):
                     problems.append('таблица «%s» без %s — EDT её не нарисует (case 004)' % (tname, need))
     if '<rowFilter' in text and 'xmlns:core=' not in text.split('>', 2)[1]:
         problems.append('rowFilter требует объявления xmlns:core в корне формы')
+    # имя команды формы — имя процедуры: ключевое слово BSL недопустимо (case 057)
+    for cname in re.findall(r'<formCommands>\s*<name>(\w+)</name>', text):
+        if cname.lower() in BSL_KEYWORDS:
+            problems.append('команда «%s» — ключевое слово BSL, «Ожидается имя процедуры» (case 057)' % cname)
+    # реквизиты формы в процедурах без контекста (case 060)
+    if module_text is not None and attr_names:
+        problems += check_form_attributes_in_no_context(module_text, attr_names - {'Объект', 'Запись'})
     # обработчики и команды — в модуле
     if module_text is not None:
         for proc in re.findall(r'<handlers>\s*<event>\w+</event>\s*<name>(\w+)</name>', text):
