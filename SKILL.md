@@ -26,6 +26,9 @@ description: Программирование конфигураций 1С:Пр�
 6. Новая ошибка → новый кейс в `cases/` тем же коммитом и строка в
    `knowledge/common-errors.md`, `index/cases.md`.
 
+Новый проект доработок — `knowledge/new-project.md` и `tools/new_project.py`
+(справочник метаданных, CLAUDE.md проекта, git и резервная копия).
+
 ## Где что
 
 - `knowledge/` — 14 тем: структура проекта, метаданные, формы, мобильные

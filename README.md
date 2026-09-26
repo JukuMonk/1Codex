@@ -39,7 +39,8 @@ reference/              боевые файлы проекта-источник�
 index/                  topics.md (по темам), patterns.md («хочу сделать X»), cases.md
 tests/                  tasks.md (24 задачи с критериями), expected/ (решения и сломанные фикстуры),
                         sandbox/ (все примеры как проект для инструментов)
-tools/                  edt_lib.py, check_project.py, check_bsl.py, scaffold.py,
+bootstrap/              стартовый набор нового проекта: шаблон CLAUDE.md, .gitignore, скрипт резервной копии
+tools/                  edt_lib.py, check_project.py, check_bsl.py, scaffold.py, new_project.py,
                         make_examples.py, make_sandbox.py, check_links.py, _cases_*.py
 ```
 
@@ -63,12 +64,19 @@ python tools/make_examples.py                                                 # 
 python tools/make_sandbox.py                                                  # собрать tests/sandbox/ из examples/
 python tools/check_project.py tests/sandbox                                   # самопроверка набора: 0 ошибок
 python tools/check_links.py [--sensitive]                                     # ссылки между md-файлами; поиск адресов/учётных данных
+python tools/new_project.py <корень EDT> <папка инструментов> --prefix <пф>  # старт нового проекта: справочник метаданных, CLAUDE.md, .gitignore, резервная копия
 ```
 
 Виды для `scaffold`: `catalog`, `enum`, `constant`, `information-register`,
 `accumulation-register`, `document`, `common-module`, `data-processor`,
 `report`, `role`, `subsystem`, `mobile` (из `examples/mobile`), `html`
 (из `examples/forms/html-field-form`).
+
+## Новый проект
+
+Порядок старта с нуля из выгрузки `.dt` — `knowledge/new-project.md`; стартовый
+набор ставит `tools/new_project.py` (справочник метаданных конфигурации из
+`.mdo`, `CLAUDE.md` проекта по шаблону, `.gitignore`, скрипт резервной копии).
 
 ## Как пользоваться с моделью
 

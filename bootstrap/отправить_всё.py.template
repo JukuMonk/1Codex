@@ -1,0 +1,84 @@
+# -*- coding: utf-8 -*-
+"""Отправка репозиториев проекта на удалённый сервер (резервная копия).
+
+Репозитории:
+  tools  папка инструментов проекта (генераторы, документация, память Claude)
+  edt    проект 1C:EDT — доработки конфигурации
+
+Первый запуск — с адресами (remote «origin» добавляется или переписывается):
+  python инструменты/отправить_всё.py --tools <url> --edt <url>
+Дальше просто:
+  python инструменты/отправить_всё.py
+Перед отправкой память Claude копируется в <инструменты>/память-claude и
+коммитится, если изменилась. Незакоммиченные изменения в репозиториях НЕ
+коммитятся — скрипт про это скажет и остановится.
+"""
+import argparse
+import os
+import re
+import shutil
+import subprocess
+import sys
+
+РЕПО = {
+    'tools': r'{{ИНСТРУМЕНТЫ}}',
+    'edt': r'{{ПРОЕКТ_EDT}}',
+}
+# Память Claude: ~/.claude/projects/<путь папки инструментов, где «\» и «:» заменены на «-»>/memory
+ПАМЯТЬ = os.path.join(os.path.expanduser('~'), '.claude', 'projects',
+                      re.sub(r'[\\:]', '-', РЕПО['tools']), 'memory')
+КОПИЯ_ПАМЯТИ = os.path.join(РЕПО['tools'], 'память-claude')
+
+
+def git(репо, *args, тихо=False):
+    р = subprocess.run(['git', '-C', репо] + list(args), capture_output=True, text=True, encoding='utf-8')
+    if р.returncode and not тихо:
+        sys.exit('ОШИБКА git %s: %s' % (' '.join(args), (р.stderr or р.stdout).strip()))
+    return р.stdout.strip()
+
+
+def обновить_память():
+    if not os.path.isdir(ПАМЯТЬ):
+        return
+    os.makedirs(КОПИЯ_ПАМЯТИ, exist_ok=True)
+    for ф in os.listdir(ПАМЯТЬ):
+        if ф.endswith('.md'):
+            shutil.copy2(os.path.join(ПАМЯТЬ, ф), os.path.join(КОПИЯ_ПАМЯТИ, ф))
+    if git(РЕПО['tools'], 'status', '--short', '--', 'память-claude'):
+        git(РЕПО['tools'], 'add', 'память-claude')
+        git(РЕПО['tools'], 'commit', '-q', '-m', 'Память Claude: копия для резервного восстановления')
+        print('  память Claude закоммичена')
+
+
+def main():
+    п = argparse.ArgumentParser()
+    for имя in РЕПО:
+        п.add_argument('--' + имя, help='адрес удалённого репозитория')
+    а = п.parse_args()
+
+    обновить_память()
+    for имя, путь in РЕПО.items():
+        адрес = getattr(а, имя)
+        if адрес:
+            if 'origin' in git(путь, 'remote', тихо=True).split():
+                git(путь, 'remote', 'set-url', 'origin', адрес)
+            else:
+                git(путь, 'remote', 'add', 'origin', адрес)
+        if 'origin' not in git(путь, 'remote').split():
+            print('  %-6s remote не задан — укажите --%s <url>' % (имя, имя))
+            continue
+        грязь = git(путь, 'status', '--short')
+        if грязь:
+            sys.exit('ОШИБКА: в %s есть незакоммиченные изменения (%d файлов) — закоммитьте сначала'
+                     % (имя, len(грязь.splitlines())))
+        ветка = git(путь, 'rev-parse', '--abbrev-ref', 'HEAD')
+        print('  %-6s → origin/%s ...' % (имя, ветка), end='', flush=True)
+        р = subprocess.run(['git', '-C', путь, 'push', '-u', 'origin', ветка],
+                           capture_output=True, text=True, encoding='utf-8')
+        print(' ok' if р.returncode == 0 else '\n' + (р.stderr or р.stdout))
+        if р.returncode:
+            sys.exit(1)
+
+
+if __name__ == '__main__':
+    main()

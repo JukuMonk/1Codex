@@ -85,6 +85,7 @@ UTF-8 **без BOM**, **CRLF**, отступы 2 пробела в `.mdo`/`.form
 
 ## Карта набора
 
+- `knowledge/new-project.md` — старт нового проекта из `.dt`; `tools/new_project.py` + `bootstrap/`.
 - `knowledge/` — 14 тем (`edt-project-structure`, `metadata`, `managed-forms`,
   `mobile-forms`, `bsl`, `skd`, `subsystems-and-ui`, `roles`,
   `html-field-and-templates`, `uuid-and-references`, `deployment`,
