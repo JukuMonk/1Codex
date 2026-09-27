@@ -72,6 +72,10 @@
 
 - Поле HTML (width/height), макет CRLF/короткие строки, мост, поведение движка, `confirm`/`alert` и делегирование → `knowledge/html-field-and-templates.md` §1–5 → `examples/forms/html-field-form/` → `reference/DataProcessors/мвмАРМДиспетчера/` → cases 022, 023, 054.
 
+## Проверка в платформе
+
+- Загрузка в пустую базу, обновление ИБ, внешнее соединение, снимки форм → `knowledge/testing.md` → `tools/platform.py`, `tools/register_com.py`, `bootstrap/platform.json.example` → `knowledge/validation.md` §5.
+
 ## Новый проект
 
 - Старт с нуля из `.dt`: база, проект EDT, git, стартовый набор, первый объект → `knowledge/new-project.md` → `tools/new_project.py`, `bootstrap/` → `knowledge/deployment.md` §2.

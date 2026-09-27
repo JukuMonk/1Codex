@@ -65,12 +65,21 @@ python tools/make_sandbox.py                                                  # 
 python tools/check_project.py tests/sandbox                                   # самопроверка набора: 0 ошибок
 python tools/check_links.py [--sensitive]                                     # ссылки между md-файлами; поиск адресов/учётных данных
 python tools/new_project.py <корень EDT> <папка инструментов> --prefix <пф>  # старт нового проекта: справочник метаданных, CLAUDE.md, .gitignore, резервная копия
+python tools/platform.py <platform.json> load|quick|update|com …|screens …    # проверка в платформе: загрузка в пустую базу, обновление ИБ, COM (отчёты, запросы), снимки форм
+python tools/register_com.py <comcntr.dll> [V83.COMConnector]                # COM-коннектор 1С на пользователя, без прав администратора
 ```
 
 Виды для `scaffold`: `catalog`, `enum`, `constant`, `information-register`,
 `accumulation-register`, `document`, `common-module`, `data-processor`,
 `report`, `role`, `subsystem`, `mobile` (из `examples/mobile`), `html`
 (из `examples/forms/html-field-form`).
+
+## Проверка в платформе
+
+Четыре уровня без участия человека — `knowledge/testing.md`: загрузка проекта
+в пустую базу, обновление ИБ, внешнее соединение (все отчёты и запросы на
+настоящих данных), снимки форм тонкого клиента. Инструмент — `tools/platform.py`
+с `platform.json` проекта (`bootstrap/platform.json.example`).
 
 ## Новый проект
 

@@ -1,0 +1,18 @@
+{
+  "v8": "C:\\Program Files\\1cv8\\8.3.27.2325\\bin\\1cv8.exe",
+  "edt_cli": "C:\\Users\\user\\AppData\\Local\\1C\\1cedtstart\\installations\\1C_EDT 2026.1\\1cedt\\1cedtcli.exe",
+  "project": "C:\\Users\\user\\AppData\\Local\\1C\\1cedtstart\\projects\\MVM\\УАТ_МВМ",
+  "work": "C:\\MVM\\.platform",
+  "prefix": "мвм",
+  "com": "V83.COMConnector",
+  "ib": "File=\"C:\\Users\\user\\Documents\\InfoBase11\";",
+  "screens": {
+    "server_call_module": "ОбщегоНазначенияВызовСервера",
+    "global_client_module": "НапоминанияПользователяГлобальный",
+    "after_start_module": "ОбщегоНазначенияКлиентПереопределяемый",
+    "default_masks": [
+      "Обработка.мвм*.Форма.*",
+      "Справочник.мвм*.Форма.*"
+    ]
+  }
+}
