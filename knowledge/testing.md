@@ -54,7 +54,7 @@
 - **`regsvr32 comcntr.dll` без прав администратора падает** (0x80070005), а
   без регистрации `Dispatch` создаётся, но `Connect` «не найден»:
   «Библиотека не зарегистрирована» — не зарегистрирована библиотека ТИПОВ.
-  Регистрация на пользователя: `tools/register_com.py <путь к comcntr.dll>`
+  Регистрация на пользователя: `tools/register_com.py` с путём к comcntr.dll
   (HKCU CLSID + ProgID + `RegisterTypeLibForUser`). `regsvr32 /n /i:user`
   не годится: у comcntr нет DllInstall.
 - Строка соединения: `File="…";Usr="…";Pwd="…";` (или `Srvr`/`Ref`). Без
