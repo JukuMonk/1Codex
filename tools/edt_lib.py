@@ -132,13 +132,18 @@ def type_xml(spec, indent):
         else:
             lines += [o + '  <stringQualifiers>', o + '    <length>%d</length>' % n,
                       o + '  </stringQualifiers>']
-    elif re.match(r'^Число\(\d+,\d+\)$', spec):
+    elif re.match(r'^Число\+?\(\d+,\d+\)$', spec):
+        # «Число+(15,3)» — неотрицательное (nonNegative), снято с eamСмета ФРЕГАТ EAM
         prec, scale = re.findall(r'\d+', spec)
         lines += [o + '  <types>Number</types>', o + '  <numberQualifiers>',
                   o + '    <precision>%s</precision>' % prec]
         if int(scale):
             lines.append(o + '    <scale>%s</scale>' % scale)
+        if '+' in spec:
+            lines.append(o + '    <nonNegative>true</nonNegative>')
         lines.append(o + '  </numberQualifiers>')
+    elif spec == 'ХранилищеЗначения':
+        lines.append(o + '  <types>ValueStorage</types>')
     elif spec == 'Булево':
         lines.append(o + '  <types>Boolean</types>')
     elif spec in ('Дата', 'ДатаВремя'):
@@ -149,7 +154,10 @@ def type_xml(spec, indent):
         prefixes = {'Справочник.': 'CatalogRef.', 'Документ.': 'DocumentRef.',
                     'Перечисление.': 'EnumRef.',
                     'ПланВидовХарактеристик.': 'ChartOfCharacteristicTypesRef.',
-                    'ОпределяемыйТип.': 'DefinedType.'}
+                    'ОпределяемыйТип.': 'DefinedType.',
+                    # характеристика ПВХ (значение аналитики статьи и т.п.)
+                    'Характеристика.': 'Characteristic.',
+                    'БизнесПроцесс.': 'BusinessProcessRef.', 'Задача.': 'TaskRef.'}
         for ru, en in prefixes.items():
             if spec.startswith(ru):
                 lines.append(o + '  <types>%s%s</types>' % (en, spec[len(ru):]))
@@ -188,8 +196,17 @@ def attribute(name, syn, spec, indent, in_ts=False, required=False, tag='attribu
 
 def tabular_section(name, syn, attributes, indent, seed=None):
     o = ' ' * indent
-    lines = [o + '<tabularSections uuid="%s">' % (stable_uid(seed) if seed else uid()),
-             o + '  <name>%s</name>' % name]
+    lines = [o + '<tabularSections uuid="%s">' % (stable_uid(seed) if seed else uid())]
+    # producedTypes ТЧ (objectType/rowType) — есть у каждой ТЧ живых документов
+    # ФРЕГАТ EAM (eamСмета); без них EDT создаёт типы сам, но uuid «плывут»
+    ps = seed or uid()
+    lines += [o + '  <producedTypes>',
+              o + '    <objectType typeId="%s" valueTypeId="%s"/>' % (stable_uid(ps + '/objectType'),
+                                                                     stable_uid(ps + '/objectType/value')),
+              o + '    <rowType typeId="%s" valueTypeId="%s"/>' % (stable_uid(ps + '/rowType'),
+                                                                  stable_uid(ps + '/rowType/value')),
+              o + '  </producedTypes>']
+    lines.append(o + '  <name>%s</name>' % name)
     lines += synonym(syn, indent + 2)
     lines += [o + '  <standardAttributes>', o + '    <dataHistory>Use</dataHistory>',
               o + '    <name>LineNumber</name>',
@@ -338,12 +355,17 @@ def constant_mdo(name, syn, spec='Булево', explanation=None, comment=None,
 
 
 def information_register_mdo(name, syn, dimensions, resources, comment=None,
-                             forms=(), default_forms=(), seed=None):
-    """Независимый непериодический регистр сведений (writeMode и периодичность
-    по умолчанию, поэтому тегов нет). Имена ресурсов НЕ должны быть
+                             forms=(), default_forms=(), seed=None, periodicity=None,
+                             recorder=False, attributes=()):
+    """Регистр сведений. По умолчанию — независимый непериодический (тегов нет).
+    periodicity: 'Second' | 'Day' | 'Month' | … — периодический (порядок тегов
+    editType → informationRegisterPeriodicity → mainFilterOnPeriod снят с
+    eamСтоимостьТМЦ ФРЕГАТ EAM); recorder=True — подчинение регистратору
+    (writeMode RecorderSubordinate, как eamГрафикТОиР). attributes — реквизиты
+    регистра (идут после ресурсов). Имена ресурсов НЕ должны быть
     ключевыми словами запроса («С», «По» — case 016)."""
     s = seed or 'InformationRegister/' + name
-    for n, _, _ in list(dimensions) + list(resources):
+    for n, _, _ in list(dimensions) + list(resources) + list(attributes):
         if n.upper() in QUERY_KEYWORDS:
             raise ValueError('имя «%s» — ключевое слово языка запросов (case 016)' % n)
     lines = ['<?xml version="1.0" encoding="UTF-8"?>',
@@ -356,6 +378,14 @@ def information_register_mdo(name, syn, dimensions, resources, comment=None,
         lines.append('  <comment>%s</comment>' % esc(comment))
     lines += ['  <useStandardCommands>true</useStandardCommands>',
               '  <editType>InDialog</editType>']
+    if periodicity:
+        lines.append('  <informationRegisterPeriodicity>%s</informationRegisterPeriodicity>' % periodicity)
+    if recorder:
+        lines.append('  <writeMode>RecorderSubordinate</writeMode>')
+    if periodicity and not recorder:
+        # у регистра, подчинённого регистратору, mainFilterOnPeriod недопустим (EDT: «Регистр должен
+        # быть независимый и периодический»)
+        lines.append('  <mainFilterOnPeriod>true</mainFilterOnPeriod>')
     # ссылки на формы у РЕГИСТРА стоят ДО dataLockControlMode (у справочника —
     # после choiceMode): порядок задан схемой, сверено с типовыми (case 039)
     for prop, fname in default_forms:
@@ -367,17 +397,22 @@ def information_register_mdo(name, syn, dimensions, resources, comment=None,
                            seed=s + '/dim/' + dn)
     for rn, rsyn, rspec in resources:
         lines += attribute(rn, rsyn, rspec, 2, tag='resources', seed=s + '/res/' + rn)
+    for an, asyn, aspec in attributes:
+        lines += attribute(an, asyn, aspec, 2, tag='attributes', seed=s + '/attr/' + an)
     for fname, fsyn in forms:
         lines += form_ref_block('InformationRegister', name, fname, fsyn, seed=s + '/form/' + fname)
     lines += ['</mdclass:InformationRegister>', '']
     return join(lines)
 
 
-def accumulation_register_mdo(name, syn, dimensions, resources, comment=None, seed=None):
+def accumulation_register_mdo(name, syn, dimensions, resources, comment=None, seed=None,
+                              turnovers=False, attributes=()):
     """Регистр накопления остатков. MEDIUM: структура снята с типового объекта
     (у нас своих регистров накопления не было). У измерений и ресурсов
     регистра НЕТ fillValue/dataHistory — только minValue/maxValue/
-    fullTextSearch, у измерений плюс useInTotals; ресурсы идут ДО измерений."""
+    fullTextSearch, у измерений плюс useInTotals; ресурсы идут ДО измерений.
+    turnovers=True — оборотный регистр (registerType Turnovers);
+    attributes — реквизиты регистра (после ресурсов, до измерений)."""
     s = seed or 'AccumulationRegister/' + name
     lines = ['<?xml version="1.0" encoding="UTF-8"?>',
              '<mdclass:AccumulationRegister %s uuid="%s">' % (XMLNS_MD, stable_uid(s))]
@@ -391,6 +426,8 @@ def accumulation_register_mdo(name, syn, dimensions, resources, comment=None, se
     for std in ('RecordType', 'Active', 'LineNumber', 'Recorder'):
         lines += standard_attribute(std, 2)
     lines += standard_attribute('Period', 2, ['<fillChecking>ShowError</fillChecking>'])
+    if turnovers:
+        lines.append('  <registerType>Turnovers</registerType>')
     lines += ['  <dataLockControlMode>Managed</dataLockControlMode>',
               '  <enableTotalsSplitting>true</enableTotalsSplitting>']
 
@@ -408,6 +445,8 @@ def accumulation_register_mdo(name, syn, dimensions, resources, comment=None, se
         return ls
     for rn, rsyn, rspec in resources:
         lines += reg_attr('resources', rn, rsyn, rspec, [])
+    for an, asyn, aspec in attributes:
+        lines += reg_attr('attributes', an, asyn, aspec, [])
     for dn, dsyn, dspec in dimensions:
         lines += reg_attr('dimensions', dn, dsyn, dspec, ['<useInTotals>true</useInTotals>'])
     lines += ['</mdclass:AccumulationRegister>', '']
@@ -416,9 +455,13 @@ def accumulation_register_mdo(name, syn, dimensions, resources, comment=None, se
 
 def document_mdo(name, syn, attributes=(), tabular_sections=(), number_length=11,
                  forms=(), default_forms=(), register_records=(), posting=True,
-                 comment=None, seed=None):
+                 comment=None, seed=None, based_on=(), periodicity=None):
     """Документ. MEDIUM: порядок тегов снят с типового документа (своих
-    документов в проекте-источнике не заводили — рейсы и заявки типовые)."""
+    документов в проекте-источнике не заводили — рейсы и заявки типовые).
+    based_on — ['Document.X', …] (ввод на основании); periodicity —
+    None (сквозной номер) | 'Year' | 'Quarter' | 'Month' | 'Day'.
+    Доработка ЗАГОТОВКИ, уже лежащей в проекте: результат пропустить через
+    preserve_uuids(новый, старый) — uuid объекта не меняются (case 020)."""
     s = seed or 'Document/' + name
     lines = ['<?xml version="1.0" encoding="UTF-8"?>',
              '<mdclass:Document %s uuid="%s">' % (XMLNS_MD, stable_uid(s))]
@@ -434,13 +477,17 @@ def document_mdo(name, syn, attributes=(), tabular_sections=(), number_length=11
         lines += standard_attribute(std, 2)
     lines += standard_attribute('Date', 2, ['<fillChecking>ShowError</fillChecking>'])
     lines += standard_attribute('Number', 2)
+    for b in based_on:
+        lines.append('  <basedOn>%s</basedOn>' % b)
     lines += ['  <createOnInput>Use</createOnInput>',
               '  <dataLockControlMode>Managed</dataLockControlMode>',
               '  <fullTextSearch>Use</fullTextSearch>',
               '  <numberType>String</numberType>',
               '  <numberLength>%d</numberLength>' % number_length,
-              '  <numberAllowedLength>Variable</numberAllowedLength>',
-              '  <checkUnique>true</checkUnique>',
+              '  <numberAllowedLength>Variable</numberAllowedLength>']
+    if periodicity:
+        lines.append('  <numberPeriodicity>%s</numberPeriodicity>' % periodicity)
+    lines += ['  <checkUnique>true</checkUnique>',
               '  <autonumbering>true</autonumbering>']
     for prop, fname in default_forms:
         lines.append('  <%s>Document.%s.Form.%s</%s>' % (prop, name, fname, prop))
@@ -477,14 +524,22 @@ def common_module_mdo(name, syn, server=True, server_call=False, client_managed=
              '<mdclass:CommonModule %s uuid="%s">' % (ns, stable_uid(s)),
              '  <name>%s</name>' % name]
     lines += synonym(syn, 2)
+    # Флаги по стандарту 1С (проверка EDT common-module-type), сверено с модулями БСП ФРЕГАТ EAM:
+    #   серверный (…Сервер)        — server + externalConnection + clientOrdinaryApplication;
+    #   вызов сервера (…ВызовСервера) — server + serverCall;
+    #   клиентский (…Клиент)       — clientManagedApplication + clientOrdinaryApplication;
+    #   клиент-серверный           — clientManagedApplication + server + externalConnection + clientOrdinaryApplication;
+    #   глобальный клиентский      — global + clientManagedApplication + clientOrdinaryApplication.
     if global_:
         lines.append('  <global>true</global>')
     if client_managed:
         lines.append('  <clientManagedApplication>true</clientManagedApplication>')
     if server:
         lines.append('  <server>true</server>')
-    if not client_managed:
-        lines.append('  <clientOrdinaryApplication>false</clientOrdinaryApplication>')
+    if server and not server_call:
+        lines.append('  <externalConnection>true</externalConnection>')
+    if not server_call:
+        lines.append('  <clientOrdinaryApplication>true</clientOrdinaryApplication>')
     if server_call:
         lines.append('  <serverCall>true</serverCall>')
     if privileged:
@@ -650,10 +705,16 @@ def picture_manifest():
     return '\ufeff' + CRLF.join(lines) + CRLF
 
 
-def object_tabular_table(ids, name, ts_path, columns, indent, editable=True):
+def object_tabular_table(ids, name, ts_path, columns, indent, editable=True, buttons=(),
+                         handlers=()):
     """Таблица ТАБЛИЧНОЙ ЧАСТИ объекта (Объект.ИмяТЧ) на форме элемента /
     документа: первая колонка — номер строки (LabelField), остальные —
-    поля ввода. Собрана по образцу вставки вкладки с ТЧ в типовую форму."""
+    поля ввода. Собрана по образцу вставки вкладки с ТЧ в типовую форму.
+    columns — имена реквизитов ТЧ ИЛИ кортежи (суффикс, путь, вид, заголовок,
+    только_чтение[, [(событие, обработчик)]]) — для колонок-«спутников» вида
+    Объект.ТЧ.Номенклатура.Код. buttons — [(имяКнопки, команда)] в командной
+    панели таблицы; handlers — [(событие, обработчик)] таблицы (стоят после
+    autoCommandBar, до спутников — как в eamСмета ФРЕГАТ EAM)."""
     o = ' ' * indent
     lines = [o + '<items xsi:type="form:Table">', o + '  <name>%s</name>' % name,
              o + '  <id>%d</id>' % ids(), o + '  <visible>true</visible>',
@@ -662,11 +723,22 @@ def object_tabular_table(ids, name, ts_path, columns, indent, editable=True):
              o + '  <dataPath xsi:type="form:DataPath">', o + '    <segments>%s</segments>' % ts_path,
              o + '  </dataPath>', o + '  <titleLocation>None</titleLocation>']
     lines += field(ids, name + 'НомерСтроки', ts_path + '.LineNumber', indent + 2, 'LabelField')
-    for cname in columns:
-        lines += field(ids, name + cname, '%s.%s' % (ts_path, cname), indent + 2)
+    for c in columns:
+        if isinstance(c, (tuple, list)):
+            suf, path, kind, ctitle, ro = c[:5]
+            ch = c[5] if len(c) > 5 else ()
+            lines += field(ids, name + suf, path, indent + 2, kind, ctitle, ro, handlers=ch)
+        else:
+            lines += field(ids, name + c, '%s.%s' % (ts_path, c), indent + 2)
     lines += [o + '  <autoCommandBar>', o + '    <name>%sКоманднаяПанель</name>' % name,
-              o + '    <id>%d</id>' % ids(), o + '    <horizontalAlign>Left</horizontalAlign>',
+              o + '    <id>%d</id>' % ids()]
+    for bname, cmd in buttons:
+        lines += bar_button(ids, bname, indent + 4, command=cmd)
+    lines += [o + '    <horizontalAlign>Left</horizontalAlign>',
               o + '    <autoFill>true</autoFill>', o + '  </autoCommandBar>']
+    for event, proc in handlers:
+        lines += [o + '  <handlers>', o + '    <event>%s</event>' % event,
+                  o + '    <name>%s</name>' % proc, o + '  </handlers>']
     lines += table_companions(ids, name, indent + 2)
     lines += tooltip(name, ids(), indent + 2)
     lines += context_menu(name, ids(), indent + 2)
@@ -727,6 +799,8 @@ CONFIG_GROUPS = {
     'InformationRegister': 'informationRegisters', 'AccumulationRegister': 'accumulationRegisters',
     'ChartOfCharacteristicTypes': 'chartsOfCharacteristicTypes', 'CommonForm': 'commonForms',
     'CommonCommand': 'commonCommands', 'DefinedType': 'definedTypes',
+    'ScheduledJob': 'scheduledJobs', 'EventSubscription': 'eventSubscriptions',
+    'DocumentJournal': 'documentJournals', 'Style': 'styles',
 }
 
 FOLDERS = {
@@ -736,7 +810,19 @@ FOLDERS = {
     'InformationRegister': 'InformationRegisters', 'AccumulationRegister': 'AccumulationRegisters',
     'ChartOfCharacteristicTypes': 'ChartsOfCharacteristicTypes', 'CommonForm': 'CommonForms',
     'CommonCommand': 'CommonCommands', 'DefinedType': 'DefinedTypes',
+    'ScheduledJob': 'ScheduledJobs', 'EventSubscription': 'EventSubscriptions',
+    'DocumentJournal': 'DocumentJournals', 'Style': 'Styles',
 }
+
+# порядок групп в Configuration.mdo, как их пишет EDT (снят с ФРЕГАТ EAM, 2026.1)
+CONFIG_ORDER = ['subsystems', 'styleItems', 'styles', 'commonPictures', 'sessionParameters', 'roles',
+                'commonTemplates', 'filterCriteria', 'commonModules', 'commonAttributes',
+                'exchangePlans', 'xDTOPackages', 'webServices', 'eventSubscriptions',
+                'scheduledJobs', 'settingsStorages', 'functionalOptions',
+                'functionalOptionsParameters', 'definedTypes', 'commonCommands', 'commandGroups',
+                'constants', 'commonForms', 'catalogs', 'documents', 'documentJournals', 'enums',
+                'reports', 'dataProcessors', 'informationRegisters', 'accumulationRegisters',
+                'chartsOfCharacteristicTypes', 'businessProcesses', 'tasks']
 
 
 def register_in_configuration(config_text, kind, name):
@@ -749,7 +835,14 @@ def register_in_configuration(config_text, kind, name):
         return config_text, False
     last = config_text.rfind('  <%s>' % tag)
     if last < 0:
-        raise ValueError('в Configuration.mdo нет группы <%s>' % tag)
+        # группы ещё нет (первый регистр накопления и т.п.) — встаём после
+        # последней строки ближайшей ПРЕДШЕСТВУЮЩЕЙ группы (CONFIG_ORDER)
+        for prev in reversed(CONFIG_ORDER[:CONFIG_ORDER.index(tag)]):
+            last = config_text.rfind('  <%s>' % prev)
+            if last >= 0:
+                break
+        if last < 0:
+            raise ValueError('в Configuration.mdo нет группы <%s> и предшествующих' % tag)
     end = config_text.index(CRLF, last) + len(CRLF)
     return config_text[:end] + line + CRLF + config_text[end:], True
 
@@ -778,18 +871,29 @@ def add_attributes_to_mdo(text, attributes, in_ts=None, tabular_sections=()):
     совпало бы и с четырёхпробельным закрытием внутри ТЧ, и новые реквизиты
     уехали бы в чужую таблицу (ловили)."""
     added = []
-    new = [a for a in attributes if ('<name>%s</name>' % a[0]) not in text]
+    # устойчивые uuid (ФРЕГАТ EAM): объект + имя — повторная доработка после перегенерации объекта
+    # другим скриптом даёт тот же uuid, база не видит «новый» реквизит (case 020)
+    mo = re.search(r'<name>([^<]+)</name>', text)
+    obj = mo.group(1) if mo else ''
+    # проверка «уже есть» — только среди реквизитов ВЕРХНЕГО уровня (отступ 2): одноимённая колонка ТЧ
+    # не должна мешать добавить реквизит шапки (ФРЕГАТ EAM: eamМерыОтветственности.Должность)
+    top = set(re.findall(r'\r?\n  <attributes uuid="[^"]+">\r?\n    <name>([^<]+)</name>', text))
+    top_ts = set(re.findall(r'\r?\n  <tabularSections uuid="[^"]+">\s*(?:<producedTypes>.*?</producedTypes>\s*)?<name>([^<]+)</name>',
+                            text, re.S))
+    new = [a for a in attributes if a[0] not in top and a[0] not in top_ts]
     if new:
         block = []
         for a in new:
-            block += attribute(a[0], a[1], a[2], 2, required=(len(a) > 3 and a[3] == 'обязательный'))
+            block += attribute(a[0], a[1], a[2], 2, required=(len(a) > 3 and a[3] == 'обязательный'),
+                               seed='addattr/%s/%s' % (obj, a[0]))
             added.append('реквизит ' + a[0])
         text = _insert_after_last(text, CLOSE_ATTR, block, 'реквизиты')
-    new_ts = [t for t in tabular_sections if ('<name>%s</name>' % t['name']) not in text]
+    new_ts = [t for t in tabular_sections if t['name'] not in top_ts and t['name'] not in top]
     if new_ts:
         block = []
         for t in new_ts:
-            block += tabular_section(t['name'], t['synonym'], t['attributes'], 2)
+            block += tabular_section(t['name'], t['synonym'], t['attributes'], 2,
+                                     seed='addts/%s/%s' % (obj, t['name']))
             added.append('ТЧ ' + t['name'])
         anchor = CLOSE_TS if CLOSE_TS in text else CLOSE_ATTR
         text = _insert_after_last(text, anchor, block, 'табличные части')
@@ -799,7 +903,13 @@ def add_attributes_to_mdo(text, attributes, in_ts=None, tabular_sections=()):
 def _insert_after_last(text, anchor, block, what):
     pos = text.rfind(anchor)
     if pos < 0:
-        raise ValueError('не найдено место для вставки (%s)' % what)
+        # у объекта ещё нет ни реквизитов, ни ТЧ (ФРЕГАТ EAM: eamДолжности): реквизиты и ТЧ
+        # встают перед первым <forms>/<commands>/<templates>, иначе — перед закрывающим тегом
+        m = re.search(r'\r\n  <(forms|commands|templates) ', text) or re.search(r'\r\n</mdclass:', text)
+        if not m:
+            raise ValueError('не найдено место для вставки (%s)' % what)
+        pos = m.start() + len(CRLF)
+        return text[:pos] + join(block) + CRLF + text[pos:]
     pos += len(anchor)
     return text[:pos] + join(block) + CRLF + text[pos:]
 
@@ -994,15 +1104,20 @@ def decoration(ids, name, text, indent, bold=False):
     return lines
 
 
-def bar_button(ids, name, indent, default=False):
-    """Кнопка в командной панели (без <type>): так пишет EDT для панели."""
+def bar_button(ids, name, indent, default=False, command=None):
+    """Кнопка в командной панели (без <type>): так пишет EDT для панели.
+    command — имя команды формы, если отличается от имени кнопки, либо полный
+    путь стандартной/общей команды ('Form.StandardCommand.X', 'CommonCommand.X')."""
     o = ' ' * indent
+    cmd = command or name
+    if not cmd.startswith(('Form.', 'CommonCommand.')):
+        cmd = 'Form.Command.' + cmd
     lines = [o + '<items xsi:type="form:Button">', o + '  <name>%s</name>' % name,
              o + '  <id>%d</id>' % ids(), o + '  <visible>true</visible>',
              o + '  <enabled>true</enabled>', o + '  <userVisible>',
              o + '    <common>true</common>', o + '  </userVisible>']
     lines += tooltip(name, ids(), indent + 2)
-    lines += [o + '  <commandName>Form.Command.%s</commandName>' % name,
+    lines += [o + '  <commandName>%s</commandName>' % cmd,
               o + '  <representation>Auto</representation>']
     if default:
         lines.append(o + '  <defaultButton>true</defaultButton>')
@@ -1294,8 +1409,18 @@ def list_form_settings_group(ids, indent, name='СписокКомпоновщи
 
 def _qualifiers(kind, indent):
     """Квалификаторы у реквизита формы. Число БЕЗ numberQualifiers ломает
-    форму целиком — пустой лист в EDT (case 001)."""
+    форму целиком — пустой лист в EDT (case 001). kind может быть
+    'Number(15,3)' (разрядность и точность) и 'String(100)' (ФРЕГАТ EAM)."""
     o = ' ' * indent
+    m = re.match(r'^Number\((\d+),(\d+)\)$', kind)
+    if m:
+        lines = [o + '<numberQualifiers>', o + '  <precision>%s</precision>' % m.group(1)]
+        if int(m.group(2)):
+            lines.append(o + '  <scale>%s</scale>' % m.group(2))
+        return lines + [o + '</numberQualifiers>']
+    m = re.match(r'^String\((\d+)\)$', kind)
+    if m:
+        return [o + '<stringQualifiers>', o + '  <length>%s</length>' % m.group(1), o + '</stringQualifiers>']
     if kind == 'String':
         return [o + '<stringQualifiers/>']
     if kind == 'Number':
@@ -1303,6 +1428,16 @@ def _qualifiers(kind, indent):
     if kind == 'Date':
         return [o + '<dateQualifiers>', o + '  <dateFractions>DateTime</dateFractions>', o + '</dateQualifiers>']
     return []
+
+
+def _value_type_lines(kind, indent):
+    """<types> + квалификаторы; составной тип — 'CatalogRef.X|DocumentRef.Y' (ФРЕГАТ EAM)."""
+    o = ' ' * indent
+    lines, quals = [], []
+    for k in kind.split('|'):
+        lines.append(o + '<types>%s</types>' % re.sub(r'\(.*\)$', '', k))
+        quals += _qualifiers(k, indent)
+    return lines + quals
 
 
 def form_attribute(nums, name, title, kind, columns=(), main=False, saved_data=False, indent=2,
@@ -1315,8 +1450,8 @@ def form_attribute(nums, name, title, kind, columns=(), main=False, saved_data=F
     lines = [o + '<attributes>', o + '  <name>%s</name>' % name]
     if title:
         lines += title_xml(title, indent + 2)
-    lines += [o + '  <id>%d</id>' % nums(), o + '  <valueType>', o + '    <types>%s</types>' % kind]
-    lines += _qualifiers(kind, indent + 4)
+    lines += [o + '  <id>%d</id>' % nums(), o + '  <valueType>']
+    lines += _value_type_lines(kind, indent + 4)
     lines += [o + '  </valueType>', o + '  <view>', o + '    <common>true</common>', o + '  </view>',
               o + '  <edit>', o + '    <common>true</common>', o + '  </edit>']
     if main:
@@ -1326,9 +1461,8 @@ def form_attribute(nums, name, title, kind, columns=(), main=False, saved_data=F
     for cname, ctitle, ckind in columns:
         lines += [o + '  <columns>', o + '    <name>%s</name>' % cname]
         lines += title_xml(ctitle, indent + 4)
-        lines += [o + '    <id>%d</id>' % nums(), o + '    <valueType>',
-                  o + '      <types>%s</types>' % ckind]
-        lines += _qualifiers(ckind, indent + 6)
+        lines += [o + '    <id>%d</id>' % nums(), o + '    <valueType>']
+        lines += _value_type_lines(ckind, indent + 6)
         lines += [o + '    </valueType>', o + '    <view>', o + '      <common>true</common>',
                   o + '    </view>', o + '    <edit>', o + '      <common>true</common>',
                   o + '    </edit>', o + '  </columns>']
@@ -1367,16 +1501,22 @@ def form_command(number, name, title, tip, handler=None, picture=None):
 
 
 def form_file(items, attributes, commands=(), handlers=(), title=None, auto_title=True,
-              ext='form:ObjectFormExtInfo', window_mode=None, auto_bar_id=-1, auto_bar_fill=True):
+              ext='form:ObjectFormExtInfo', window_mode=None, auto_bar_id=-1, auto_bar_fill=True,
+              bar_items=(), parameters=()):
     """Каркас Form.form. handlers — [(событие, процедура)]. Хвост в порядке
     модели EDT: autoCommandBar → handlers → windowOpeningMode →
-    saveWindowSettings (без него EDT форму не рисует — case 002) → …"""
+    saveWindowSettings (без него EDT форму не рисует — case 002) → …
+    bar_items — строки кнопок (bar_button) командной панели формы;
+    ext — 'form:DocumentFormExtInfo' у формы документа, 'form:DynamicListFormExtInfo'
+    у формы списка."""
     lines = ['<?xml version="1.0" encoding="UTF-8"?>', '<form:Form %s>' % XMLNS_FORM]
     if title:
         lines += title_xml(title, 2)
     lines += items
     lines += ['  <autoCommandBar>', '    <name>ФормаКоманднаяПанель</name>',
-              '    <id>%d</id>' % auto_bar_id, '    <horizontalAlign>Left</horizontalAlign>']
+              '    <id>%d</id>' % auto_bar_id]
+    lines += list(bar_items)
+    lines += ['    <horizontalAlign>Left</horizontalAlign>']
     if auto_bar_fill:
         lines.append('    <autoFill>true</autoFill>')
     lines.append('  </autoCommandBar>')
@@ -1392,6 +1532,15 @@ def form_file(items, attributes, commands=(), handlers=(), title=None, auto_titl
               '  <showCloseButton>true</showCloseButton>']
     lines += attributes
     lines += commands
+    # параметры формы — после команд, до commandInterface (снято с CommonForm.АдреснаяКнига ФРЕГАТ EAM);
+    # parameters — [(имя, тип|None)], тип как у form_attribute ('ValueList', 'CatalogRef.X|DocumentRef.Y')
+    for pname, ptype in parameters:
+        lines += ['  <parameters>', '    <name>%s</name>' % pname]
+        if ptype:
+            lines += ['    <valueType>'] + _value_type_lines(ptype, 6) + ['    </valueType>']
+        else:
+            lines.append('    <valueType/>')
+        lines.append('  </parameters>')
     lines += ['  <commandInterface>', '    <navigationPanel/>', '    <commandBar/>',
               '  </commandInterface>', '  <extInfo xsi:type="%s"/>' % ext, '</form:Form>', '']
     return join(lines)
@@ -1973,3 +2122,1069 @@ def check_mdo(text):
         if m.group(2).upper() in QUERY_KEYWORDS:
             problems.append('имя «%s» — ключевое слово языка запросов (case 016)' % m.group(2))
     return problems
+
+
+# ============================================================ добавлено: ФРЕГАТ EAM (2026-09)
+# Функции, которых не хватило при массовой реализации ТЗ в конфигурации ФРЕГАТ EAM
+# (EDT 2026.1, БСП 3.1.3). Формат сверен с живыми объектами того проекта и
+# проверен `1cedtcli validate` (без ошибок, только замечания стандартов).
+
+_UUID_RE = re.compile(r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}')
+
+
+def preserve_uuids(new_text, old_text):
+    """Перегенерация ЗАГОТОВКИ, уже лежащей в проекте (и, возможно, в базе):
+    uuid объекта, его producedTypes и uuid одноимённых реквизитов/ТЧ/форм/
+    значений перечислений берутся из старого .mdo — база не увидит «новый»
+    объект вместо старого (case 020)."""
+    m_new = re.search(r'(<mdclass:\w+ [^>]*uuid=")([^"]+)(")', new_text)
+    m_old = re.search(r'<mdclass:\w+ [^>]*uuid="([^"]+)"', old_text)
+    text = new_text[:m_new.start(2)] + m_old.group(1) + new_text[m_new.end(2):]
+    pt_old = re.search(r'\n  <producedTypes>.*?\n  </producedTypes>', old_text, re.S)
+    pt_new = re.search(r'\n  <producedTypes>.*?\n  </producedTypes>', text, re.S)
+    if pt_old and pt_new:
+        text = text[:pt_new.start()] + pt_old.group(0).replace('\r\n', '\n').replace('\n', CRLF) + text[pt_new.end():]
+    pat = r'(\n {2,4}<(attributes|tabularSections|forms|enumValues|dimensions|resources|templates|commands) uuid=")([^"]+)(">\s*(?:<producedTypes>.*?</producedTypes>\s*)?<name>([^<]+)</name>)'
+
+    def slots(t):
+        """[(начало uuid, конец uuid, ключ)]; ключ реквизита ТЧ содержит имя ТЧ —
+        одноимённые реквизиты разных ТЧ (КлючСвязи и т.п.) не путаются."""
+        spans = []
+        for m in re.finditer(r'\n  <tabularSections uuid="[^"]+">.*?\n  </tabularSections>', t, re.S):
+            nm = re.search(r'</producedTypes>\s*<name>([^<]+)</name>|^\s*<tabularSections[^>]*>\s*<name>([^<]+)</name>',
+                           m.group(0), re.S)
+            spans.append((m.start(), m.end(), (nm.group(1) or nm.group(2)) if nm else ''))
+        res = []
+        for m in re.finditer(pat, t, re.S):
+            pos = m.start(3)
+            scope = ''
+            if m.group(2) != 'tabularSections':
+                scope = next((n for s, e, n in spans if s < pos < e), '')
+            res.append((m.start(3), m.end(3), (scope, m.group(2), m.group(5))))
+        return res
+
+    old = {k: old_text[s:e] for s, e, k in slots(old_text)}
+    old_ts_pt = {}
+    for m in re.finditer(r'<tabularSections uuid="[^"]+">\s*(<producedTypes>.*?</producedTypes>)\s*<name>([^<]+)</name>', old_text, re.S):
+        old_ts_pt[m.group(2)] = m.group(1)
+    for s, e, k in reversed(slots(text)):
+        if k in old:
+            text = text[:s] + old[k] + text[e:]
+
+    def repl_pt(m):
+        pt = old_ts_pt.get(m.group(3))
+        if not pt:
+            return m.group(0)
+        return m.group(1) + pt.replace('\r\n', '\n').replace('\n', CRLF) + m.group(2) + m.group(3) + m.group(4)
+    text = re.sub(r'(<tabularSections uuid="[^"]+">\s*)<producedTypes>.*?</producedTypes>(\s*<name>)([^<]+)(</name>)',
+                  repl_pt, text, flags=re.S)
+    return text
+
+
+def add_content_to_subsystem(text, full_names):
+    """Состав подсистемы: строки <content>Вид.Имя</content> (идемпотентно).
+    Встают после последней строки состава, а у пустой подсистемы — после
+    includeInCommandInterface/explanation/picture (порядок как в .mdo подсистем)."""
+    added = []
+    for fn in full_names:
+        line = '  <content>%s</content>' % fn
+        if line + CRLF in text:
+            continue
+        last = text.rfind('  <content>')
+        if last < 0:
+            end = -1
+            for tag in ('  <includeInCommandInterface>', '  <explanation>', '  </explanation>',
+                        '  <picture ', '  </picture>'):
+                i = text.rfind(tag)
+                if i >= 0:
+                    end = max(end, text.index(CRLF, i) + len(CRLF))
+            if end < 0:
+                end = text.index(CRLF, text.rfind('  </synonym>')) + len(CRLF)
+        else:
+            end = text.index(CRLF, last) + len(CRLF)
+        text = text[:end] + line + CRLF + text[end:]
+        added.append(fn)
+    return text, added
+
+
+def add_type_to_defined_type(text, type_name):
+    """Тип в состав определяемого типа (CatalogRef.X / DocumentRef.X /
+    CatalogObject.X …) — например, для подключения файлов БСП
+    (ВладелецПрисоединенныхФайлов, ПрисоединенныйФайл, ПрисоединенныйФайлОбъект)."""
+    line = '    <types>%s</types>' % type_name
+    if line + CRLF in text:
+        return text, False
+    i = text.rfind('    <types>')
+    end = text.index(CRLF, i) + len(CRLF)
+    return text[:end] + line + CRLF + text[end:], True
+
+
+def add_attributes_to_ts(text, ts_name, attributes):
+    """Идемпотентно добавляет реквизиты [(имя, синоним, тип)] в СУЩЕСТВУЮЩУЮ
+    табличную часть .mdo (перед её закрытием, отступ 4 — у реквизитов ТЧ нет
+    fillValue, case 025)."""
+    m = re.search(r'<tabularSections uuid="[^"]+">\s*(?:<producedTypes>.*?</producedTypes>\s*)?<name>%s</name>.*?\r\n  </tabularSections>'
+                  % re.escape(ts_name), text, re.S)
+    if not m:
+        raise ValueError('нет ТЧ %s' % ts_name)
+    block = m.group(0)
+    added = []
+    new_lines = []
+    for a in attributes:
+        if ('<name>%s</name>' % a[0]) in block:
+            continue
+        mo = re.search(r'<name>([^<]+)</name>', text)
+        new_lines += attribute(a[0], a[1], a[2], 4, in_ts=True,
+                               seed='addtsattr/%s/%s/%s' % (mo.group(1) if mo else '', ts_name, a[0]))
+        added.append(a[0])
+    if not new_lines:
+        return text, added
+    close = CRLF + '  </tabularSections>'
+    nb = block[:-len(close)] + CRLF + CRLF.join(new_lines) + close
+    return text[:m.start()] + nb + text[m.end():], added
+
+
+def clone_object_dir(src_dir, dst_dir, replacements, uuid_salt):
+    """Копия работающего объекта проекта под новым именем: во всех текстовых
+    файлах (.mdo/.bsl/.form/.dcss/.html/.cmi) выполняются replacements
+    [(старое, новое)], а все uuid в .mdo/.dcss заменяются устойчиво
+    (uuid5 от uuid_salt + старый uuid) — повторная копия даёт те же uuid.
+    Так собирается, например, справочник присоединённых файлов БСП для нового
+    владельца (копия <Владелец>ПрисоединенныеФайлы)."""
+    for root, _dirs, files in os.walk(src_dir):
+        for f in files:
+            sp = os.path.join(root, f)
+            rel = os.path.relpath(sp, src_dir)
+            for a, b in replacements:  # имя файла тоже: <Имя>.mdo, <Имя>ПрисоединенныеФайлы.mdo
+                rel = rel.replace(a, b)
+            dp = os.path.join(dst_dir, rel)
+            os.makedirs(os.path.dirname(dp), exist_ok=True)
+            if f.endswith(('.mdo', '.bsl', '.form', '.dcss', '.html', '.cmi', '.dcs')):
+                t = io.open(sp, encoding='utf-8', newline='').read()
+                for a, b in replacements:
+                    t = t.replace(a, b)
+                if f.endswith(('.mdo', '.dcss')):
+                    t = _UUID_RE.sub(lambda m: str(uuid.uuid5(uuid.NAMESPACE_OID,
+                                                               uuid_salt + os.path.relpath(dp, dst_dir) + m.group(0))), t)
+                io.open(dp, 'w', encoding='utf-8', newline='').write(t)
+            else:
+                io.open(dp, 'wb').write(io.open(sp, 'rb').read())
+
+
+def list_settings_dcss(seed):
+    """Attributes/Список/ExtInfo/ListSettings.dcss формы списка (пользовательские
+    настройки динамического списка) — формат снят с форм ФРЕГАТ EAM."""
+    ids = [stable_uid(seed + '/' + k) for k in ('filter', 'order', 'ca', 'items')]
+    return join([
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<Settings xmlns="http://v8.1c.ru/8.1/data-composition-system/settings" '
+        'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xs="http://www.w3.org/2001/XMLSchema" '
+        'xmlns:v8="http://v8.1c.ru/8.1/data/core" xmlns:v8ui="http://v8.1c.ru/8.1/data/ui" '
+        'xmlns:pal="http://v8.1c.ru/8.1/data/ui/colors/palette" xmlns:style="http://v8.1c.ru/8.1/data/ui/style" '
+        'xmlns:sys="http://v8.1c.ru/8.1/data/ui/fonts/system" xmlns:web="http://v8.1c.ru/8.1/data/ui/colors/web" '
+        'xmlns:win="http://v8.1c.ru/8.1/data/ui/colors/windows" '
+        'xmlns:dcscor="http://v8.1c.ru/8.1/data-composition-system/core">',
+        '\t<filter>', '\t\t<viewMode>Normal</viewMode>', '\t\t<userSettingID>%s</userSettingID>' % ids[0], '\t</filter>',
+        '\t<order>', '\t\t<viewMode>Normal</viewMode>', '\t\t<userSettingID>%s</userSettingID>' % ids[1], '\t</order>',
+        '\t<conditionalAppearance>', '\t\t<viewMode>Normal</viewMode>',
+        '\t\t<userSettingID>%s</userSettingID>' % ids[2], '\t</conditionalAppearance>',
+        '\t<itemsViewMode>Normal</itemsViewMode>', '\t<itemsUserSettingID>%s</itemsUserSettingID>' % ids[3],
+        '</Settings>', ''])
+
+
+# ---- расширенная схема компоновки: несколько вариантов, ресурсы, вычисляемые поля,
+#      условное оформление, типизированные параметры, период как в eamГрафикТОиР
+class DcsField(object):
+    """Поле набора: путь, заголовок, формат ('ЧДЦ=2'), ширина, роль измерения."""
+
+    def __init__(self, path, title=None, fmt=None, width=None, dim=False):
+        self.path, self.title, self.fmt, self.width, self.dim = path, title, fmt, width, dim
+
+
+class DcsAppearance(object):
+    """Элемент условного оформления: fields — поля (пусто — вся строка),
+    conds — [(поле, вид_сравнения, значение)] (значение: число/булево/строка,
+    'Поле:Имя' — другое поле, 'Знач:Перечисление.X.Y' — значение конфигурации,
+    None — без правой части), appearance — {'ЦветФона'|'ЦветТекста': 'web:LightPink'
+    или '#RRGGBB', 'Шрифт': 'bold', 'Текст': 'строка'}."""
+
+    def __init__(self, fields, conds, appearance, title=None):
+        self.fields, self.conds, self.appearance, self.title = fields, conds, appearance, title
+
+
+def _dcs_color(v):
+    if v.startswith('#'):
+        r, g, b = int(v[1:3], 16), int(v[3:5], 16), int(v[5:7], 16)
+        return '#%02X%02X%02X' % (r, g, b)
+    return v
+
+
+def _dcs_right(v):
+    if isinstance(v, bool):
+        return '<dcsset:right xsi:type="xs:boolean">%s</dcsset:right>' % ('true' if v else 'false')
+    if isinstance(v, (int, float)):
+        return '<dcsset:right xsi:type="xs:decimal">%s</dcsset:right>' % v
+    if v is None:
+        return ''
+    if v.startswith('Поле:'):
+        return '<dcsset:right xsi:type="dcscor:Field">%s</dcsset:right>' % v[5:]
+    if v.startswith('Знач:'):
+        return '<dcsset:right xsi:type="dcscor:DesignTimeValue">%s</dcsset:right>' % v[5:]
+    return '<dcsset:right xsi:type="xs:string">%s</dcsset:right>' % esc(v)
+
+
+def _dcs_ca(items, o):
+    if not items:
+        return []
+    lines = [o + '<dcsset:conditionalAppearance>']
+    for ca in items:
+        lines += [o + '\t<dcsset:item>', o + '\t\t<dcsset:selection>']
+        for f in ca.fields:
+            lines += [o + '\t\t\t<dcsset:item>', o + '\t\t\t\t<dcsset:field>%s</dcsset:field>' % f,
+                      o + '\t\t\t</dcsset:item>']
+        lines += [o + '\t\t</dcsset:selection>', o + '\t\t<dcsset:filter>']
+        for left, cmp_, right in ca.conds:
+            lines += [o + '\t\t\t<dcsset:item xsi:type="dcsset:FilterItemComparison">',
+                      o + '\t\t\t\t<dcsset:left xsi:type="dcscor:Field">%s</dcsset:left>' % left,
+                      o + '\t\t\t\t<dcsset:comparisonType>%s</dcsset:comparisonType>' % cmp_]
+            r = _dcs_right(right)
+            if r:
+                lines.append(o + '\t\t\t\t' + r)
+            lines.append(o + '\t\t\t</dcsset:item>')
+        lines += [o + '\t\t</dcsset:filter>', o + '\t\t<dcsset:appearance>']
+        for k, v in ca.appearance.items():
+            lines += [o + '\t\t\t<dcscor:item xsi:type="dcsset:SettingsParameterValue">',
+                      o + '\t\t\t\t<dcscor:parameter>%s</dcscor:parameter>' % k]
+            if k.startswith('Цвет'):
+                lines.append(o + '\t\t\t\t<dcscor:value xsi:type="v8ui:Color">%s</dcscor:value>' % _dcs_color(v))
+            elif k == 'Шрифт':
+                lines.append(o + '\t\t\t\t<dcscor:value xsi:type="v8ui:Font" ref="sys:DefaultGUIFont" '
+                                 'bold="true" italic="false" underline="false" strikeout="false" kind="WindowsFont"/>')
+            elif k == 'Текст':
+                lines += _local_string('dcscor:value', v, o + '\t\t\t\t')
+            lines.append(o + '\t\t\t</dcscor:item>')
+        lines.append(o + '\t\t</dcsset:appearance>')
+        if ca.title:
+            lines += _local_string('dcsset:presentation', ca.title, o + '\t\t')
+        lines.append(o + '\t</dcsset:item>')
+    return lines + [o + '</dcsset:conditionalAppearance>']
+
+
+def _dcs_group_field(f, o):
+    return [o + '<dcsset:item xsi:type="dcsset:GroupItemField">', o + '\t<dcsset:field>%s</dcsset:field>' % f,
+            o + '\t<dcsset:groupType>Items</dcsset:groupType>',
+            o + '\t<dcsset:periodAdditionType>None</dcsset:periodAdditionType>',
+            o + '\t<dcsset:periodAdditionBegin xsi:type="xs:dateTime">0001-01-01T00:00:00</dcsset:periodAdditionBegin>',
+            o + '\t<dcsset:periodAdditionEnd xsi:type="xs:dateTime">0001-01-01T00:00:00</dcsset:periodAdditionEnd>',
+            o + '</dcsset:item>']
+
+
+def _dcs_auto(o):
+    return [o + '<dcsset:order>', o + '\t<dcsset:item xsi:type="dcsset:OrderItemAuto"/>', o + '</dcsset:order>',
+            o + '<dcsset:selection>', o + '\t<dcsset:item xsi:type="dcsset:SelectedItemAuto"/>', o + '</dcsset:selection>']
+
+
+def _dcs_structure(levels, o, detail=True, level_ca=()):
+    """levels — [[поля уровня 1], [поля уровня 2], …]; последним уровнем —
+    детальные записи (case 035). level_ca — оформление уровней (по индексу)."""
+    if not levels:
+        if not detail:
+            return []
+        return [o + '<dcsset:item xsi:type="dcsset:StructureItemGroup">'] + _dcs_auto(o + '\t') + [o + '</dcsset:item>']
+    lines = [o + '<dcsset:item xsi:type="dcsset:StructureItemGroup">', o + '\t<dcsset:groupItems>']
+    for f in levels[0]:
+        lines += _dcs_group_field(f, o + '\t\t')
+    lines.append(o + '\t</dcsset:groupItems>')
+    lines += _dcs_auto(o + '\t')
+    if level_ca and level_ca[0]:
+        lines += _dcs_ca(level_ca[0], o + '\t')
+    lines += _dcs_structure(levels[1:], o + '\t', detail, level_ca[1:] if level_ca else ())
+    lines.append(o + '</dcsset:item>')
+    return lines
+
+
+def dcs_param_value(ptype, value=None):
+    """Значение параметра СКД для dcs_schema_ex(params=…)."""
+    if ptype == 'xs:decimal':
+        return '<value xsi:type="xs:decimal">%s</value>' % (value if value is not None else 0)
+    if ptype == 'xs:boolean':
+        return '<value xsi:type="xs:boolean">%s</value>' % ('true' if value else 'false')
+    if ptype == 'xs:dateTime':
+        return '<value xsi:type="xs:dateTime">0001-01-01T00:00:00</value>'
+    return '<value xsi:nil="true"/>'
+
+
+def dcs_schema_ex(fields, query, variants, params=(), calc=(), totals=(), period=True, name='Данные'):
+    """Схема компоновки: один набор-запрос, НЕСКОЛЬКО вариантов.
+    fields — [DcsField]; calc — [(поле, выражение, заголовок)] вычисляемые поля;
+    totals — [(поле, выражение)] ресурсы (проценты считать выражением на каждом
+    уровне: ВЫБОР КОГДА Сумма(Зн)=0 ТОГДА 0 ИНАЧЕ Сумма(Ч)/Сумма(Зн)*100 КОНЕЦ);
+    params — [(имя, заголовок, тип, dcs_param_value(...))], тип: 'xs:decimal' |
+    'xs:boolean' | 'xs:dateTime' | 'cfg:CatalogRef.X' (ссылка конфигурации);
+    period=True — ПериодОтчета (StandardPeriod) + НачалоПериода/КонецПериода из него
+    (как у отчёта eamГрафикТОиР ФРЕГАТ EAM).
+    variant = dict(name, title, selection=[поля], groups=[[уровень1],…], filters=[(поле,
+    'Справочник.X.ПустаяСсылка' | '' [, вид_сравнения])], ca=[DcsAppearance], level_ca=[[…],[…]],
+    period_variant='ThisMonth', order=[(поле,'Asc')], detail=True, totals=True,
+    data_params=[(имя, значение_xml)], output_title=…)."""
+    L = ['<?xml version="1.0" encoding="UTF-8"?>', DCS_HEAD, '\t<dataSource>', '\t\t<name>ИсточникДанных1</name>',
+         '\t\t<dataSourceType>Local</dataSourceType>', '\t</dataSource>', '\t<dataSet xsi:type="DataSetQuery">',
+         '\t\t<name>%s</name>' % name]
+    for f in fields:
+        L += ['\t\t<field xsi:type="DataSetFieldField">', '\t\t\t<dataPath>%s</dataPath>' % f.path,
+              '\t\t\t<field>%s</field>' % f.path]
+        if f.title:
+            L += _local_string('title', f.title, '\t\t\t')
+        if f.dim:
+            L += ['\t\t\t<role>', '\t\t\t\t<dcscom:dimension>true</dcscom:dimension>', '\t\t\t</role>']
+        if f.fmt or f.width:
+            L.append('\t\t\t<appearance>')
+            if f.fmt:
+                L += ['\t\t\t\t<dcscor:item xsi:type="dcsset:SettingsParameterValue">',
+                      '\t\t\t\t\t<dcscor:parameter>Формат</dcscor:parameter>']
+                L += _local_string('dcscor:value', f.fmt, '\t\t\t\t\t')
+                L.append('\t\t\t\t</dcscor:item>')
+            if f.width:
+                for p in ('МинимальнаяШирина', 'МаксимальнаяШирина'):
+                    L += ['\t\t\t\t<dcscor:item xsi:type="dcsset:SettingsParameterValue">',
+                          '\t\t\t\t\t<dcscor:parameter>%s</dcscor:parameter>' % p,
+                          '\t\t\t\t\t<dcscor:value xsi:type="xs:decimal">%d</dcscor:value>' % f.width,
+                          '\t\t\t\t</dcscor:item>']
+            L.append('\t\t\t</appearance>')
+        L.append('\t\t</field>')
+    q = query.strip('\r\n').replace('\r\n', '\n').replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+    L += ['\t\t<dataSource>ИсточникДанных1</dataSource>', '\t\t<query>%s</query>' % q.replace('\n', CRLF), '\t</dataSet>']
+    for cpath, cexpr, ctitle in calc:
+        L += ['\t<calculatedField>', '\t\t<dataPath>%s</dataPath>' % cpath,
+              '\t\t<expression>%s</expression>' % esc(cexpr)]
+        L += _local_string('title', ctitle, '\t\t')
+        L.append('\t</calculatedField>')
+    for tpath, texpr in totals:
+        L += ['\t<totalField>', '\t\t<dataPath>%s</dataPath>' % tpath,
+              '\t\t<expression>%s</expression>' % esc(texpr), '\t</totalField>']
+    if period:
+        for pn, pt, ex in (('НачалоПериода', 'Начало периода', '&ПериодОтчета.ДатаНачала'),
+                           ('КонецПериода', 'Конец периода', '&ПериодОтчета.ДатаОкончания')):
+            L += ['\t<parameter>', '\t\t<name>%s</name>' % pn]
+            L += _local_string('title', pt, '\t\t')
+            L += ['\t\t<valueType>', '\t\t\t<v8:Type>xs:dateTime</v8:Type>', '\t\t\t<v8:DateQualifiers>',
+                  '\t\t\t\t<v8:DateFractions>DateTime</v8:DateFractions>', '\t\t\t</v8:DateQualifiers>',
+                  '\t\t</valueType>', '\t\t<value xsi:type="xs:dateTime">0001-01-01T00:00:00</value>',
+                  '\t\t<useRestriction>true</useRestriction>', '\t\t<expression>%s</expression>' % esc(ex),
+                  '\t</parameter>']
+        L += ['\t<parameter>', '\t\t<name>ПериодОтчета</name>'] + _local_string('title', 'Период', '\t\t') + [
+            '\t\t<valueType>', '\t\t\t<v8:Type>v8:StandardPeriod</v8:Type>', '\t\t</valueType>',
+            '\t\t<value xsi:type="v8:StandardPeriod">',
+            '\t\t\t<v8:variant xsi:type="v8:StandardPeriodVariant">Custom</v8:variant>',
+            '\t\t\t<v8:startDate>0001-01-01T00:00:00</v8:startDate>',
+            '\t\t\t<v8:endDate>0001-01-01T00:00:00</v8:endDate>', '\t\t</value>',
+            '\t\t<useRestriction>false</useRestriction>', '\t\t<use>Always</use>', '\t</parameter>']
+    for pn, pt, ptype, pval in params:
+        L += ['\t<parameter>', '\t\t<name>%s</name>' % pn] + _local_string('title', pt, '\t\t')
+        L.append('\t\t<valueType>')
+        if ptype.startswith('cfg:'):
+            L.append('\t\t\t<v8:Type xmlns:d4p1="http://v8.1c.ru/8.1/data/enterprise/current-config">d4p1:%s</v8:Type>'
+                     % ptype[4:])
+        elif ptype == 'xs:decimal':
+            L += ['\t\t\t<v8:Type>xs:decimal</v8:Type>', '\t\t\t<v8:NumberQualifiers>',
+                  '\t\t\t\t<v8:Digits>15</v8:Digits>', '\t\t\t\t<v8:FractionDigits>2</v8:FractionDigits>',
+                  '\t\t\t\t<v8:AllowedSign>Any</v8:AllowedSign>', '\t\t\t</v8:NumberQualifiers>']
+        elif ptype == 'xs:dateTime':
+            L += ['\t\t\t<v8:Type>xs:dateTime</v8:Type>', '\t\t\t<v8:DateQualifiers>',
+                  '\t\t\t\t<v8:DateFractions>Date</v8:DateFractions>', '\t\t\t</v8:DateQualifiers>']
+        else:
+            L.append('\t\t\t<v8:Type>%s</v8:Type>' % ptype)
+        # use=Always: параметр запроса (без необязательных {…}) передается всегда, даже если в настройках
+        # варианта он выключен — иначе «Не задано значение параметра» (ФРЕГАТ EAM, 8.5.1.1529)
+        L += ['\t\t</valueType>', '\t\t' + pval, '\t\t<useRestriction>false</useRestriction>', '\t\t<use>Always</use>',
+              '\t</parameter>']
+    for v in variants:
+        L += ['\t<settingsVariant>', '\t\t<dcsset:name>%s</dcsset:name>' % v['name']]
+        L += _local_string('dcsset:presentation', v['title'], '\t\t')
+        L.append('\t\t' + DCS_SETTINGS)
+        o = '\t\t\t'
+        L.append(o + '<dcsset:selection>')
+        for f in v.get('selection', ()):
+            L += [o + '\t<dcsset:item xsi:type="dcsset:SelectedItemField">', o + '\t\t<dcsset:field>%s</dcsset:field>' % f,
+                  o + '\t</dcsset:item>']
+        L.append(o + '</dcsset:selection>')
+        if v.get('filters'):
+            L.append(o + '<dcsset:filter>')
+            for fl in v['filters']:
+                fpath, fempty = fl[0], fl[1]
+                cmp_ = fl[2] if len(fl) > 2 else 'Equal'
+                # 4-й элемент — включённый отбор с правой частью-значением (_dcs_right: число/булево/'Знач:…')
+                use_val = fl[3] if len(fl) > 3 else None
+                L += [o + '\t<dcsset:item xsi:type="dcsset:FilterItemComparison">']
+                if use_val is None:
+                    L.append(o + '\t\t<dcsset:use>false</dcsset:use>')
+                L += [o + '\t\t<dcsset:left xsi:type="dcscor:Field">%s</dcsset:left>' % fpath,
+                      o + '\t\t<dcsset:comparisonType>%s</dcsset:comparisonType>' % cmp_]
+                if use_val is not None:
+                    r = _dcs_right(use_val)
+                    if r:
+                        L.append(o + '\t\t' + r)
+                elif fempty:
+                    L.append(o + '\t\t<dcsset:right xsi:type="dcscor:DesignTimeValue">%s</dcsset:right>' % fempty)
+                L += [o + '\t\t<dcsset:viewMode>QuickAccess</dcsset:viewMode>',
+                      o + '\t\t<dcsset:userSettingID>%s</dcsset:userSettingID>' % stable_uid(v['name'] + '/f/' + fpath + query[:60]),
+                      o + '\t</dcsset:item>']
+            L.append(o + '</dcsset:filter>')
+        dp = []
+        if period:
+            dp += [o + '\t<dcscor:item xsi:type="dcsset:SettingsParameterValue">',
+                   o + '\t\t<dcscor:parameter>ПериодОтчета</dcscor:parameter>',
+                   o + '\t\t<dcscor:value xsi:type="v8:StandardPeriod">',
+                   o + '\t\t\t<v8:variant xsi:type="v8:StandardPeriodVariant">%s</v8:variant>' % v.get('period_variant', 'ThisMonth'),
+                   o + '\t\t</dcscor:value>',
+                   o + '\t\t<dcsset:userSettingID>%s</dcsset:userSettingID>' % stable_uid(v['name'] + '/period/' + query[:60]),
+                   o + '\t</dcscor:item>']
+        for pn, pval in v.get('data_params', ()):
+            dp += [o + '\t<dcscor:item xsi:type="dcsset:SettingsParameterValue">',
+                   o + '\t\t<dcscor:parameter>%s</dcscor:parameter>' % pn,
+                   o + '\t\t' + pval.replace('<value', '<dcscor:value').replace('</value>', '</dcscor:value>'),
+                   o + '\t\t<dcsset:userSettingID>%s</dcsset:userSettingID>' % stable_uid(v['name'] + '/p/' + pn + query[:60]),
+                   o + '\t</dcscor:item>']
+        if dp:
+            L += [o + '<dcsset:dataParameters>'] + dp + [o + '</dcsset:dataParameters>']
+        if v.get('order'):
+            L.append(o + '<dcsset:order>')
+            for f, d in v['order']:
+                L += [o + '\t<dcsset:item xsi:type="dcsset:OrderItemField">', o + '\t\t<dcsset:field>%s</dcsset:field>' % f,
+                      o + '\t\t<dcsset:orderType>%s</dcsset:orderType>' % d, o + '\t</dcsset:item>']
+            L.append(o + '</dcsset:order>')
+        L += _dcs_ca(v.get('ca', ()), o)
+        L += [o + '<dcsset:outputParameters>', o + '\t<dcscor:item xsi:type="dcsset:SettingsParameterValue">',
+              o + '\t\t<dcscor:parameter>РасположениеРеквизитов</dcscor:parameter>',
+              o + '\t\t<dcscor:value xsi:type="dcsset:DataCompositionAttributesPlacement">Separately</dcscor:value>',
+              o + '\t</dcscor:item>']
+        if v.get('totals_top'):
+            # общий итог вверху (ВертикальноеРасположениеОбщихИтогов = Начало)
+            L += [o + '\t<dcscor:item xsi:type="dcsset:SettingsParameterValue">',
+                  o + '\t\t<dcscor:parameter>ВертикальноеРасположениеОбщихИтогов</dcscor:parameter>',
+                  o + '\t\t<dcscor:value xsi:type="dcscor:DataCompositionTotalPlacement">Begin</dcscor:value>',
+                  o + '\t</dcscor:item>']
+        if not v.get('totals', True):
+            for p in ('ГоризонтальноеРасположениеОбщихИтогов', 'ВертикальноеРасположениеОбщихИтогов'):
+                L += [o + '\t<dcscor:item xsi:type="dcsset:SettingsParameterValue">',
+                      o + '\t\t<dcscor:parameter>%s</dcscor:parameter>' % p,
+                      o + '\t\t<dcscor:value xsi:type="dcscor:DataCompositionTotalPlacement">None</dcscor:value>',
+                      o + '\t</dcscor:item>']
+        L += [o + '\t<dcscor:item xsi:type="dcsset:SettingsParameterValue">', o + '\t\t<dcscor:parameter>Заголовок</dcscor:parameter>']
+        L += _local_string('dcscor:value', v.get('output_title', v['title']), o + '\t\t')
+        L += [o + '\t</dcscor:item>', o + '</dcsset:outputParameters>']
+        L += _dcs_structure(v.get('groups', []), o, v.get('detail', True), v.get('level_ca', ()))
+        L += ['\t\t</dcsset:settings>', '\t</settingsVariant>']
+    L += ['</DataCompositionSchema>', '']
+    return join(L)
+
+
+def add_predefined_items(text, items):
+    """Плоские предопределённые элементы справочника/ПВХ в .mdo (идемпотентно по имени).
+    items — [(Имя, Наименование, Код|None, это_группа, тип|None)]; тип — спецификация
+    type_xml (для ПВХ). Блок <predefined> встаёт после <defaultPresentation> (или после
+    descriptionLength), как в eamРесурсныеСпецификации / ОбъектыАдресацииЗадач.
+    Вложенные предопределённые (иерархия) не поддерживаются — создавать обработчиком
+    обновления ИБ."""
+    block = []
+    for name, descr, code, folder, spec in items:
+        if ('<name>%s</name>' % name) in text:
+            continue
+        block += ['    <items id="%s">' % stable_uid('predefined/' + name + descr),
+                  '      <name>%s</name>' % name, '      <description>%s</description>' % esc(descr)]
+        if code:
+            block += ['      <code xsi:type="core:StringValue">', '        <value>%s</value>' % esc(code),
+                      '      </code>']
+        if spec:
+            block += type_xml(spec, 6)
+        if folder:
+            block.append('      <isFolder>true</isFolder>')
+        block.append('    </items>')
+    if not block:
+        return text, False
+    if '  </predefined>' in text:
+        i = text.index('  </predefined>')
+        return text[:i] + CRLF.join(block) + CRLF + text[i:], True
+    for anchor in ('  <defaultPresentation>', '  <descriptionLength>'):
+        i = text.find(anchor)
+        if i >= 0:
+            end = text.index(CRLF, i) + len(CRLF)
+            return text[:end] + CRLF.join(['  <predefined>'] + block + ['  </predefined>']) + CRLF + text[end:], True
+    raise ValueError('не найдено место для <predefined>')
+
+
+def set_mdo_property(text, tag, value):
+    """Замена значения простого свойства верхнего уровня .mdo (<tag>value</tag>, отступ 2):
+    например descriptionLength/codeLength/numberLength/numberPeriodicity. Если свойства нет —
+    ValueError (добавлять свойства этой функцией нельзя: порядок тегов задаёт схема)."""
+    new, n = re.subn(r'(\r\n  <%s>)[^<]*(</%s>)' % (tag, tag), r'\g<1>%s\g<2>' % value, text, count=1)
+    if not n:
+        raise ValueError('нет свойства <%s>' % tag)
+    return new
+
+
+def extend_attribute_type(text, attr_name, type_names, ts_name=None):
+    """Добавляет типы в составной тип существующего реквизита (шапки или ТЧ ts_name):
+    type_names — ['DocumentRef.X', …]. Идемпотентно."""
+    scope = text
+    off = 0
+    if ts_name:
+        m = re.search(r'<tabularSections uuid="[^"]+">\s*(?:<producedTypes>.*?</producedTypes>\s*)?<name>%s</name>.*?</tabularSections>'
+                      % re.escape(ts_name), text, re.S)
+        scope, off = m.group(0), m.start()
+    m = re.search(r'<attributes uuid="[^"]+">\s*<name>%s</name>.*?<type>(.*?)</type>' % re.escape(attr_name), scope, re.S)
+    if not m:
+        raise ValueError('нет реквизита %s' % attr_name)
+    tb = m.group(1)
+    ind = re.search(r'(\s*)<types>', tb).group(1)
+    add = ''.join('%s<types>%s</types>' % (ind, t) for t in type_names if '<types>%s</types>' % t not in tb)
+    if not add:
+        return text, False
+    last = tb.rfind('</types>') + len('</types>')
+    pos = off + m.start(1) + last
+    return text[:pos] + add + text[pos:], True
+
+
+def add_document_ref_property(text, tag, value):
+    """Строка-ссылка документа (идемпотентно): tag='basedOn' (ввод на основании, value='Document.X')
+    или 'registerRecords' (регистратор, value='AccumulationRegister.X'). Встаёт после последней
+    такой же строки; первая basedOn — перед createOnInput, первая registerRecords — перед
+    postInPrivilegedMode (порядок снят с eamСмета / eamГрафикТОиР ФРЕГАТ EAM)."""
+    line = '  <%s>%s</%s>' % (tag, value, tag)
+    if line + CRLF in text:
+        return text, False
+    last = text.rfind('  <%s>' % tag)
+    if last >= 0:
+        end = text.index(CRLF, last) + len(CRLF)
+    else:
+        anchor = {'basedOn': '  <createOnInput>', 'registerRecords': '  <postInPrivilegedMode>'}[tag]
+        end = text.index(anchor)
+    return text[:end] + line + CRLF + text[end:], True
+
+
+def common_command_mdo(name, syn, group='NavigationPanelOrdinary', tooltip=None, seed=None):
+    """Общая команда без параметра (панель навигации раздела и т.п.); формат снят с
+    БСП CommonCommand.ПанельОтчетовАдминистрирование (ФРЕГАТ EAM). Модуль — CommandModule.bsl
+    с &НаКлиенте Процедура ОбработкаКоманды(ПараметрКоманды, ПараметрыВыполнения)."""
+    s = seed or 'CommonCommand/' + name
+    lines = ['<?xml version="1.0" encoding="UTF-8"?>',
+             '<mdclass:CommonCommand xmlns:mdclass="http://g5.1c.ru/v8/dt/metadata/mdclass" uuid="%s">' % stable_uid(s),
+             '  <name>%s</name>' % name]
+    lines += synonym(syn, 2)
+    lines += ['  <group>%s</group>' % group, '  <representation>Auto</representation>']
+    if tooltip:
+        lines += ['  <toolTip>', '    <key>ru</key>', '    <value>%s</value>' % esc(tooltip), '  </toolTip>']
+    lines += ['</mdclass:CommonCommand>', '']
+    return join(lines)
+
+
+def scheduled_job_mdo(name, syn, method, use=True, predefined=True, seed=None):
+    """Регламентное задание; method — 'CommonModule.Модуль.Процедура' (модуль серверный,
+    процедура экспортная). Формат снят с bpmОтправкаУведомленийПоПочте (ФРЕГАТ EAM).
+    Расписание — отдельный файл Schedule.schedule (schedule_file)."""
+    s = seed or 'ScheduledJob/' + name
+    lines = ['<?xml version="1.0" encoding="UTF-8"?>',
+             '<mdclass:ScheduledJob xmlns:mdclass="http://g5.1c.ru/v8/dt/metadata/mdclass" uuid="%s">' % stable_uid(s),
+             '  <name>%s</name>' % name]
+    lines += synonym(syn, 2)
+    lines.append('  <methodName>%s</methodName>' % method)
+    if use:
+        lines.append('  <use>true</use>')
+    if predefined:
+        lines.append('  <predefined>true</predefined>')
+    lines += ['  <restartCountOnFailure>3</restartCountOnFailure>',
+              '  <restartIntervalOnFailure>10</restartIntervalOnFailure>', '</mdclass:ScheduledJob>', '']
+    return join(lines)
+
+
+def schedule_file(begin_time='00:00:00', repeat_period_in_day=0, days_repeat_period=1):
+    """Schedule.schedule регламентного задания: ежедневно (все дни недели и месяцы) с
+    begin_time; repeat_period_in_day — повтор в течение дня, сек (0 — один раз в сутки)."""
+    attrs = ('beginDate="0001-01-01" endDate="0001-01-01" daysRepeatPeriod="%d" beginTime="%s" '
+             'endTime="00:00:00" completionTime="00:00:00" repeatPeriodInDay="%d" weeksPeriod="1"'
+             % (days_repeat_period, begin_time, repeat_period_in_day))
+    lines = ['<?xml version="1.0" encoding="UTF-8"?>',
+             '<schedule:Schedule xmlns:schedule="http://g5.1c.ru/v8/dt/schedule" %s>' % attrs]
+    lines += ['  <weekDays>%s</weekDays>' % d for d in ('Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun')]
+    lines += ['  <months>%s</months>' % m for m in ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug',
+                                                     'Sep', 'Oct', 'Nov', 'Dec')]
+    lines += ['</schedule:Schedule>', '']
+    return join(lines)
+
+
+def dcs_postprocess(text, hierarchy=(), group_filled=(), total_groups=()):
+    """Дополнения к тексту схемы, который вернул edt_lib.dcs_schema_ex (формат снят с типовых схем ФРЕГАТ EAM (перенесено из G6.py, ТЗ-61…71):
+    <group>ОбщийИтог</group> — ЗаменаИОбъединениеЭлементов, <group> — eamГрафикТОиР, отбор группировки Filled —
+    ИнтерактивноеИзменениеВыгрузки):
+      hierarchy     — поля группировок с типом «Иерархия» (groupType Hierarchy);
+      group_filled  — поля, по группировке которых ставится отбор «Заполнено» (запись без значения не выводится);
+      total_groups  — для каждого ресурса (в порядке totals) список группировок <group>;
+      пустой <groupItems> (уровень детальных записей со своим оформлением) удаляется."""
+    t = text.replace("\r\n", "\n")
+    for f in hierarchy:
+        t, n = re.subn(r"(<dcsset:field>%s</dcsset:field>\n\t*<dcsset:groupType>)Items(</dcsset:groupType>)"
+                       % re.escape(f), r"\1Hierarchy\2", t)
+        assert n, "нет группировки %s" % f
+    for f in group_filled:
+        pat = re.compile(r"(\n(\t*)<dcsset:groupItems>\n\t*<dcsset:item xsi:type=\"dcsset:GroupItemField\">\n"
+                         r"\t*<dcsset:field>%s</dcsset:field>.*?\n\t*</dcsset:groupItems>)" % re.escape(f), re.S)
+
+        def rep(m, f=f):
+            o = m.group(2)
+            return m.group(1) + "\n".join([
+                "", o + "<dcsset:filter>", o + "\t<dcsset:item xsi:type=\"dcsset:FilterItemComparison\">",
+                o + "\t\t<dcsset:left xsi:type=\"dcscor:Field\">%s</dcsset:left>" % f,
+                o + "\t\t<dcsset:comparisonType>Filled</dcsset:comparisonType>",
+                o + "\t</dcsset:item>", o + "</dcsset:filter>"])
+        t, n = pat.subn(rep, t)
+        assert n, "нет группировки %s для отбора" % f
+    t = re.sub(r"\n\t*<dcsset:groupItems>\n\t*</dcsset:groupItems>", "", t)
+    if any(total_groups):
+        blocks = list(re.finditer(r"\t<totalField>\n.*?\n\t</totalField>", t, re.S))
+        assert len(blocks) == len(total_groups), "ресурсов %d, групп %d" % (len(blocks), len(total_groups))
+        out, pos = [], 0
+        for m, grs in zip(blocks, total_groups):
+            body = t[m.start():m.end() - len("\t</totalField>")]
+            out.append(t[pos:m.start()] + body + "".join("\t\t<group>%s</group>\n" % x for x in grs)
+                       + "\t</totalField>")
+            pos = m.end()
+        out.append(t[pos:])
+        t = "".join(out)
+    return t
+
+
+def add_child_subsystem(parent_text, child_name):
+    """Ссылка родителя на дочернюю подсистему: <subsystems>Имя</subsystems> (короткое имя, как в
+    подсистемах ФРЕГАТ EAM) — после последней такой строки, иначе в конец перед закрывающим тегом.
+    Саму дочернюю подсистему строить subsystem_mdo(..., parent=<родитель>) в папке
+    Subsystems/<Родитель>/Subsystems/<Имя>/<Имя>.mdo (case 019)."""
+    line = '  <subsystems>%s</subsystems>' % child_name
+    if line + CRLF in parent_text:
+        return parent_text, False
+    last = parent_text.rfind('  <subsystems>')
+    if last >= 0:
+        end = parent_text.index(CRLF, last) + len(CRLF)
+    else:
+        end = parent_text.index('</mdclass:Subsystem>')
+    return parent_text[:end] + line + CRLF + parent_text[end:], True
+
+
+def remove_content_from_subsystem(text, full_names):
+    """Убрать строки <content>Вид.Имя</content> из подсистемы (перенос объекта в дочернюю подсистему)."""
+    removed = []
+    for fn in full_names:
+        line = '  <content>%s</content>' % fn + CRLF
+        if line in text:
+            text = text.replace(line, '', 1)
+            removed.append(fn)
+    return text, removed
+
+
+def set_attribute_type(text, attr_name, spec):
+    """Замена типа существующего реквизита шапки (блок <type> на отступе 4) на spec в нотации type_xml —
+    для безопасных расширений (Число(3,0) → Число+(4,1), длина строки больше). Идемпотентно."""
+    m = re.search(r'(\r\n  <attributes uuid="[^"]+">\r\n    <name>%s</name>.*?)(\r\n    <type>.*?\r\n    </type>)'
+                  % re.escape(attr_name), text, re.S)
+    if not m:
+        raise ValueError('нет реквизита %s' % attr_name)
+    new_type = CRLF + CRLF.join(type_xml(spec, 4))
+    if m.group(2) == new_type:
+        return text, False
+    return text[:m.start(2)] + new_type + text[m.end(2):], True
+
+
+def add_register_fields(text, tag, fields, register_kind='InformationRegister'):
+    """Измерения/ресурсы/реквизиты в СУЩЕСТВУЮЩИЙ регистр, в том числе в регистр без ресурсов
+    (tag: 'resources' | 'dimensions' | 'attributes'; fields — [(имя, синоним, тип)]). Порядок блоков
+    в .mdo регистра: resources → attributes → dimensions → forms (снято с eamСтоимостьТМЦ ФРЕГАТ EAM)."""
+    order = ['resources', 'attributes', 'dimensions', 'forms', 'commands', 'templates']
+    added = []
+    for n, sy, sp in fields:
+        if re.search(r'<(resources|dimensions|attributes) uuid="[^"]+">\s*<name>%s</name>' % re.escape(n), text):
+            continue
+        extra = ['<mainFilter>true</mainFilter>'] if (tag == 'dimensions' and register_kind == 'InformationRegister') else []
+        block = attribute(n, sy, sp, 2, tag=tag, extra_before_close=extra)
+        last = text.rfind('\r\n  </%s>' % tag)
+        if last >= 0:
+            pos = text.index(CRLF, last + 2) + len(CRLF)
+        else:
+            pos = None
+            for later in order[order.index(tag) + 1:]:
+                m = re.search(r'\r\n  <%s ' % later, text)
+                if m:
+                    pos = m.start() + len(CRLF)
+                    break
+            if pos is None:
+                pos = text.index('</mdclass:')
+        text = text[:pos] + CRLF.join(block) + CRLF + text[pos:]
+        added.append(n)
+    return text, added
+
+
+def picture_zip(path, draw):
+    """Picture.zip общей картинки из функции рисования draw(size) -> PIL.Image (RGBA, size×size):
+    восемь масштабов PICTURE_SCALES + Picture.png 16 px (интерфейс 8.2) + manifest.xml (раздел 3
+    knowledge/subsystems-and-ui.md). Рисовать лучше крупно и уменьшать LANCZOS внутри draw."""
+    import zipfile
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with zipfile.ZipFile(path, 'w', zipfile.ZIP_DEFLATED) as z:
+        for fname, size, _d in PICTURE_SCALES:
+            buf = io.BytesIO()
+            draw(size).save(buf, 'PNG', optimize=True)
+            z.writestr(fname, buf.getvalue())
+        buf = io.BytesIO()
+        draw(16).save(buf, 'PNG', optimize=True)
+        z.writestr('Picture.png', buf.getvalue())
+        z.writestr('manifest.xml', picture_manifest().encode('utf-8'))
+
+
+def set_subsystem_picture(text, picture_name):
+    """<picture xsi:type="core:PictureRef"> подсистемы: после explanation / includeInCommandInterface
+    (порядок как у типового «Администрирование»), с пространствами имён xsi и core в корне, если их нет.
+    Идемпотентно; заменяет прежнюю картинку."""
+    if 'xmlns:xsi=' not in text.split('\n', 2)[1]:
+        text = text.replace('<mdclass:Subsystem xmlns:mdclass="http://g5.1c.ru/v8/dt/metadata/mdclass"',
+                            '<mdclass:Subsystem ' + XMLNS_MD, 1)
+    block = CRLF.join(['  <picture xsi:type="core:PictureRef">',
+                       '    <picture>CommonPicture.%s</picture>' % picture_name, '  </picture>'])
+    m = re.search(r'  <picture xsi:type="core:PictureRef">\r?\n.*?\r?\n  </picture>', text)
+    if m:
+        return text[:m.start()] + block + text[m.end():]
+    for anchor in (r'  </explanation>\r?\n', r'  <includeInCommandInterface>[^<]*</includeInCommandInterface>\r?\n'):
+        m = re.search(anchor, text)
+        if m:
+            return text[:m.end()] + block + CRLF + text[m.end():]
+    raise ValueError('нет места для <picture> в подсистеме')
+
+
+def set_configuration_splash(config_text):
+    """<splash/> в Configuration.mdo — заставка берётся из src/Configuration/Splash.png (формат снят с
+    УАТ МВМ, EDT 2026.1: картинка 600×255). Встаёт перед copyright / defaultReportForm, иначе после
+    version. Идемпотентно."""
+    if '<splash/>' in config_text:
+        return config_text, False
+    for tag in ('copyright', 'vendorInformationAddress', 'configurationInformationAddress', 'defaultReportForm'):
+        m = re.search(r'\r?\n  <%s[ >]' % tag, config_text)
+        if m:
+            pos = m.start() + (2 if config_text[m.start()] == '\r' else 1)
+            return config_text[:pos] + '  <splash/>' + CRLF + config_text[pos:], True
+    m = re.search(r'  <version>[^<]*</version>\r?\n', config_text)
+    return config_text[:m.end()] + '  <splash/>' + CRLF + config_text[m.end():], True
+
+
+def style_mdo(name, syn, seed=None):
+    """Объект метаданных «Стиль» (src/Styles/Имя/Имя.mdo). Сами элементы — внешнее свойство style,
+    файл Style.style (style_file). Модель: MdClass.xcore class Style / Style.xcore (EDT 2026.1)."""
+    lines = ['<?xml version="1.0" encoding="UTF-8"?>',
+             '<mdclass:Style xmlns:mdclass="http://g5.1c.ru/v8/dt/metadata/mdclass" uuid="%s">'
+             % stable_uid(seed or 'Style/' + name),
+             '  <name>%s</name>' % name]
+    lines += synonym(syn, 2)
+    lines += ['</mdclass:Style>', '']
+    return join(lines)
+
+
+def style_file(colors):
+    """Style.style: переопределения системных цветов стиля платформы (FormBackColor, ButtonBackColor, BorderColor,
+    FieldBackColor, ToolTipBackColor…). colors — [(ИмяЭлементаСтиля, (r, g, b))]. Цвет — core:ColorDef, как
+    значение элемента стиля (StyleItems/*.mdo) в проекте."""
+    lines = ['<?xml version="1.0" encoding="UTF-8"?>',
+             '<style:Style xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" '
+             'xmlns:core="http://g5.1c.ru/v8/dt/mcore" xmlns:style="http://g5.1c.ru/v8/dt/style">']
+    for name, (r, g, b) in colors:
+        lines += ['  <items xsi:type="style:ColorStyleItem">', '    <name>%s</name>' % name,
+                  '    <color xsi:type="core:ColorDef">', '      <red>%d</red>' % r, '      <green>%d</green>' % g,
+                  '      <blue>%d</blue>' % b, '    </color>', '  </items>']
+    lines += ['</style:Style>', '']
+    return join(lines)
+
+
+def set_default_style(config_text, style_name):
+    """<defaultStyle>Style.Имя</defaultStyle> в Configuration.mdo (основной стиль конфигурации). Встаёт перед
+    defaultLanguage (порядок свойств MdClass.xcore: …shortCaption, defaultStyle, defaultLanguage…). Идемпотентно."""
+    tag = '  <defaultStyle>Style.%s</defaultStyle>' % style_name
+    if tag in config_text:
+        return config_text, False
+    m = re.search(r'  <defaultStyle>[^<]*</defaultStyle>\r?\n', config_text)
+    if m:
+        return config_text[:m.start()] + tag + CRLF + config_text[m.end():], True
+    m = re.search(r'\r?\n  <defaultLanguage>', config_text)
+    pos = m.start() + (2 if config_text[m.start()] == '\r' else 1)
+    return config_text[:pos] + tag + CRLF + config_text[pos:], True
+
+
+def html_field_ex(ids, name, data_path, indent, on_complete=None, on_click=None, width=70, height=10):
+    """Поле HTML с обработчиками DocumentComplete и OnClick (ДанныеСобытия.href — щелчок по ссылке
+    страницы). Порядок обработчиков в HtmlFieldExtInfo — DocumentComplete, затем OnClick (снято с
+    УАТ МВМ Catalog.Новости.ФормаНовости; одиночный OnClick — БСП DataProcessor.ИнформацияПриЗапуске).
+    Остальное — как html_field (width/height обязательны вместе с растяжением, case 022)."""
+    lines = html_field(ids, name, data_path, indent, on_complete=on_complete, width=width, height=height)
+    if on_click:
+        o = ' ' * (indent + 4)
+        block = [o + '<handlers>', o + '  <event>OnClick</event>', o + '  <name>%s</name>' % on_click,
+                 o + '</handlers>']
+        pos = [i for i, l in enumerate(lines) if l.strip() == '<extInfo xsi:type="form:HtmlFieldExtInfo">'][0] + 1
+        if on_complete:
+            pos += 4
+        lines[pos:pos] = block
+    return lines
+
+
+def write_binary(path, data):
+    """Двоичный макет (templateType BinaryData): EDT хранит его СЫРЫМ файлом
+    <Объект>/Templates/<Макет>/Template.bin — байты как есть, без обёртки (снято с БСП
+    DataProcessor.СкрытиеКонфиденциальнойИнформации.Template.НастройкиБСП и
+    Catalog.ЕдиницыИзмерения.КлассификаторЕдиницИзмерения; knowledge/html-field-and-templates.md §2).
+    Текст JS/HTML удобнее класть так, чем текстовым макетом: нет лимита длины строки и склейки
+    по Символ(1) (case 023). На сервере: ПолучитьСтрокуИзДвоичныхДанных(ПолучитьМакет(…), КодировкаТекста.UTF8).
+    Пишет только при изменении; возвращает True, если записал."""
+    if os.path.exists(path) and io.open(path, 'rb').read() == data:
+        return False
+    os.makedirs(os.path.dirname(path) or '.', exist_ok=True)
+    io.open(path, 'wb').write(data)
+    return True
+
+
+def home_page_work_area(forms, template='OneColumn'):
+    """src/Configuration/HomePageWorkArea.hpwa — состав начальной страницы (свойства в
+    Configuration.mdo нет, case 061). forms — [(полное имя формы, высота)], например
+    ('DataProcessor.X.Form.Форма', 10). Формат снят с УАТ МВМ (EDT 2026.1) и
+    cases/061-home-page-work-area-file/after: шаблон OneColumn, <columns><items> с form/height/
+    <visibility><common>true</common>. ВНИМАНИЕ: пустой <visibility/> выгружается как Видимость.Общая = Ложь —
+    форма на начальной странице скрыта для всех (ФРЕГАТ EAM, проверено загрузкой в 8.5.1.1529).
+    Разметку двух колонок в образцах не встречали — поддержан только OneColumn."""
+    if template != 'OneColumn':
+        raise ValueError('home_page_work_area: образец есть только для OneColumn')
+    lines = ['<?xml version="1.0" encoding="UTF-8"?>',
+             '<hpwa:HomePageWorkArea xmlns:hpwa="http://g5.1c.ru/v8/dt/hpwa">',
+             '  <workingAreaTemplate>%s</workingAreaTemplate>' % template, '  <columns>']
+    for form, height in forms:
+        lines += ['    <items>', '      <form>%s</form>' % form, '      <height>%d</height>' % height,
+                  '      <visibility>', '        <common>true</common>', '      </visibility>', '    </items>']
+    lines += ['  </columns>', '</hpwa:HomePageWorkArea>', '']
+    return join(lines)
+
+
+def add_form_to_home_page(text, form, height=10, first=True):
+    """Добавить форму в существующий HomePageWorkArea.hpwa (первой или последней в <columns>),
+    не трогая остальные формы. Идемпотентно: (текст, добавлена ли)."""
+    if '<form>%s</form>' % form in text:
+        return text, False
+    block = CRLF.join(['    <items>', '      <form>%s</form>' % form, '      <height>%d</height>' % height,
+                       '      <visibility>', '        <common>true</common>', '      </visibility>',
+                       '    </items>']) + CRLF
+    m = re.search(r'  <columns>\r?\n', text)
+    if m and first:
+        return text[:m.end()] + block + text[m.end():], True
+    m = re.search(r'  </columns>\r?\n', text)
+    if m:
+        return text[:m.start()] + block + text[m.start():], True
+    m = re.search(r'</hpwa:HomePageWorkArea>', text)
+    return text[:m.start()] + '  <columns>' + CRLF + block + '  </columns>' + CRLF + text[m.start():], True
+
+
+# ============================================================ перекомпоновка СУЩЕСТВУЮЩЕЙ Form.form (текст)
+# Разбор готовой формы на элементы <items> по отступам (как пишет EDT: 2 пробела на уровень), перенос
+# элементов в новые группы без переписывания их XML (id, dataPath, обработчики не меняются), правка
+# ширины/заголовка поля в порядке тегов EDT. Группы — usual_group (четыре свойства, case 007).
+
+class FormNode(object):
+    """Элемент <items> существующей формы: строки [start, end] (включительно) списка строк формы,
+    отступ, имя, xsi-вид (FormField/FormGroup/Button/Decoration/Table), <type> (UsualGroup, Page,
+    InputField, …), свой id и id расширенной подсказки."""
+
+    def __init__(self, lines, start, end, indent):
+        self.start, self.end, self.indent = start, end, indent
+        m = re.search(r'xsi:type="form:(\w+)"', lines[start])
+        self.xsi = m.group(1) if m else None
+        m = re.match(r'\s*<name>(.*)</name>$', lines[start + 1])
+        self.name = m.group(1) if m else None
+        self.kind = self.id = self.tooltip_id = None
+        own = ' ' * (indent + 2)
+        k = start + 1
+        while k < end:
+            line = lines[k]
+            if line.startswith(own + '<'):
+                s = line[len(own):]
+                if s.startswith('<type>') and self.kind is None:
+                    self.kind = re.match(r'<type>(\w+)</type>', s).group(1)
+                elif s.startswith('<id>') and self.id is None:
+                    self.id = int(re.match(r'<id>(-?\d+)</id>', s).group(1))
+                elif s == '<extendedTooltip>' and self.tooltip_id is None:
+                    for j in range(k + 1, end):
+                        mm = re.match(r'%s  <id>(-?\d+)</id>$' % own, lines[j])
+                        if mm:
+                            self.tooltip_id = int(mm.group(1))
+                            break
+                        if lines[j] == own + '</extendedTooltip>':
+                            break
+            k += 1
+
+    def block(self, lines):
+        return lines[self.start:self.end + 1]
+
+    def is_container(self):
+        """Группа, в которую можно заходить: обычная группа, страница, страницы (не таблица и не панель)."""
+        return self.xsi == 'FormGroup' and self.kind in ('UsualGroup', 'Page', 'Pages')
+
+
+def form_children(lines, parent=None):
+    """Прямые дочерние <items> корня формы (parent=None, отступ 2) или элемента parent."""
+    if parent is None:
+        lo, hi, ind = 0, len(lines), 2
+    else:
+        lo, hi, ind = parent.start + 1, parent.end, parent.indent + 2
+    opening, closing = ' ' * ind + '<items ', ' ' * ind + '</items>'
+    out, i = [], lo
+    while i < hi:
+        if lines[i].startswith(opening):
+            if lines[i].rstrip().endswith('/>'):
+                raise ValueError('пустой элемент <items/> в строке %d' % (i + 1))
+            j = i + 1
+            while lines[j] != closing:
+                j += 1
+            out.append(FormNode(lines, i, j, ind))
+            i = j + 1
+        else:
+            i += 1
+    return out
+
+
+def form_find(lines, name):
+    """Элемент формы по имени (любой вложенности) или None."""
+    for i in range(1, len(lines)):
+        s = lines[i].lstrip(' ')
+        if s == '<name>%s</name>' % name:
+            ind = len(lines[i]) - len(s) - 2
+            if ind >= 2 and lines[i - 1].startswith(' ' * ind + '<items '):
+                closing = ' ' * ind + '</items>'
+                j = i
+                while lines[j] != closing:
+                    j += 1
+                return FormNode(lines, i - 1, j, ind)
+    return None
+
+
+def form_walk(lines, node):
+    """Все элементы поддерева node (включая сам node), в порядке документа; в таблицы и панели не заходит."""
+    out = [node]
+    if node.is_container():
+        for ch in form_children(lines, node):
+            out += form_walk(lines, ch)
+    return out
+
+
+def form_max_item_id(text):
+    """Наибольший id пространства элементов (items + autoCommandBar, до <attributes>)."""
+    cut = text.find(CRLF + '  <attributes>')
+    part = text if cut < 0 else text[:cut]
+    return max([0] + [int(x) for x in re.findall(r'<id>(-?\d+)</id>', part)])
+
+
+def reindent_lines(block, delta):
+    """Сдвиг блока элемента на delta пробелов. Многострочный текст внутри значения сдвиг бы испортил —
+    такие блоки не переносим (исключение)."""
+    if not block:
+        return []
+    base = len(block[0]) - len(block[0].lstrip(' '))
+    for line in block:
+        if line.strip() and (not line.startswith(' ' * base) or not line.lstrip(' ').startswith('<')):
+            raise ValueError('в блоке элемента многострочный текст — перенос сдвигом отступа невозможен: %r'
+                             % line[:60])
+    if delta >= 0:
+        return [' ' * delta + line if line else line for line in block]
+    if base < -delta:
+        raise ValueError('отступ блока меньше сдвига')
+    return [line[-delta:] if line else line for line in block]
+
+
+def _xml_chunks(lines, lo, hi, ind):
+    """Дочерние теги на отступе ind в строках [lo, hi): [(тег, начало, конец включительно)]."""
+    out, k, pre = [], lo, ' ' * ind + '<'
+    while k < hi:
+        line = lines[k]
+        if not line.startswith(pre) or line.startswith(pre + '/'):
+            k += 1
+            continue
+        tag = re.match(r'<([\w:]+)', line[ind:]).group(1)
+        if line.rstrip().endswith('/>') or '</%s>' % tag in line:
+            out.append((tag, k, k))
+            k += 1
+            continue
+        j = k + 1
+        while lines[j] != ' ' * ind + '</%s>' % tag:
+            j += 1
+        out.append((tag, k, j))
+        k = j + 1
+    return out
+
+
+FIELD_WIDTH_TAGS = ('width', 'autoMaxWidth', 'maxWidth', 'horizontalStretch')
+_BEFORE_STRETCH = ('handlers', 'width', 'autoMaxWidth', 'maxWidth', 'height', 'autoMaxHeight', 'maxHeight')
+
+
+def set_field_width(block, width=None, stretch=None):
+    """Ширина поля ввода/надписи (блок <items> поля). Порядок тегов extInfo — как пишет EDT:
+    handlers → width → autoMaxWidth → maxWidth → height → autoMaxHeight → maxHeight →
+    horizontalStretch → verticalStretch → wrap … . Прежние width/autoMaxWidth/maxWidth/
+    horizontalStretch заменяются: width пишется ВМЕСТЕ с autoMaxWidth=true (case 008);
+    stretch=False — поле не растягивается шире width, True — тянется на ширину группы,
+    None — растяжение не пишется (авто). Флажки и прочие поля — без изменений."""
+    block = list(block)
+    ind = len(block[0]) - len(block[0].lstrip(' '))
+    own = ' ' * (ind + 2)
+    try:
+        s = next(k for k, l in enumerate(block)
+                 if re.match(own + r'<extInfo xsi:type="form:(InputFieldExtInfo|LabelFieldExtInfo)">$', l))
+    except StopIteration:
+        return block
+    e = block.index(own + '</extInfo>', s)
+    chunks = [c for c in _xml_chunks(block, s + 1, e, ind + 4)]
+    kept = []
+    for tag, a, b in chunks:
+        if tag not in FIELD_WIDTH_TAGS:
+            kept.append((tag, block[a:b + 1]))
+    o = own + '  '
+    head = []
+    if width:
+        head.append(('width', [o + '<width>%d</width>' % width]))
+    head.append(('autoMaxWidth', [o + '<autoMaxWidth>true</autoMaxWidth>']))
+    pos = 0
+    while pos < len(kept) and kept[pos][0] == 'handlers':
+        pos += 1
+    kept[pos:pos] = head
+    if stretch is not None:
+        pos = 0
+        for i, (tag, _) in enumerate(kept):
+            if tag in _BEFORE_STRETCH:
+                pos = i + 1
+        kept[pos:pos] = [('horizontalStretch', [o + '<horizontalStretch>%s</horizontalStretch>'
+                                                % str(bool(stretch)).lower()])]
+    body = [l for _, ls in kept for l in ls]
+    return block[:s + 1] + body + block[e:]
+
+
+def set_item_title(block, text):
+    """Заголовок элемента (<title> сразу за <id>, порядок EDT; заменяется целиком, если был)."""
+    block = list(block)
+    ind = len(block[0]) - len(block[0].lstrip(' '))
+    own = ' ' * (ind + 2)
+    new = title_xml(text, ind + 2)
+    chunks = _xml_chunks(block, 1, len(block) - 1, ind + 2)
+    for tag, a, b in chunks:
+        if tag == 'title':
+            return block[:a] + new + block[b + 1:]
+    k = next(k for k, l in enumerate(block) if l.startswith(own + '<id>'))
+    return block[:k + 1] + new + block[k + 1:]
+
+
+class PresetIds(object):
+    """Счётчик id, который сначала отдаёт заданные номера (сохранить id пересоздаваемой группы и её
+    подсказки), затем — из общего счётчика fallback (Ids)."""
+
+    def __init__(self, preset, fallback):
+        self.preset = [x for x in preset if x is not None]
+        self.fallback = fallback
+
+    def __call__(self):
+        return self.preset.pop(0) if self.preset else self.fallback()
