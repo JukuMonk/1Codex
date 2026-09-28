@@ -17,6 +17,12 @@
   screens  снимки форм тонкого клиента: в XML-КОПИЮ (не в проект) добавляется
            запуск по /C, клиент открывает формы по списку, скрипт снимает окно
            процесса (PrintWindow) в PNG. Ловит раскладку, пустые формы, диалоги.
+  forms    открыть в клиенте ВСЕ свои формы (ПолучитьФорму, без показа) и собрать
+           ошибки ПриСозданииНаСервере/ПриОткрытии: «Поле объекта не обнаружено»,
+           «Несоответствие типов», непроинициализированные реквизиты. Минуты.
+  com fill аудит заполненности: доля пустых значений каждого реквизита своих
+           справочников и документов (шапка и ТЧ) по ВСЕЙ таблице — где демо-посев
+           или обработчики оставляют пробелы.
 
 Настройки — platform.json рядом с папкой инструментов проекта (пример —
 bootstrap/platform.json.example); путь к нему — первый аргумент или переменная
@@ -27,6 +33,8 @@ PLATFORM_JSON. Все пути внутри — абсолютные.
   python tools/platform.py <platform.json> update [ib]
   python tools/platform.py <platform.json> com counts | reports [фильтр] | query "<текст>" | call Модуль.Функция [арг…]
   python tools/platform.py <platform.json> screens [шаг_с] [маска …]
+  python tools/platform.py <platform.json> forms [префикс …]
+  python tools/platform.py <platform.json> com fill [порог_пустых_%=100]
 """
 import filecmp
 import glob
@@ -84,8 +92,11 @@ def step(title, args, log=None, enc='utf-8'):
 
 def auth(cfg):
     """После обновления ИБ у тестовой базы есть пользователи типовой — без
-    /N Конфигуратор и клиент отвечают «Пользователь ИБ не идентифицирован»."""
-    return ['/N' + cfg.get('test_usr', 'Администратор'), '/P' + cfg.get('test_pwd', '')]
+    /N Конфигуратор и клиент отвечают «Пользователь ИБ не идентифицирован».
+    И наоборот: база БЕЗ пользователей (своя конфигурация, ФРЕГАТ EAM) на /N несуществующего
+    отвечает тем же — там в platform.json "test_usr": "" (без /N /P)."""
+    usr = cfg.get('test_usr', 'Администратор')
+    return ['/N' + usr, '/P' + cfg.get('test_pwd', '')] if usr else []
 
 
 def designer(cfg, ib, args, log):
@@ -236,7 +247,8 @@ def connect(cfg, ib=None):
     import win32com.client
     c = win32com.client.Dispatch(cfg.get('com', 'V83.COMConnector'))
     if ib and not ib.startswith(('File=', 'Srvr=')):
-        ib = 'File="%s";Usr="%s";Pwd="%s";' % (ib, cfg.get('test_usr', 'Администратор'), cfg.get('test_pwd', ''))
+        usr = cfg.get('test_usr', 'Администратор')
+        ib = ('File="%s";Usr="%s";Pwd="%s";' % (ib, usr, cfg.get('test_pwd', ''))) if usr else 'File="%s";' % ib
     return c.Connect(ib or cfg['ib'])
 
 
@@ -329,6 +341,89 @@ def com_query(cn, text):
     print('строк: %d' % t.Количество())
 
 
+def com_fill(cfg, cn, limit=100.0):
+    """Доля пустых значений каждого реквизита своих справочников и документов (шапка и ТЧ) по ВСЕЙ
+    таблице: запрос считает заполненные значения на стороне базы (выборка «первые N» обманывает —
+    заполненное часто только у части строк). Печатает реквизиты с долей пустых >= limit %."""
+    prefixes = tuple(cfg.get('fill_prefixes') or [cfg.get('prefix', '')])
+    skip = {'Ссылка', 'ПометкаУдаления', 'Предопределенный', 'ИмяПредопределенныхДанных', 'ВерсияДанных',
+            'НомерСтроки', 'Проведен', 'Родитель', 'Владелец', 'ЭтоГруппа', 'Код', 'Номер', 'Дата', 'Наименование'}
+    q = cn.NewObject('Запрос')
+    found = 0
+    for coll, ru in ((cn.Метаданные.Справочники, 'Справочник'), (cn.Метаданные.Документы, 'Документ')):
+        for i in range(coll.Количество()):
+            md = coll.Получить(i)
+            if not md.Имя.startswith(prefixes):
+                continue
+            tables = [(ru + '.' + md.Имя, md.Реквизиты, md.Имя)]
+            for j in range(md.ТабличныеЧасти.Количество()):
+                ts = md.ТабличныеЧасти.Получить(j)
+                tables.append((ru + '.' + md.Имя + '.' + ts.Имя, ts.Реквизиты, md.Имя + '.' + ts.Имя))
+            for table, attrs, title in tables:
+                # выражение «заполнено» — по типу реквизита из метаданных: язык запросов проверяет типы
+                # статически, одно выражение на все типы (ТИПЗНАЧЕНИЯ + ВЫРАЗИТЬ) не компилируется
+                names, cols = [], []
+                for k in range(attrs.Количество()):
+                    at = attrs.Получить(k)
+                    if at.Имя in skip:
+                        continue
+                    kinds = []
+                    for j in range(at.Тип.Типы().Количество()):
+                        x = cn.XMLТип(at.Тип.Типы().Получить(j))
+                        kinds.append(x.ИмяТипа if x is not None else '?')
+                    n = at.Имя
+                    if kinds == ['string']:
+                        cond = 'ВЫРАЗИТЬ(Т.%s КАК СТРОКА(10)) <> ""' % n
+                    elif kinds == ['decimal']:
+                        cond = 'Т.%s <> 0' % n
+                    elif kinds == ['dateTime']:
+                        cond = 'Т.%s <> ДАТАВРЕМЯ(1, 1, 1)' % n
+                    elif kinds and all('Ref.' in x for x in kinds):
+                        cond = 'НЕ Т.%s.Ссылка ЕСТЬ NULL' % n   # пустая ссылка не разыменовывается — NULL
+                    else:
+                        continue   # булево, хранилище значения, составной с примитивами — «пусто» не определено
+                    names.append(n)
+                    cols.append('СУММА(ВЫБОР КОГДА %s ТОГДА 1 ИНАЧЕ 0 КОНЕЦ) КАК Р%d' % (cond, len(cols)))
+                if not names:
+                    continue
+                q.Текст = 'ВЫБРАТЬ КОЛИЧЕСТВО(*) КАК Всего, ' + ', '.join(cols) + ' ИЗ ' + table + ' КАК Т'
+                filled_by = {}
+                try:
+                    s = q.Выполнить().Выбрать()
+                    s.Следующий()
+                    total = s.Всего or 0
+                    for k in range(len(names)):
+                        filled_by[k] = getattr(s, 'Р%d' % k) or 0
+                except Exception:
+                    # реквизит, недопустимый в запросе (ХранилищеЗначения и т.п.), — считаем по одному, его пропускаем
+                    total = None
+                    for k, col in enumerate(cols):
+                        q.Текст = 'ВЫБРАТЬ КОЛИЧЕСТВО(*) КАК Всего, ' + col.replace(' КАК Р%d' % k, ' КАК Р0') + ' ИЗ ' + table + ' КАК Т'
+                        try:
+                            s = q.Выполнить().Выбрать()
+                            s.Следующий()
+                            total = s.Всего or 0
+                            filled_by[k] = s.Р0 or 0
+                        except Exception:
+                            pass
+                if not total:
+                    continue
+                shown = False
+                for k, n in enumerate(names):
+                    if k not in filled_by:
+                        continue
+                    filled = filled_by[k]
+                    pct = round((total - filled) * 100.0 / total, 1)
+                    if pct >= limit:
+                        if not shown:
+                            print('%s (%d)' % (title, total))
+                            shown = True
+                        print('   %-42s пусто %5.1f%%' % (n, pct))
+                        found += 1
+    print('реквизитов с долей пустых >= %s%%: %d' % (limit, found))
+    return 0
+
+
 def cmd_com(cfg):
     a = cfg['_args']
     sub = a[1] if len(a) > 1 else 'counts'
@@ -340,6 +435,8 @@ def cmd_com(cfg):
         return 0 if com_reports(cfg, cn, a[2] if len(a) > 2 else '') else 1
     elif sub == 'query':
         com_query(cn, a[2])
+    elif sub == 'fill':
+        return com_fill(cfg, cn, float(a[2]) if len(a) > 2 else 100.0)
     elif sub == 'call':
         mod, fn = a[2].split('.')
         try:
@@ -365,6 +462,7 @@ public class W {
   [DllImport("user32.dll")] public static extern bool IsWindowVisible(IntPtr h);
   [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();
   [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr h, out uint pid);
+  [DllImport("user32.dll")] public static extern bool SetProcessDPIAware();
   public struct R { public int L, T, Rr, B; }
   public static List<IntPtr> Of(uint pid) {
     var res = new List<IntPtr>();
@@ -372,6 +470,9 @@ public class W {
     return res; }
 }
 "@
+# масштаб экрана не 100%: без DPI-awareness GetWindowRect отдаёт логические размеры, а PrintWindow рисует
+# физические — снимок обрезан справа и снизу (ФРЕГАТ EAM, экран 125–150 %)
+[W]::SetProcessDPIAware() | Out-Null
 $c = Get-CimInstance Win32_Process | Where-Object { ($_.Name -eq '1cv8c.exe' -or $_.Name -eq '1cv8.exe') -and $_.CommandLine -like '*%s*' -and $_.CommandLine -like '*ENTERPRISE*' }
 if (-not $c) { exit 1 }
 $pid1 = ($c | Select-Object -First 1).ProcessId
@@ -528,10 +629,99 @@ def cmd_screens(cfg):
     return 0
 
 
+def cmd_forms(cfg):
+    """Все свои формы — ПолучитьФорму в клиенте (без показа): падения ПриСозданииНаСервере / ПриОткрытии
+    видны только так (внешнему соединению формы недоступны). В XML-КОПИЮ добавляются две вставки (серверный
+    модуль — список форм и запись итога в ХранилищеОбщихНастроек, переопределяемый БСП — обход по /C
+    ПроверкаФорм), клиент завершается сам. Формы, которым нужен контекст (параметры, ключ, владелец), падают
+    ожидаемо — их список сверять с прошлым прогоном, а не чинить «вслепую»."""
+    w, xml, ib, ws, prj = paths(cfg)
+    sc = cfg.get('screens', {})
+    a = cfg['_args']
+    prefixes = a[1:] or cfg.get('fill_prefixes') or [cfg.get('prefix', '')]
+    if not os.path.isdir(xml):
+        sys.exit('Сначала load: нет XML-выгрузки в %s' % w)
+    srv, after = sc['server_call_module'], sc['after_start_module']
+    cm = lambda name: os.path.join('CommonModules', name, 'Ext', 'Module.bsl')
+    patch_xml_module(xml, cm(srv), None, '''
+Функция ТестИменаФорм(Префиксы) Экспорт
+	Имена = Новый Массив;
+	Виды = Новый Структура("Справочник, Документ, РегистрСведений, РегистрНакопления, ПланВидовХарактеристик, Отчет, Обработка",
+		Метаданные.Справочники, Метаданные.Документы, Метаданные.РегистрыСведений, Метаданные.РегистрыНакопления,
+		Метаданные.ПланыВидовХарактеристик, Метаданные.Отчеты, Метаданные.Обработки);
+	Для Каждого Вид Из Виды Цикл
+		Для Каждого М Из Вид.Значение Цикл
+			Свой = Ложь;
+			Для Каждого П Из СтрРазделить(Префиксы, ",") Цикл
+				Свой = Свой Или СтрНачинаетсяС(М.Имя, П);
+			КонецЦикла;
+			Если Свой Тогда
+				Для Каждого Ф Из М.Формы Цикл
+					Имена.Добавить(Вид.Ключ + "." + М.Имя + ".Форма." + Ф.Имя);
+				КонецЦикла;
+			КонецЕсли;
+		КонецЦикла;
+	КонецЦикла;
+	Возврат Имена;
+КонецФункции
+
+Процедура ТестЗаписатьФормы(Текст) Экспорт
+	ХранилищеОбщихНастроек.Сохранить("ТестФормы", "Итог", Текст);
+КонецПроцедуры
+''')
+    patch_xml_module(xml, cm(after), 'Процедура ПослеНачалаРаботыСистемы() Экспорт\r\n', '''	Если СтрНайти(ПараметрЗапуска, "ПроверкаФорм") > 0 Тогда
+		ОшибкиФорм = Новый Массив;
+		ИменаФорм = %s.ТестИменаФорм("%s");
+		Для Каждого ИмяФормы Из ИменаФорм Цикл
+			Попытка
+				ПолучитьФорму(ИмяФормы, , , Новый УникальныйИдентификатор);
+			Исключение
+				ОшибкиФорм.Добавить(ИмяФормы + ": " + КраткоеПредставлениеОшибки(ИнформацияОбОшибке()));
+			КонецПопытки;
+		КонецЦикла;
+		%s.ТестЗаписатьФормы("ФОРМЫ: проверено " + ИменаФорм.Количество() + ", ошибок " + ОшибкиФорм.Количество()
+			+ Символы.ПС + СтрСоединить(ОшибкиФорм, Символы.ПС));
+		ЗавершитьРаботуСистемы(Ложь);
+		Возврат;
+	КонецЕсли;''' % (srv, ','.join(prefixes), srv))
+    stop_clients(ib)
+    if os.path.exists(os.path.join(xml, 'ConfigDumpInfo.xml')):
+        files = ','.join(os.path.join(xml, cm(m)) for m in (srv, after))
+        load_args = ['/LoadConfigFromFiles', xml, '-files', files, '-updateConfigDumpInfo']
+    else:
+        load_args = ['/LoadConfigFromFiles', xml, '-updateConfigDumpInfo']
+    if designer(cfg, ib, load_args, os.path.join(w, 'f1.log')) or \
+       designer(cfg, ib, ['/UpdateDBCfg'], os.path.join(w, 'f2.log')):
+        return 1
+    cn = connect(cfg, ib)
+    cn.ХранилищеОбщихНастроек.Удалить('ТестФормы', 'Итог', '')
+    si = subprocess.STARTUPINFO()
+    si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+    si.wShowWindow = 1
+    subprocess.Popen([cfg['v8'], 'ENTERPRISE', '/F', ib] + auth(cfg) + ['/DisableStartupDialogs', '/DisableStartupMessages',
+                      '/C', 'ПроверкаФорм'], startupinfo=si)
+    итог, t0 = None, time.time()
+    while time.time() - t0 < 900:
+        time.sleep(3)
+        try:
+            итог = cn.ХранилищеОбщихНастроек.Загрузить('ТестФормы', 'Итог')
+        except Exception:
+            итог = None
+        if итог:
+            break
+    time.sleep(3)
+    stop_clients(ib)
+    if not итог:
+        print('итога нет: клиент не дошёл до проверки (диалог при запуске?) — снимите screens')
+        return 1
+    print(итог)
+    return 0
+
+
 def main():
     cfg = load_cfg()
     cmd = cfg['_args'][0] if cfg['_args'] else ''
-    fn = {'load': cmd_load, 'quick': cmd_quick, 'update': cmd_update, 'com': cmd_com, 'screens': cmd_screens}.get(cmd)
+    fn = {'load': cmd_load, 'quick': cmd_quick, 'update': cmd_update, 'com': cmd_com, 'screens': cmd_screens, 'forms': cmd_forms}.get(cmd)
     if not fn:
         sys.exit(__doc__)
     sys.exit(fn(cfg) or 0)
