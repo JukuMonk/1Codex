@@ -229,7 +229,8 @@ python tools/vanessa.py <platform.json> <каталог фич или .feature> 
 ```
 
 `platform.json`: `"va_epf": "<путь к vanessa-automation-single.epf>"` (скачивать вне проекта,
-с согласия пользователя), `"va_port"` (по умолчанию 48000). Инструмент собирает `VAParams.json`
+с согласия пользователя), `"va_port"` (по умолчанию 48000), `"va_ib"` — другая файловая база вместо
+`work/ib` (например, копия рабочей базы для сдачи: сценарии на настоящих данных). Инструмент собирает `VAParams.json`
 (плоский формат, ключи — как в папке tools/JSON репозитория VA), запускает
 `1cv8 ENTERPRISE /F<база> /TESTMANAGER /Execute <epf> /C"StartFeaturePlayer;VAParams=<json>"`,
 закрывает клиенты тестовой базы и печатает итог JUnit; при падении — лог шагов со временем.

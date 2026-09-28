@@ -8,7 +8,8 @@
 «И я активизирую главное окно сеанса TESTCLIENT» — иначе клиент под окном менеджера Vanessa. ffmpeg —
 "ffmpeg" в platform.json или в PATH. Файл по умолчанию — <va_video_dir или work/va_out>/va_<дата-время>.mp4.
 
-Берёт из platform.json: v8, work (тестовая база — после platform.py load/update), test_usr/test_pwd,
+Берёт из platform.json: v8, work (тестовая база work/ib — после platform.py load/update; другая файловая
+база — «va_ib»), test_usr/test_pwd,
 va_epf — путь к vanessa-automation-single.epf (скачивается с github.com/Pr-Mex/vanessa-automation, релиз
 «single»; в проект не кладётся). Собирает VAParams.json (плоский формат, ключи — как в tools/JSON
 репозитория VA), запускает менеджер тестирования:
@@ -104,7 +105,8 @@ def main():
     if not epf or not os.path.exists(epf):
         sys.exit('В platform.json нет va_epf (путь к vanessa-automation-single.epf) или файла нет: %s' % epf)
     w = cfg['work']
-    ib = os.path.join(w, 'ib')
+    # тестовая база platform.py (work\ib) или другая файловая база — «va_ib» (например, копия рабочей для сдачи)
+    ib = cfg.get('va_ib') or os.path.join(w, 'ib')
     out = os.path.join(w, 'va_out')
     shutil.rmtree(out, ignore_errors=True)
     os.makedirs(out)
