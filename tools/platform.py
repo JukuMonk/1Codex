@@ -220,8 +220,7 @@ def cmd_update(cfg):
         print('COM не справился, пробую клиентом: %s' % err_text(e)[:300])
     # 2) клиентом с параметром БСП; ошибки — из журнала регистрации
     t0 = time.time()
-    proc = subprocess.Popen([cfg['v8'], 'ENTERPRISE', '/F', ib] + auth(cfg) + ['/DisableStartupDialogs', '/DisableStartupMessages',
-                             '/C', 'ЗапуститьОбновлениеИнформационнойБазы;ЗавершитьРаботуСистемы'])
+    proc = subprocess.Popen(client_cmd(cfg, ib, 'ЗапуститьОбновлениеИнформационнойБазы;ЗавершитьРаботуСистемы'))
     while proc.poll() is None:
         if any('При вызове обработчика обновления' in e for e in journal_errors(ib)):
             time.sleep(5)
@@ -250,6 +249,15 @@ def connect(cfg, ib=None):
         usr = cfg.get('test_usr', 'Администратор')
         ib = ('File="%s";Usr="%s";Pwd="%s";' % (ib, usr, cfg.get('test_pwd', ''))) if usr else 'File="%s";' % ib
     return c.Connect(ib or cfg['ib'])
+
+
+def client_cmd(cfg, ib, launch):
+    """Командная строка тонкого клиента СТРОКОЙ, а не списком: пустой пароль платформа
+    ждёт как /P"" — список subprocess экранирует кавычки, остаётся голое /P, и вместо
+    входа открывается окно авторизации (пользователь жмёт «Войти» на каждом прогоне)."""
+    usr = cfg.get('test_usr', 'Администратор')
+    cred = ' /N"%s" /P"%s"' % (usr, cfg.get('test_pwd', '')) if usr else ''
+    return '"%s" ENTERPRISE /F"%s"%s /DisableStartupDialogs /DisableStartupMessages /C "%s"' % (cfg['v8'], ib, cred, launch)
 
 
 def err_text(e):
@@ -596,8 +604,7 @@ def cmd_screens(cfg):
     si = subprocess.STARTUPINFO()
     si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
     si.wShowWindow = 1   # SW_SHOWNORMAL
-    subprocess.Popen([cfg['v8'], 'ENTERPRISE', '/F', ib] + auth(cfg) + ['/DisableStartupDialogs', '/DisableStartupMessages',
-                      '/C', 'СкриншотыФорм'], startupinfo=si)
+    subprocess.Popen(client_cmd(cfg, ib, 'СкриншотыФорм'), startupinfo=si)
     done, t_last = -1, time.time()
     ib_ps = ib   # в PowerShell -like обратный слэш — обычный символ, удвоение ломало поиск окна
     while time.time() - t_last < 180:
@@ -698,8 +705,7 @@ def cmd_forms(cfg):
     si = subprocess.STARTUPINFO()
     si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
     si.wShowWindow = 1
-    subprocess.Popen([cfg['v8'], 'ENTERPRISE', '/F', ib] + auth(cfg) + ['/DisableStartupDialogs', '/DisableStartupMessages',
-                      '/C', 'ПроверкаФорм'], startupinfo=si)
+    subprocess.Popen(client_cmd(cfg, ib, 'ПроверкаФорм'), startupinfo=si)
     итог, t0 = None, time.time()
     while time.time() - t0 < 900:
         time.sleep(3)
