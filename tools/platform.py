@@ -100,8 +100,14 @@ def auth(cfg):
 
 
 def designer(cfg, ib, args, log):
-    return step(args[0], [cfg['v8'], 'DESIGNER', '/F', ib] + auth(cfg) + ['/DisableStartupDialogs', '/DisableStartupMessages']
-                + args + ['/Out', log], log)
+    # Строкой, как client_cmd: со списком пустой пароль /P"" терял кавычки, и Конфигуратор
+    # показывал окно авторизации даже с /DisableStartupDialogs — загрузка стояла, пока
+    # пользователь не нажмёт «Войти».
+    usr = cfg.get('test_usr', 'Администратор')
+    cred = ' /N"%s" /P"%s"' % (usr, cfg.get('test_pwd', '')) if usr else ''
+    cmd = '"%s" DESIGNER /F"%s"%s /DisableStartupDialogs /DisableStartupMessages %s /Out "%s"' % (
+        cfg['v8'], ib, cred, ' '.join('"%s"' % a if ' ' in a else a for a in args), log)
+    return step(args[0], cmd, log)
 
 
 def stop_clients(ib):
