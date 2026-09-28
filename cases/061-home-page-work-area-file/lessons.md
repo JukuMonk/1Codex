@@ -9,3 +9,5 @@
 **Коммиты.** MVM 786c4b9 (подсистема_логистики.py).
 
 **Ссылки.** `knowledge/subsystems-and-ui.md` §6.
+
+**Дополнение (ФРЕГАТ EAM, 8.5.1.1529).** Пустой `<visibility/>` у формы в `HomePageWorkArea.hpwa` выгружается как `Видимость.Общая = Ложь` — форма скрыта для всех, начальная страница пустая даже без пользовательских настроек. Нужно `<visibility><common>true</common></visibility>` (так пишет `edt_lib.add_form_to_home_page`).
