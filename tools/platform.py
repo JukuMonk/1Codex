@@ -485,7 +485,7 @@ public class W {
 }
 "@
 # масштаб экрана не 100%%: без DPI-awareness GetWindowRect отдаёт логические размеры, а PrintWindow рисует
-# физические — снимок обрезан справа и снизу (ФРЕГАТ EAM, экран 125–150 %)
+# физические — снимок обрезан справа и снизу (ФРЕГАТ EAM, экран 125–150 %%)
 [W]::SetProcessDPIAware() | Out-Null
 $c = Get-CimInstance Win32_Process | Where-Object { ($_.Name -eq '1cv8c.exe' -or $_.Name -eq '1cv8.exe') -and $_.CommandLine -like '*%s*' -and $_.CommandLine -like '*ENTERPRISE*' }
 if (-not $c) { exit 1 }
