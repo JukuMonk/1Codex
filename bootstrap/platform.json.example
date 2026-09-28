@@ -12,6 +12,8 @@
   "ui_timeout": 900,
   "va_epf": "C:/1c-tools/vanessa/vanessa-automation-single.epf",
   "va_port": 48000,
+  "ffmpeg": "ffmpeg",
+  "va_video_dir": "C:/1c-tools/vanessa/video",
   "ib": "File=\"C:\\Users\\user\\Documents\\InfoBase11\";",
   "screens": {
     "server_call_module": "ОбщегоНазначенияВызовСервера",
