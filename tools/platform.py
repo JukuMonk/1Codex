@@ -82,15 +82,21 @@ def step(title, args, log=None, enc='utf-8'):
     return r.returncode
 
 
+def auth(cfg):
+    """После обновления ИБ у тестовой базы есть пользователи типовой — без
+    /N Конфигуратор и клиент отвечают «Пользователь ИБ не идентифицирован»."""
+    return ['/N' + cfg.get('test_usr', 'Администратор'), '/P' + cfg.get('test_pwd', '')]
+
+
 def designer(cfg, ib, args, log):
-    return step(args[0], [cfg['v8'], 'DESIGNER', '/F', ib, '/DisableStartupDialogs', '/DisableStartupMessages']
+    return step(args[0], [cfg['v8'], 'DESIGNER', '/F', ib] + auth(cfg) + ['/DisableStartupDialogs', '/DisableStartupMessages']
                 + args + ['/Out', log], log)
 
 
 def stop_clients(ib):
     """Остановить клиентов ТОЛЬКО этой базы (по командной строке процесса)."""
     ps = ("Get-CimInstance Win32_Process | Where-Object { $_.Name -like '1cv8*' -and $_.CommandLine -like '*%s*' }"
-          " | ForEach-Object { Stop-Process -Id $_.ProcessId -Force }" % ib.replace('\\', '\\\\'))
+          " | ForEach-Object { Stop-Process -Id $_.ProcessId -Force }" % ib)   # в -like обратный слэш не экранируется
     subprocess.run(['powershell', '-NoProfile', '-Command', ps], capture_output=True)
 
 
@@ -194,7 +200,7 @@ def cmd_update(cfg):
     ib = cfg['_args'][1] if len(cfg['_args']) > 1 else paths(cfg)[2]
     # 1) внешним соединением — быстрее и с полным текстом ошибки
     try:
-        cn = connect(cfg, 'File="%s";' % ib)
+        cn = connect(cfg, ib)
         t0 = time.time()
         r = cn.ОбновлениеИнформационнойБазы.ВыполнитьОбновлениеИнформационнойБазы()
         print('обновление ИБ (COM): %s, %.1f мин' % (r, (time.time() - t0) / 60))
@@ -203,7 +209,7 @@ def cmd_update(cfg):
         print('COM не справился, пробую клиентом: %s' % err_text(e)[:300])
     # 2) клиентом с параметром БСП; ошибки — из журнала регистрации
     t0 = time.time()
-    proc = subprocess.Popen([cfg['v8'], 'ENTERPRISE', '/F', ib, '/DisableStartupDialogs', '/DisableStartupMessages',
+    proc = subprocess.Popen([cfg['v8'], 'ENTERPRISE', '/F', ib] + auth(cfg) + ['/DisableStartupDialogs', '/DisableStartupMessages',
                              '/C', 'ЗапуститьОбновлениеИнформационнойБазы;ЗавершитьРаботуСистемы'])
     while proc.poll() is None:
         if any('При вызове обработчика обновления' in e for e in journal_errors(ib)):
@@ -224,8 +230,13 @@ def cmd_update(cfg):
 
 # --------------------------------------------------------------- com
 def connect(cfg, ib=None):
+    """ib — путь к ТЕСТОВОЙ базе (после update у неё есть пользователи типовой:
+    имя — cfg['test_usr'], по умолчанию «Администратор», без пароля); без ib —
+    строка соединения cfg['ib'] как есть."""
     import win32com.client
     c = win32com.client.Dispatch(cfg.get('com', 'V83.COMConnector'))
+    if ib and not ib.startswith(('File=', 'Srvr=')):
+        ib = 'File="%s";Usr="%s";Pwd="%s";' % (ib, cfg.get('test_usr', 'Администратор'), cfg.get('test_pwd', ''))
     return c.Connect(ib or cfg['ib'])
 
 
@@ -344,20 +355,39 @@ def cmd_com(cfg):
 SHOT_PS = r'''
 Add-Type -AssemblyName System.Drawing
 Add-Type @"
-using System; using System.Runtime.InteropServices;
-public class W { [DllImport("user32.dll")] public static extern bool PrintWindow(IntPtr h, IntPtr dc, uint f);
-[DllImport("user32.dll")] public static extern bool GetWindowRect(IntPtr h, out R r);
-[DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr h, int c);
-public struct R { public int L, T, Rr, B; } }
+using System; using System.Collections.Generic; using System.Runtime.InteropServices;
+public class W {
+  public delegate bool EnumProc(IntPtr h, IntPtr l);
+  [DllImport("user32.dll")] public static extern bool PrintWindow(IntPtr h, IntPtr dc, uint f);
+  [DllImport("user32.dll")] public static extern bool GetWindowRect(IntPtr h, out R r);
+  [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr h, int c);
+  [DllImport("user32.dll")] public static extern bool EnumWindows(EnumProc p, IntPtr l);
+  [DllImport("user32.dll")] public static extern bool IsWindowVisible(IntPtr h);
+  [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();
+  [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr h, out uint pid);
+  public struct R { public int L, T, Rr, B; }
+  public static List<IntPtr> Of(uint pid) {
+    var res = new List<IntPtr>();
+    EnumWindows((h, l) => { uint q; GetWindowThreadProcessId(h, out q); if (q == pid && IsWindowVisible(h)) res.Add(h); return true; }, IntPtr.Zero);
+    return res; }
+}
 "@
-$c = Get-CimInstance Win32_Process | Where-Object { ($_.Name -eq '1cv8c.exe' -or $_.Name -eq '1cv8.exe') -and $_.CommandLine -like '*%s*' }
-$p = $null
-foreach ($x in $c) { $q = Get-Process -Id $x.ProcessId -ErrorAction SilentlyContinue; if ($q -and $q.MainWindowHandle -ne 0) { $p = $q } }
-if (-not $p) { exit 1 }
-$h = $p.MainWindowHandle
-[W]::ShowWindow($h, 3) | Out-Null
+$c = Get-CimInstance Win32_Process | Where-Object { ($_.Name -eq '1cv8c.exe' -or $_.Name -eq '1cv8.exe') -and $_.CommandLine -like '*%s*' -and $_.CommandLine -like '*ENTERPRISE*' }
+if (-not $c) { exit 1 }
+$pid1 = ($c | Select-Object -First 1).ProcessId
+# окно в фокусе, если оно этого клиента (формы элементов открываются отдельными окнами и получают фокус);
+# иначе — самое большое видимое окно процесса (уведомления платформы маленькие)
+$fg = [W]::GetForegroundWindow(); $fgpid = [uint32]0; [W]::GetWindowThreadProcessId($fg, [ref]$fgpid) | Out-Null
+$h = [IntPtr]::Zero
+if ($fgpid -eq $pid1) { $h = $fg } else {
+  $best = 0
+  foreach ($w in [W]::Of([uint32]$pid1)) { $r = New-Object W+R; [W]::GetWindowRect($w, [ref]$r) | Out-Null
+    $a = ($r.Rr - $r.L) * ($r.B - $r.T); if ($a -gt $best) { $best = $a; $h = $w } }
+}
+if ($h -eq [IntPtr]::Zero) { exit 1 }
 $r = New-Object W+R; [W]::GetWindowRect($h, [ref]$r) | Out-Null
 $w = $r.Rr - $r.L; $hh = $r.B - $r.T
+if ($w -lt 50 -or $hh -lt 50) { exit 1 }
 $bmp = New-Object System.Drawing.Bitmap $w, $hh
 $g = [System.Drawing.Graphics]::FromImage($bmp); $dc = $g.GetHdc()
 [W]::PrintWindow($h, $dc, 2) | Out-Null
@@ -441,18 +471,34 @@ def cmd_screens(cfg):
 		Возврат;
 	КонецЕсли;''' % (srv, ';'.join(names), stepsec * 2))
     stop_clients(ib)
-    if designer(cfg, ib, ['/LoadConfigFromFiles', xml], os.path.join(w, 's1.log')) or \
+    # Полная загрузка типовой — десять минут; после load с -updateConfigDumpInfo
+    # Конфигуратор умеет грузить ТОЛЬКО перечисленные файлы (-files).
+    if os.path.exists(os.path.join(xml, 'ConfigDumpInfo.xml')):
+        files = ','.join(os.path.join(xml, cm(m)) for m in (srv, glob_cl, after))
+        load_args = ['/LoadConfigFromFiles', xml, '-files', files, '-updateConfigDumpInfo']
+    else:
+        load_args = ['/LoadConfigFromFiles', xml, '-updateConfigDumpInfo']
+    if designer(cfg, ib, load_args, os.path.join(w, 's1.log')) or \
        designer(cfg, ib, ['/UpdateDBCfg'], os.path.join(w, 's2.log')):
         return 1
     out = os.path.join(w, 'screens')
     os.makedirs(out, exist_ok=True)
     for f in glob.glob(os.path.join(out, '*.png')):
         os.remove(f)
-    subprocess.Popen([cfg['v8'], 'ENTERPRISE', '/F', ib, '/DisableStartupDialogs', '/DisableStartupMessages',
-                      '/C', 'СкриншотыФорм'])
-    cn = connect(cfg, 'File="%s";' % ib)
+    # Индекс прошлого прогона лежит в хранилище — сбросить ДО запуска клиента,
+    # иначе скрипт примет его за свежий и «снимет» последнюю форму сразу.
+    cn = connect(cfg, ib)
+    cn.ХранилищеОбщихНастроек.Сохранить('ТестСкриншоты', 'Индекс', -1)
+    # Клиент запускать с явным SW_SHOWNORMAL: если сам скрипт стартовал из
+    # скрытого окна (Start-Process -WindowStyle Hidden), дочерний 1cv8
+    # наследует «скрытость», и окна для PrintWindow не будет.
+    si = subprocess.STARTUPINFO()
+    si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+    si.wShowWindow = 1   # SW_SHOWNORMAL
+    subprocess.Popen([cfg['v8'], 'ENTERPRISE', '/F', ib] + auth(cfg) + ['/DisableStartupDialogs', '/DisableStartupMessages',
+                      '/C', 'СкриншотыФорм'], startupinfo=si)
     done, t_last = -1, time.time()
-    ib_ps = ib.replace('\\', '\\\\')
+    ib_ps = ib   # в PowerShell -like обратный слэш — обычный символ, удвоение ломало поиск окна
     while time.time() - t_last < 180:
         try:
             idx = cn.ХранилищеОбщихНастроек.Загрузить('ТестСкриншоты', 'Индекс')
