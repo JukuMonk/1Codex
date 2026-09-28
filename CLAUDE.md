@@ -4,7 +4,7 @@
 `.mdo`, `Form.form`, `Module.bsl`, `Template.dcs`, `.cmi`, `.rights`). Этот
 набор — знания, рабочие примеры и кейсы, снятые с реальных проектов: типовая
 ТЛЭиУА 1.1.36 / МВМ на платформе 8.3.24 (около 400 коммитов) и ФРЕГАТ EAM на 8.5.1
-(EDT 2026.1) — 70 разобранных ошибок. Набор общий для всех 1С-проектов и
+(EDT 2026.1) — 71 разобранная ошибка. Набор общий для всех 1С-проектов и
 пополняется из каждого (см. «Пополнение набора»). Он заменяет память модели там,
 где память ошибается.
 
@@ -55,7 +55,7 @@
    проект; Problems чисто; открыть форму (пустой лист → лесенка проб, case 006).
    Обновление базы — только из EDT; новые объекты — полное обновление.
 9. **Прогон в платформе** — сначала автоматически (`knowledge/testing.md`):
-   `tools/platform.py … load` (или `quick`), `update`, `com reports`, `screens`;
+   `tools/platform.py … load` (или `quick`), `update`, `com reports`, `screens`, `forms`, `ui` (настоящие нажатия по сценарию);
    затем руками: открыть каждую форму, нажать каждую команду,
    выполнить сценарий с данными (включая группы иерархических справочников,
    пустые ТЧ, чистую базу). Запросы, директивы, имена свойств проверяются
@@ -113,7 +113,7 @@ UTF-8 **без BOM**, **CRLF**, отступы 2 пробела в `.mdo`/`.form
 
 ## Карта набора
 
-- `knowledge/testing.md` — проверка в платформе (загрузка, обновление ИБ, COM, снимки форм); `tools/platform.py`, `tools/register_com.py`.
+- `knowledge/testing.md` — проверка в платформе, 9 уровней (загрузка, обновление ИБ, COM, снимки и все формы, заполненность, сценарии, поле HTML, настоящие нажатия); `tools/platform.py`, `tools/register_com.py`.
 - `knowledge/new-project.md` — старт нового проекта из `.dt`; `tools/new_project.py` + `bootstrap/`.
 - `knowledge/` — 14 тем (`edt-project-structure`, `metadata`, `managed-forms`,
   `mobile-forms`, `bsl`, `skd`, `subsystems-and-ui`, `roles`,
@@ -121,7 +121,7 @@ UTF-8 **без BOM**, **CRLF**, отступы 2 пробела в `.mdo`/`.form
   `generators`, `validation`, `common-errors`).
 - `examples/` — 12 видов метаданных, 4 формы, мобильная форма, 2 отчёта,
   8 фрагментов BSL; README у каждого; собираются `tools/make_examples.py`.
-- `cases/` — 70 кейсов; указатель `index/cases.md`.
+- `cases/` — 71 кейс; указатель `index/cases.md`.
 - `reference/` — боевые файлы и генераторы; указатель `reference/INDEX.md`.
 - `tools/` — `edt_lib.py` (сборка XML), `check_project.py`, `check_bsl.py`,
   `scaffold.py`, `make_examples.py`, `make_sandbox.py`, `check_links.py`.
