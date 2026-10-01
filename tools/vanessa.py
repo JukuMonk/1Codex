@@ -59,15 +59,29 @@ def video_features(src, dst):
     return dst
 
 
-def start_video(cfg, path, runner):
-    """Ждать тестируемый клиент (или конец прогона) и начать запись рабочего стола."""
+def thin_pids():
+    """PID тонких клиентов (1cv8c.exe) через tasklist: WMI (Get-CimInstance) без прав
+    администратора процессов не отдаёт вовсе — так на сервере МВМ, и запись не начиналась."""
+    r = subprocess.run(['tasklist', '/FI', 'IMAGENAME eq 1cv8c.exe', '/FO', 'CSV', '/NH'],
+                       capture_output=True, text=True, encoding='cp866', errors='replace')
+    return {int(m.group(1)) for m in re.finditer(r'"1cv8c\.exe","(\d+)"', r.stdout, re.I)}
+
+
+def start_video(cfg, path, runner, before=None):
+    """Ждать тестируемый клиент (или конец прогона) и начать запись рабочего стола.
+    Клиент узнаём по /TESTCLIENT в командной строке (WMI), а если WMI пуст — по новому
+    тонкому клиенту, которого не было до старта менеджера (`before`)."""
     ffmpeg = cfg.get('ffmpeg') or shutil.which('ffmpeg')
     if not ffmpeg:
         print('видео: ffmpeg не найден (ключ "ffmpeg" в platform.json или PATH) — прогон без записи')
         return None
     t0 = time.time()
     while runner.poll() is None and time.time() - t0 < 300:
-        if subprocess.run(['powershell', '-NoProfile', '-Command', TESTCLIENT_PS], capture_output=True).returncode == 0:
+        found = subprocess.run(['powershell', '-NoProfile', '-Command', TESTCLIENT_PS],
+                               capture_output=True).returncode == 0
+        if not found and before is not None:
+            found = bool(thin_pids() - before)
+        if found:
             # весь рабочий стол: главное окно тонкого клиента по заголовку в перечислении окон не находится
             print('видео: запись началась', flush=True)
             return subprocess.Popen([ffmpeg, '-y', '-loglevel', 'error', '-f', 'gdigrab', '-framerate', '15',
@@ -157,8 +171,9 @@ def main():
     cmd = '"%s" ENTERPRISE /F"%s"%s /DisableStartupDialogs /DisableStartupMessages /TESTMANAGER /Execute "%s" ' \
           '/C"StartFeaturePlayer;VAParams=%s"' % (cfg['v8'], ib, cred, epf, pj)
     t0 = time.time()
+    before = thin_pids()
     p = subprocess.Popen(cmd)
-    rec = start_video(cfg, video, p) if video else None
+    rec = start_video(cfg, video, p, before) if video else None
     try:
         p.wait(timeout=int(cfg.get('va_timeout', 1800)))
     except subprocess.TimeoutExpired:
