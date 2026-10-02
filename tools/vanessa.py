@@ -182,15 +182,18 @@ def main():
     subprocess.run(['powershell', '-NoProfile', '-Command', stop], capture_output=True)
     print('Vanessa: %.1f мин' % ((time.time() - t0) / 60))
 
-    ok = False
+    # Прошло — только если прошли ВСЕ фичи: раньше итог брался по последней, и прогон
+    # нескольких фич печатал «пройден» при падении в середине (МВМ, 02.10.2026).
+    suites = []
     for f in glob.glob(os.path.join(out, 'junit', '*.xml')):
         x = io.open(f, encoding='utf-8-sig').read()
         for m in re.finditer(r'<testsuite name="([^"]*)" errors="(\d+)" skipped="(\d+)" tests="(\d+)" failures="(\d+)" time="([^"]*)"', x):
             print('фича «%s»: сценариев %s, ошибок %s, падений %s, пропущено %s, %s с' % (
                 m.group(1), m.group(4), m.group(2), m.group(5), m.group(3), m.group(6)))
-            ok = m.group(2) == '0' and m.group(5) == '0' and int(m.group(4)) > 0
+            suites.append(m.group(2) == '0' and m.group(5) == '0' and int(m.group(4)) > 0)
         for m in re.finditer(r'<failure[^>]*message="([^"]*)"', x):
             print('  ПАДЕНИЕ:', m.group(1)[:600])
+    ok = bool(suites) and all(suites)
     log = os.path.join(out, 'log.txt')
     if not ok and os.path.exists(log):
         print(io.open(log, encoding='utf-8-sig', errors='replace').read()[-4000:])
