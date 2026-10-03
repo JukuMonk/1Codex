@@ -258,11 +258,15 @@ def form_ref_block(kind, obj, form_name, syn, purposes=('PersonalComputer', 'Mob
 # ============================================================ .mdo: объекты
 def catalog_mdo(name, syn, attributes=(), tabular_sections=(), code_length=9,
                 description_length=150, manual_code=False, hierarchical=False,
-                comment=None, forms=(), default_forms=(), seed=None):
+                comment=None, forms=(), default_forms=(), seed=None, owners=()):
     """Справочник. forms — [(имя, синоним)], default_forms —
     [('defaultObjectForm', 'ФормаЭлемента'), ...].
     manual_code=True: код — ключ, а не номер (autonumbering=false,
-    fillChecking у Code)."""
+    fillChecking у Code).
+    owners — имена справочников-владельцев (подчинённый справочник). Порядок
+    тегов снят с живого подчинённого справочника (ItobДатчики, МВМ): owners —
+    после foldersOnTop и до codeLength, codeSeries WithinOwnerSubordination —
+    после codeAllowedLength (UP, 2026-10)."""
     s = seed or 'Catalog/' + name
     lines = ['<?xml version="1.0" encoding="UTF-8"?>',
              '<mdclass:Catalog %s uuid="%s">' % (XMLNS_MD, stable_uid(s))]
@@ -288,11 +292,14 @@ def catalog_mdo(name, syn, attributes=(), tabular_sections=(), code_length=9,
         # порядок снят с типового иерархического справочника
         lines += ['  <hierarchical>true</hierarchical>', '  <levelCount>2</levelCount>',
                   '  <foldersOnTop>true</foldersOnTop>']
+    lines += ['  <owners>Catalog.%s</owners>' % o for o in owners]
     lines += ['  <codeLength>%d</codeLength>' % code_length,
               '  <descriptionLength>%d</descriptionLength>' % description_length,
               '  <codeType>String</codeType>',
-              '  <codeAllowedLength>Variable</codeAllowedLength>',
-              '  <checkUnique>true</checkUnique>',
+              '  <codeAllowedLength>Variable</codeAllowedLength>']
+    if owners:
+        lines.append('  <codeSeries>WithinOwnerSubordination</codeSeries>')
+    lines += ['  <checkUnique>true</checkUnique>',
               '  <autonumbering>%s</autonumbering>' % ('false' if manual_code else 'true'),
               '  <defaultPresentation>AsDescription</defaultPresentation>',
               '  <editType>InDialog</editType>',
