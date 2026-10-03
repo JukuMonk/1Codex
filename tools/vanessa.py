@@ -5,7 +5,9 @@
 
 --video — запись экрана (ffmpeg gdigrab, весь рабочий стол): начинается, когда запущен тестируемый клиент
 (процесс с /TESTCLIENT), кончается с прогоном; в копию сценариев после шага подключения добавляется
-«И я активизирую главное окно сеанса TESTCLIENT» — иначе клиент под окном менеджера Vanessa. ffmpeg —
+«И я активизирую главное окно сеанса TESTCLIENT» — иначе клиент под окном менеджера Vanessa. Если этот шаг
+в конфигурации падает («Метод не может быть вызван для данного объекта») — "va_window": "os" в platform.json:
+шаг не вставляется, менеджер сворачивается, клиент разворачивается на весь экран средствами Windows. ffmpeg —
 "ffmpeg" в platform.json или в PATH. Файл по умолчанию — <va_video_dir или work/va_out>/va_<дата-время>.mp4.
 
 Берёт из platform.json: v8, work (тестовая база work/ib — после platform.py load/update; другая файловая
@@ -39,14 +41,17 @@ TESTCLIENT_PS = ("if (Get-CimInstance Win32_Process | Where-Object { $_.Name -li
                  "$_.CommandLine -like '*TESTCLIENT*' }) { exit 0 }; exit 1")
 
 
-def video_features(src, dst):
-    """Копия сценариев для видео: после шага подключения — активизация окна тестируемого клиента."""
+def video_features(src, dst, activate=True):
+    """Копия сценариев для видео: после шага подключения — активизация окна тестируемого клиента
+    (activate=False — режим "va_window": "os", окна раскладывает arrange_windows)."""
     shutil.rmtree(dst, ignore_errors=True)
     if os.path.isdir(src):
         shutil.copytree(src, dst)
     else:
         os.makedirs(dst)
         shutil.copy(src, dst)
+    if not activate:
+        return dst
     for f in glob.glob(os.path.join(dst, '**', '*.feature'), recursive=True):
         lines = io.open(f, encoding='utf-8-sig').read().split('\n')
         res = []
@@ -92,6 +97,41 @@ def start_video(cfg, path, runner, before=None):
     return None
 
 
+ARRANGE_PS = r'''
+Add-Type @"
+using System; using System.Runtime.InteropServices;
+public class VaWin { [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr h, int c);
+[DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr h); }
+"@
+$m = (Get-Process -Id %d -ErrorAction SilentlyContinue).MainWindowHandle
+if ($m -and $m -ne [IntPtr]::Zero) { [VaWin]::ShowWindow($m, 6) | Out-Null }
+foreach ($id in @(%s)) {
+  $c = (Get-Process -Id $id -ErrorAction SilentlyContinue).MainWindowHandle
+  if ($c -and $c -ne [IntPtr]::Zero) { [VaWin]::ShowWindow($c, 3) | Out-Null; [VaWin]::SetForegroundWindow($c) | Out-Null; 'ok' }
+}
+'''
+
+
+def arrange_windows(manager, before, runner):
+    """Режим "va_window": "os": шаг VA «я активизирую главное окно сеанса TESTCLIENT» в части
+    конфигураций падает («Метод не может быть вызван для данного объекта», UP 8.5.1: на начальной
+    странице открыта форма отчёта) — тогда окно менеджера тестирования сворачивается, окно
+    тестируемого клиента разворачивается на весь экран средствами Windows. Повторяется весь прогон:
+    менеджер выходит наверх при каждом сценарии."""
+    import threading
+
+    def loop():
+        while runner.poll() is None:
+            pids = sorted(thin_pids() - before)
+            if pids:
+                subprocess.run(['powershell', '-NoProfile', '-Command', ARRANGE_PS % (manager, ','.join(map(str, pids)))],
+                               capture_output=True)
+            time.sleep(3)
+    t = threading.Thread(target=loop, daemon=True)
+    t.start()
+    return t
+
+
 def stop_video(rec, path):
     if not rec:
         return
@@ -130,7 +170,8 @@ def main():
         vdir = cfg.get('va_video_dir') or out  # va_out очищается каждым прогоном — видео лучше хранить отдельно
         os.makedirs(vdir, exist_ok=True)
         video = os.path.abspath(video) if video else os.path.join(vdir, time.strftime('va_%Y%m%d_%H%M%S.mp4'))
-        features = video_features(features, os.path.join(out, 'features_video'))
+        features = video_features(features, os.path.join(out, 'features_video'),
+                                  activate=cfg.get('va_window') != 'os')
     root = features if os.path.isdir(features) else os.path.dirname(features)
     params = {
         "КаталогФич": features,
@@ -174,6 +215,8 @@ def main():
     before = thin_pids()
     p = subprocess.Popen(cmd)
     rec = start_video(cfg, video, p, before) if video else None
+    if rec and cfg.get('va_window') == 'os':
+        arrange_windows(p.pid, before, p)
     try:
         p.wait(timeout=int(cfg.get('va_timeout', 1800)))
     except subprocess.TimeoutExpired:
