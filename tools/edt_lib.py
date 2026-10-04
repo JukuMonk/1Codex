@@ -713,7 +713,7 @@ def picture_manifest():
 
 
 def object_tabular_table(ids, name, ts_path, columns, indent, editable=True, buttons=(),
-                         handlers=()):
+                         handlers=(), max_width=True):
     """Таблица ТАБЛИЧНОЙ ЧАСТИ объекта (Объект.ИмяТЧ) на форме элемента /
     документа: первая колонка — номер строки (LabelField), остальные —
     поля ввода. Собрана по образцу вставки вкладки с ТЧ в типовую форму.
@@ -731,7 +731,12 @@ def object_tabular_table(ids, name, ts_path, columns, indent, editable=True, but
              o + '  </dataPath>', o + '  <titleLocation>None</titleLocation>']
     lines += field(ids, name + 'НомерСтроки', ts_path + '.LineNumber', indent + 2, 'LabelField')
     for c in columns:
-        if isinstance(c, (tuple, list)):
+        if isinstance(c, dict):
+            # {'name', 'width', 'title', 'ro', 'kind'} — колонка со своей шириной (UP, 2026-10)
+            lines += field(ids, name + c['name'], '%s.%s' % (ts_path, c['name']), indent + 2,
+                           c.get('kind', 'InputField'), c.get('title'), c.get('ro', False),
+                           width=c.get('width'), max_width=bool(c.get('width')))
+        elif isinstance(c, (tuple, list)):
             suf, path, kind, ctitle, ro = c[:5]
             ch = c[5] if len(c) > 5 else ()
             lines += field(ids, name + suf, path, indent + 2, kind, ctitle, ro, handlers=ch)
@@ -751,7 +756,8 @@ def object_tabular_table(ids, name, ts_path, columns, indent, editable=True, but
     lines += context_menu(name, ids(), indent + 2)
     ed = 'true' if editable else 'false'
     lines += [o + '  <changeRowSet>%s</changeRowSet>' % ed, o + '  <changeRowOrder>%s</changeRowOrder>' % ed,
-              o + '  <autoMaxWidth>true</autoMaxWidth>', o + '  <autoMaxHeight>true</autoMaxHeight>',
+              ] + ([o + '  <autoMaxWidth>true</autoMaxWidth>'] if max_width else []) + [
+              o + '  <autoMaxHeight>true</autoMaxHeight>',
               o + '  <autoMaxRowsCount>true</autoMaxRowsCount>',
               o + '  <selectionMode>MultiRow</selectionMode>', o + '  <header>true</header>',
               o + '  <headerHeight>1</headerHeight>', o + '  <footerHeight>1</footerHeight>',
@@ -951,7 +957,10 @@ def add_form_to_mdo(text, kind, obj, form_name, syn, prop, purposes=('PersonalCo
     if place is None:
         raise ValueError('не найдено место для ссылки на форму')
     lines.insert(place, ref)
-    block = ['  <forms uuid="%s">' % uid(), '    <name>%s</name>' % form_name]
+    # устойчивый uuid: генератор, пересобирающий .mdo целиком и добавляющий форму этим вызовом, иначе
+    # даёт форме новый uuid при каждом запуске — база видит «новую» форму (case 020; UP, 2026-10)
+    block = ['  <forms uuid="%s">' % stable_uid('addform/%s/%s/%s' % (kind, obj, form_name)),
+             '    <name>%s</name>' % form_name]
     block += synonym(syn, 4)
     block += ['    <usePurposes>%s</usePurposes>' % p for p in purposes]
     block.append('  </forms>')
@@ -987,12 +996,17 @@ def title_xml(text, indent):
 
 def field(ids, name, data_path, indent, kind='InputField', title=None, read_only=False,
           width=None, max_width=False, handlers=(), fmt=None, clear_button=False,
-          default_item=False, title_location=None, multiline=False, input_hint=None):
+          default_item=False, title_location=None, multiline=False, input_hint=None, height=None,
+          stretch=None):
     """Поле формы. Порядок тегов — как пишет EDT: title за id, handlers за
     dataPath, значения по умолчанию не пишутся (case 027).
     kind: InputField | CheckBoxField | LabelField.
     width без max_width — поле вне колонок тянется до края формы; типовая
-    у узких полей пишет width ВМЕСТЕ с autoMaxWidth=true (case 008)."""
+    у узких полей пишет width ВМЕСТЕ с autoMaxWidth=true (case 008).
+    height — высота многострочного поля в строках (по умолчанию 3; UP, 2026-10).
+    stretch (только InputField): True — без autoMaxWidth и с horizontalStretch (наименование, тексты
+    тянутся на всю форму); False — horizontalStretch=false (узкое поле с width не расползается в
+    горизонтальной группе); None — как раньше. Проверено в тонком клиенте 8.5.1 (UP, 2026-10)."""
     o = ' ' * indent
     lines = [o + '<items xsi:type="form:FormField">', o + '  <name>%s</name>' % name,
              o + '  <id>%d</id>' % ids()]
@@ -1022,18 +1036,21 @@ def field(ids, name, data_path, indent, kind='InputField', title=None, read_only
         lines.append(o + '  <extInfo xsi:type="form:InputFieldExtInfo">')
         if width:
             lines.append(o + '    <width>%d</width>' % width)
-            if max_width:
+            if max_width and stretch is not True:
                 lines.append(o + '    <autoMaxWidth>true</autoMaxWidth>')
-        else:
+        elif stretch is not True:
             lines.append(o + '    <autoMaxWidth>true</autoMaxWidth>')
         if multiline:
-            lines += [o + '    <height>3</height>', o + '    <autoMaxHeight>true</autoMaxHeight>',
+            lines += [o + '    <height>%d</height>' % (height or 3), o + '    <autoMaxHeight>true</autoMaxHeight>',
                       o + '    <horizontalStretch>true</horizontalStretch>',
                       o + '    <verticalStretch>false</verticalStretch>',
                       o + '    <wrap>true</wrap>', o + '    <multiLine>true</multiLine>',
                       o + '    <extendedEdit>true</extendedEdit>']
         else:
-            lines += [o + '    <autoMaxHeight>true</autoMaxHeight>', o + '    <wrap>true</wrap>']
+            lines.append(o + '    <autoMaxHeight>true</autoMaxHeight>')
+            if stretch is not None:
+                lines.append(o + '    <horizontalStretch>%s</horizontalStretch>' % ('true' if stretch else 'false'))
+            lines.append(o + '    <wrap>true</wrap>')
         if clear_button:
             lines.append(o + '    <clearButton>true</clearButton>')
         lines += [o + '    <chooseType>true</chooseType>',
@@ -1774,7 +1791,7 @@ def check_bsl(text, is_form_module=True, hierarchical_catalogs=(), tabular_of=No
         if s.startswith('&'):
             directive = s
             continue
-        if s.startswith(('Процедура ', 'Функция ')):
+        if s.startswith(('Процедура ', 'Функция ', 'Асинх Процедура ', 'Асинх Функция ')):
             current = s.split('(')[0]
             if is_form_module and directive == '':
                 problems.append('строка %d: «%s» без директивы компиляции — в модуле формы '
@@ -1842,7 +1859,7 @@ def check_bsl(text, is_form_module=True, hierarchical_catalogs=(), tabular_of=No
             for p in check_query_aliases(q, tabular_of):
                 problems.append('запрос: ' + p)
     # 5) имена процедур: глобальные методы (case 047) и ключевые слова (case 057)
-    for m in re.finditer(r'^\s*(?:Процедура|Функция)\s+([А-Яа-яЁёA-Za-z_][А-Яа-яЁёA-Za-z_0-9]*)', clean, re.M):
+    for m in re.finditer(r'^\s*(?:Асинх\s+)?(?:Процедура|Функция)\s+([А-Яа-яЁёA-Za-z_][А-Яа-яЁёA-Za-z_0-9]*)', clean, re.M):
         name = m.group(1)
         n = clean.count('\n', 0, m.start()) + 1
         if name in GLOBAL_METHODS:
@@ -1856,7 +1873,7 @@ def check_bsl(text, is_form_module=True, hierarchical_catalogs=(), tabular_of=No
     ident = r'[А-Яа-яЁёA-Za-z_][А-Яа-яЁёA-Za-z_0-9]*'
     for n, raw in enumerate(lines, 1):
         s = raw.strip()
-        if s.startswith(('Процедура ', 'Функция ')):
+        if s.startswith(('Процедура ', 'Функция ', 'Асинх Процедура ', 'Асинх Функция ')):
             numeric, cur = set(), s.split('(')[0]
             continue
         if s.startswith('//'):
@@ -1975,7 +1992,7 @@ def check_form_attributes_in_no_context(module_text, attr_names):
             flush()
             directive, proc, params, locals_, body = s, '', set(), set(), []
             continue
-        m = re.match(r'^(?:Процедура|Функция)\s+(\w+)\s*\(([^)]*)\)', s)
+        m = re.match(r'^(?:Асинх\s+)?(?:Процедура|Функция)\s+(\w+)\s*\(([^)]*)\)', s)
         if m:
             proc = m.group(1)
             params = {p.strip().split('=')[0].strip().replace('Знач ', '').strip()
@@ -2029,6 +2046,19 @@ def check_form(text, module_text=None, mdo_text=None):
     dup = sorted({i for i in ids if ids.count(i) > 1})
     if dup:
         problems.append('повторяющиеся id элементов формы: %s' % dup)
+    # имена элементов: группа и поле с одним именем (и их спутники «…РасширеннаяПодсказка») —
+    # EDT и проверки молчат, тонкий клиент 8.5.1 падает (mngui.dll, 0xc0000005) при закрытии формы (UP, 2026-10)
+    names = []
+    for branch in root:
+        if _local(branch.tag) in ('items', 'autoCommandBar'):
+            for node in branch.iter():
+                if _local(node.tag) in ('items', 'extendedTooltip', 'contextMenu', 'autoCommandBar'):
+                    n = next((c.text for c in node if _local(c.tag) == 'name'), None)
+                    if n:
+                        names.append(n)
+    dup_names = sorted({n for n in names if names.count(n) > 1})
+    if dup_names:
+        problems.append('повторяющиеся имена элементов формы: %s — клиент падает при закрытии формы' % ', '.join(dup_names))
     # реквизиты и колонки — одно пространство (case 003)
     attr_ids = []
     attr_names = set()
@@ -2072,10 +2102,10 @@ def check_form(text, module_text=None, mdo_text=None):
     # обработчики и команды — в модуле
     if module_text is not None:
         for proc in re.findall(r'<handlers>\s*<event>\w+</event>\s*<name>(\w+)</name>', text):
-            if not re.search(r'^(Процедура|Функция)\s+%s\(' % re.escape(proc), module_text, re.M):
+            if not re.search(r'^(?:Асинх\s+)?(Процедура|Функция)\s+%s\(' % re.escape(proc), module_text, re.M):
                 problems.append('обработчик «%s» не описан в модуле формы' % proc)
         for name in re.findall(r'<handler>\s*<name>(\w+)</name>', text):
-            if not re.search(r'^Процедура\s+%s\(' % re.escape(name), module_text, re.M):
+            if not re.search(r'^(?:Асинх\s+)?Процедура\s+%s\(' % re.escape(name), module_text, re.M):
                 problems.append('у команды нет обработчика «%s» в модуле' % name)
     # группы: типовые свойства
     for g in root.iter():
