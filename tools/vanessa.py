@@ -3,6 +3,8 @@
 
   python tools/vanessa.py <platform.json> <каталог или файл .feature> [тег] [--video [файл.mp4]]
 
+--shots <каталог> — снимки только окон тестируемого клиента (window_shots.py: PrintWindow, кадр — когда
+картинка устоялась; рабочий стол пользователя не попадает), для пользовательских инструкций.
 --video — запись экрана (ffmpeg gdigrab, весь рабочий стол): начинается, когда запущен тестируемый клиент
 (процесс с /TESTCLIENT), кончается с прогоном; в копию сценариев после шага подключения добавляется
 «И я активизирую главное окно сеанса TESTCLIENT» — иначе клиент под окном менеджера Vanessa. Если этот шаг
@@ -150,6 +152,11 @@ def main():
         i = args.index('--video')
         video = args[i + 1] if i + 1 < len(args) and args[i + 1].lower().endswith('.mp4') else ''
         del args[i:i + (2 if video else 1)]
+    shots = None
+    if '--shots' in args:  # снимки только окон клиента для инструкций (window_shots.py), без рабочего стола
+        i = args.index('--shots')
+        shots = os.path.abspath(args[i + 1])
+        del args[i:i + 2]
     if len(args) < 2:
         sys.exit(__doc__)
     cfg = json.load(io.open(args[0], encoding='utf-8-sig'))
@@ -215,6 +222,10 @@ def main():
     before = thin_pids()
     p = subprocess.Popen(cmd)
     rec = start_video(cfg, video, p, before) if video else None
+    if shots:
+        import window_shots
+        shutil.rmtree(shots, ignore_errors=True)
+        shooter = window_shots.start(shots, lambda: thin_pids() - before, lambda: p.poll() is None)
     if rec and cfg.get('va_window') == 'os':
         arrange_windows(p.pid, before, p)
     try:
@@ -222,6 +233,9 @@ def main():
     except subprocess.TimeoutExpired:
         print('таймаут: менеджер тестирования не завершился (диалог? см. снимок screens)')
     stop_video(rec, video)
+    if shots:
+        shooter.join(10)
+        print('снимки окон клиента: %d в %s' % (len(glob.glob(os.path.join(shots, '*.png'))), shots))
     subprocess.run(['powershell', '-NoProfile', '-Command', stop], capture_output=True)
     print('Vanessa: %.1f мин' % ((time.time() - t0) / 60))
 
