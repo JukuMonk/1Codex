@@ -2752,6 +2752,28 @@ def common_command_mdo(name, syn, group='NavigationPanelOrdinary', tooltip=None,
     return join(lines)
 
 
+def object_command(owner, name, syn, param_type, group='FormCommandBarImportant', multiple=False, tooltip=None):
+    """Команда объекта (обработки, отчёта, документа) с параметром: платформа сама выводит её в
+    формы объектов типа param_type (группа FormCommandBarImportant — командная панель формы с
+    autoFill, FormNavigationPanelImportant — панель навигации), сама форма не меняется.
+    Возвращает текст <commands> — вставлять ПОСЛЕДНИМ перед закрывающим тегом .mdo (после
+    forms/templates). owner — 'DataProcessor.Имя' для устойчивого uuid. Формат снят с
+    КоммерческоеПредложение.Печать и СтатистикаЗадач.СтатистикаПоЗадаче (UP, 2026-10).
+    Модуль — Commands/<name>/CommandModule.bsl: &НаКлиенте Процедура ОбработкаКоманды(
+    ПараметрКоманды, ПараметрыВыполненияКоманды)."""
+    lines = ['  <commands uuid="%s">' % stable_uid('%s/Command/%s' % (owner, name)), '    <name>%s</name>' % name]
+    lines += synonym(syn, 4)
+    lines += ['    <group>%s</group>' % group, '    <commandParameterType>',
+              '      <types>%s</types>' % param_type, '    </commandParameterType>']
+    if multiple:
+        lines.append('    <parameterUseMode>Multiple</parameterUseMode>')
+    lines.append('    <representation>Auto</representation>')
+    if tooltip:
+        lines += ['    <toolTip>', '      <key>ru</key>', '      <value>%s</value>' % esc(tooltip), '    </toolTip>']
+    lines.append('  </commands>')
+    return join(lines)
+
+
 def scheduled_job_mdo(name, syn, method, use=True, predefined=True, seed=None):
     """Регламентное задание; method — 'CommonModule.Модуль.Процедура' (модуль серверный,
     процедура экспортная). Формат снят с bpmОтправкаУведомленийПоПочте (ФРЕГАТ EAM).
