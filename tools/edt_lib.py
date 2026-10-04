@@ -1106,6 +1106,43 @@ def html_field(ids, name, data_path, indent, on_complete=None, width=70, height=
     return lines
 
 
+def spreadsheet_field(ids, name, data_path, indent, width=100, height=25, edit=False):
+    """Поле табличного документа (печатная форма в форме). Теги — как в живой форме EDT
+    (КонсольЗапросов.РезультатЗапроса, UP 2026-10); реквизит формы — form_attribute(kind=
+    'SpreadsheetDocument', ext=['<extInfo xsi:type="form:SpreadsheetDocumentExtInfo"/>'])."""
+    o = ' ' * indent
+    lines = [o + '<items xsi:type="form:FormField">', o + '  <name>%s</name>' % name,
+             o + '  <id>%d</id>' % ids(), o + '  <visible>true</visible>',
+             o + '  <enabled>true</enabled>', o + '  <userVisible>',
+             o + '    <common>true</common>', o + '  </userVisible>',
+             o + '  <dataPath xsi:type="form:DataPath">',
+             o + '    <segments>%s</segments>' % data_path, o + '  </dataPath>',
+             o + '  <titleLocation>None</titleLocation>']
+    lines += tooltip(name, ids(), indent + 2)
+    lines += context_menu(name, ids(), indent + 2)
+    lines += [o + '  <type>SpreadsheetDocumentField</type>', o + '  <editMode>Enter</editMode>',
+              o + '  <showInHeader>true</showInHeader>',
+              o + '  <headerHorizontalAlign>Left</headerHorizontalAlign>',
+              o + '  <showInFooter>true</showInFooter>',
+              o + '  <extInfo xsi:type="form:SpreadSheetDocFieldExtInfo">',
+              o + '    <width>%d</width>' % width, o + '    <autoMaxWidth>true</autoMaxWidth>',
+              o + '    <height>%d</height>' % height, o + '    <autoMaxHeight>true</autoMaxHeight>',
+              o + '    <horizontalStretch>true</horizontalStretch>',
+              o + '    <verticalStretch>true</verticalStretch>',
+              o + '    <pointerType>Special</pointerType>',
+              o + '    <verticalScrollBar>ScrollAlways</verticalScrollBar>',
+              o + '    <horizontalScrollBar>ScrollAlways</horizontalScrollBar>',
+              o + '    <selectionShowMode>Always</selectionShowMode>',
+              o + '    <drawingSelectionShowMode>Auto</drawingSelectionShowMode>']
+    if edit:
+        lines.append(o + '    <edit>true</edit>')
+    lines += [o + '    <showGroups>true</showGroups>',
+              o + '    <enableStartDrag>true</enableStartDrag>',
+              o + '    <enableDrag>true</enableDrag>',
+              o + '  </extInfo>', o + '</items>']
+    return lines
+
+
 def decoration(ids, name, text, indent, bold=False):
     """Надпись. Текст ей отдаёт модуль через Элементы.X.Заголовок."""
     o = ' ' * indent
