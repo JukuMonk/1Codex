@@ -258,7 +258,7 @@ def form_ref_block(kind, obj, form_name, syn, purposes=('PersonalComputer', 'Mob
 # ============================================================ .mdo: объекты
 def catalog_mdo(name, syn, attributes=(), tabular_sections=(), code_length=9,
                 description_length=150, manual_code=False, hierarchical=False,
-                comment=None, forms=(), default_forms=(), seed=None, owners=()):
+                comment=None, forms=(), default_forms=(), seed=None, owners=(), search_any_part=False):
     """Справочник. forms — [(имя, синоним)], default_forms —
     [('defaultObjectForm', 'ФормаЭлемента'), ...].
     manual_code=True: код — ключ, а не номер (autonumbering=false,
@@ -277,8 +277,12 @@ def catalog_mdo(name, syn, attributes=(), tabular_sections=(), code_length=9,
         lines.append('  <comment>%s</comment>' % esc(comment))
     lines += ['  <useStandardCommands>true</useStandardCommands>',
               '  <inputByString>Catalog.%s.StandardAttribute.Description</inputByString>' % name,
-              '  <inputByString>Catalog.%s.StandardAttribute.Code</inputByString>' % name,
-              '  <fullTextSearchOnInputByString>DontUse</fullTextSearchOnInputByString>']
+              '  <inputByString>Catalog.%s.StandardAttribute.Code</inputByString>' % name]
+    if search_any_part:
+        # подбор при вводе по вхождению, а не по началу строки («операц» находит «Технологическая операция»);
+        # тег — как в живом ОбъектыКонфигурации.mdo (UP, 2026-10)
+        lines.append('  <searchStringModeOnInputByString>AnyPart</searchStringModeOnInputByString>')
+    lines.append('  <fullTextSearchOnInputByString>DontUse</fullTextSearchOnInputByString>')
     for std in ('PredefinedDataName', 'Predefined', 'Ref', 'DeletionMark', 'IsFolder'):
         lines += standard_attribute(std, 2)
     lines += standard_attribute('Owner', 2, ['<fillFromFillingValue>true</fillFromFillingValue>'])
@@ -736,7 +740,8 @@ def object_tabular_table(ids, name, ts_path, columns, indent, editable=True, but
             # handlers — [(событие, обработчик)] колонки: OnChange, StartChoice…
             lines += field(ids, name + c['name'], '%s.%s' % (ts_path, c['name']), indent + 2,
                            c.get('kind', 'InputField'), c.get('title'), c.get('ro', False),
-                           width=c.get('width'), max_width=bool(c.get('width')), handlers=c.get('handlers', ()))
+                           width=c.get('width'), max_width=bool(c.get('width')), handlers=c.get('handlers', ()),
+                           choice_button=c.get('choice_button', False), text_edit=c.get('text_edit', True))
         elif isinstance(c, (tuple, list)):
             suf, path, kind, ctitle, ro = c[:5]
             ch = c[5] if len(c) > 5 else ()
@@ -998,7 +1003,7 @@ def title_xml(text, indent):
 def field(ids, name, data_path, indent, kind='InputField', title=None, read_only=False,
           width=None, max_width=False, handlers=(), fmt=None, clear_button=False,
           default_item=False, title_location=None, multiline=False, input_hint=None, height=None,
-          stretch=None):
+          stretch=None, choice_button=False, text_edit=True):
     """Поле формы. Порядок тегов — как пишет EDT: title за id, handlers за
     dataPath, значения по умолчанию не пишутся (case 027).
     kind: InputField | CheckBoxField | LabelField.
@@ -1007,7 +1012,10 @@ def field(ids, name, data_path, indent, kind='InputField', title=None, read_only
     height — высота многострочного поля в строках (по умолчанию 3; UP, 2026-10).
     stretch (только InputField): True — без autoMaxWidth и с horizontalStretch (наименование, тексты
     тянутся на всю форму); False — horizontalStretch=false (узкое поле с width не расползается в
-    горизонтальной группе); None — как раньше. Проверено в тонком клиенте 8.5.1 (UP, 2026-10)."""
+    горизонтальной группе); None — как раньше. Проверено в тонком клиенте 8.5.1 (UP, 2026-10).
+    choice_button — кнопка выбора (обработчик StartChoice: всплывающее окно, своя форма выбора);
+    text_edit=False — текст в поле не набирается, только через выбор (порядок тегов — как в живой форме
+    Задачи.ФормаЭлемента: wrap, choiceButton, clearButton, chooseType, typeDomainEnabled, textEdit)."""
     o = ' ' * indent
     lines = [o + '<items xsi:type="form:FormField">', o + '  <name>%s</name>' % name,
              o + '  <id>%d</id>' % ids()]
@@ -1052,11 +1060,13 @@ def field(ids, name, data_path, indent, kind='InputField', title=None, read_only
             if stretch is not None:
                 lines.append(o + '    <horizontalStretch>%s</horizontalStretch>' % ('true' if stretch else 'false'))
             lines.append(o + '    <wrap>true</wrap>')
+        if choice_button:
+            lines.append(o + '    <choiceButton>true</choiceButton>')
         if clear_button:
             lines.append(o + '    <clearButton>true</clearButton>')
         lines += [o + '    <chooseType>true</chooseType>',
                   o + '    <typeDomainEnabled>true</typeDomainEnabled>',
-                  o + '    <textEdit>true</textEdit>']
+                  o + '    <textEdit>%s</textEdit>' % ('true' if text_edit else 'false')]
         if fmt:
             lines += [o + '    <format>', o + '      <key>ru</key>',
                       o + '      <value>%s</value>' % esc(fmt), o + '    </format>']
@@ -1957,7 +1967,9 @@ QUERY_KINDS = {'Справочник': 'Catalog', 'Документ': 'Document'
 def tabular_sections_of_mdo(text):
     """Имена табличных частей объекта из его .mdo."""
     names = []
-    for m in re.finditer(r'<tabularSections uuid="[^"]+">\s*<name>([^<]+)</name>', text):
+    # EDT пишет <producedTypes> перед <name> — без него ТЧ не находились и case 062 молчал (UP, ДиЗ-02 2026-10)
+    for m in re.finditer(r'<tabularSections uuid="[^"]+">\s*(?:<producedTypes>.*?</producedTypes>\s*)?'
+                         r'<name>([^<]+)</name>', text, re.S):
         names.append(m.group(1))
     return set(names)
 
@@ -1969,6 +1981,11 @@ def queries_in_module(text):
         s = line.strip()
         if s.startswith('|'):
             buf.append(s[1:])
+            continue
+        # первая строка запроса — после кавычки: Новый Запрос("ВЫБРАТЬ … (без неё терялись источники в ИЗ)
+        m = re.search(r'"\s*((?:ВЫБРАТЬ|SELECT)\b.*)$', s)
+        if m and not buf:
+            buf.append(m.group(1))
             continue
         if buf:
             queries.append('\n'.join(buf)); buf = []
