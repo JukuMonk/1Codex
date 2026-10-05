@@ -732,10 +732,11 @@ def object_tabular_table(ids, name, ts_path, columns, indent, editable=True, but
     lines += field(ids, name + 'НомерСтроки', ts_path + '.LineNumber', indent + 2, 'LabelField')
     for c in columns:
         if isinstance(c, dict):
-            # {'name', 'width', 'title', 'ro', 'kind'} — колонка со своей шириной (UP, 2026-10)
+            # {'name', 'width', 'title', 'ro', 'kind', 'handlers'} — колонка со своей шириной (UP, 2026-10);
+            # handlers — [(событие, обработчик)] колонки: OnChange, StartChoice…
             lines += field(ids, name + c['name'], '%s.%s' % (ts_path, c['name']), indent + 2,
                            c.get('kind', 'InputField'), c.get('title'), c.get('ro', False),
-                           width=c.get('width'), max_width=bool(c.get('width')))
+                           width=c.get('width'), max_width=bool(c.get('width')), handlers=c.get('handlers', ()))
         elif isinstance(c, (tuple, list)):
             suf, path, kind, ctitle, ro = c[:5]
             ch = c[5] if len(c) > 5 else ()
