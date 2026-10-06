@@ -1254,13 +1254,15 @@ def command_bar(ids, name, buttons, indent):
 
 
 def usual_group(ids, name, title, content, indent, direction=None, show_title=True,
-                representation=None, vertical_stretch=None, horizontal_stretch=None):
+                representation=None, vertical_stretch=None, horizontal_stretch=None, collapsed=None):
     """Обычная группа. direction: None (умолчание Horizontal — тег не
     пишется), 'Vertical', 'AlwaysHorizontal'. Четыре свойства showLeftMargin/
     united/throughAlign/currentRowUse типовая пишет у КАЖДОЙ группы; без них
     платформа получает «сквозное выравнивание: Использовать» и строка
     расползается по колонкам (case 007). Свойства растяжения идут ПОСЛЕ
-    title и ДО extendedTooltip (case 009)."""
+    title и ДО extendedTooltip (case 009).
+    collapsed — сворачиваемая группа (True — свёрнута при открытии): технические поля (GUID и т.п.)
+    не занимают строки формы; теги — как в ГрупповоеИзменениеРеквизитов.ДополнительныеПараметры (UP, 2026-10)."""
     o = ' ' * indent
     lines = [o + '<items xsi:type="form:FormGroup">', o + '  <name>%s</name>' % name,
              o + '  <id>%d</id>' % ids()]
@@ -1277,6 +1279,11 @@ def usual_group(ids, name, title, content, indent, direction=None, show_title=Tr
     lines += [o + '  <type>UsualGroup</type>', o + '  <extInfo xsi:type="form:UsualGroupExtInfo">']
     if direction:
         lines.append(o + '    <group>%s</group>' % direction)
+    if collapsed is not None:
+        lines += [o + '    <behavior>Collapsible</behavior>']
+        if collapsed:
+            lines.append(o + '    <collapsed>true</collapsed>')
+        lines.append(o + '    <controlRepresentation>Button</controlRepresentation>')
     if representation:
         lines.append(o + '    <representation>%s</representation>' % representation)
     lines += [o + '    <showLeftMargin>true</showLeftMargin>', o + '    <united>true</united>']
