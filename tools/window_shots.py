@@ -123,7 +123,9 @@ def record(out, get_pids, alive, step=2.0, stable=1):
             continue
         calm = calm + 1 if not differs(img, prev, 0.4) else 0
         prev = img
-        if calm == stable and differs(img, saved, 1.5):
+        # порог нового кадра: средняя разница миниатюр; изменение одной ячейки таблицы (тип строки, загрузка строки)
+        # меньше 1,5 — для таких снимков SHOTS_MIN_DIFF=0.2 (UP, отчёт по ДиЗ-02)
+        if calm == stable and differs(img, saved, float(os.environ.get('SHOTS_MIN_DIFF', '1.5'))):
             n += 1
             img.save(os.path.join(out, '%03d.png' % n))
             saved = img
