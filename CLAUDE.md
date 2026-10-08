@@ -4,7 +4,7 @@
 `.mdo`, `Form.form`, `Module.bsl`, `Template.dcs`, `.cmi`, `.rights`). Этот
 набор — знания, рабочие примеры и кейсы, снятые с реальных проектов: типовая
 ТЛЭиУА 1.1.36 / МВМ на платформе 8.3.24 (около 400 коммитов) и ФРЕГАТ EAM на 8.5.1
-(EDT 2026.1) — 73 разобранные ошибки. Набор общий для всех 1С-проектов и
+(EDT 2026.1) — 74 разобранные ошибки. Набор общий для всех 1С-проектов и
 пополняется из каждого (см. «Пополнение набора»). Он заменяет память модели там,
 где память ошибается.
 
@@ -115,13 +115,14 @@ UTF-8 **без BOM**, **CRLF**, отступы 2 пробела в `.mdo`/`.form
 
 - `knowledge/testing.md` — проверка в платформе, 9 уровней (загрузка, обновление ИБ, COM, снимки и все формы, заполненность, сценарии, поле HTML, настоящие нажатия); `tools/platform.py`, `tools/register_com.py`.
 - `knowledge/new-project.md` — старт нового проекта из `.dt`; `tools/new_project.py` + `bootstrap/`.
+- `knowledge/designer-format.md` — работа БЕЗ EDT: выгрузка Конфигуратора, внешние обработки, сборка и загрузка пакетным Конфигуратором, проверка через COM и TestManager; `tools/designer_lib.py`.
 - `knowledge/` — 14 тем (`edt-project-structure`, `metadata`, `managed-forms`,
   `mobile-forms`, `bsl`, `skd`, `subsystems-and-ui`, `roles`,
   `html-field-and-templates`, `uuid-and-references`, `deployment`,
   `generators`, `validation`, `common-errors`).
 - `examples/` — 12 видов метаданных, 4 формы, мобильная форма, 2 отчёта,
   8 фрагментов BSL; README у каждого; собираются `tools/make_examples.py`.
-- `cases/` — 73 кейса; указатель `index/cases.md`.
+- `cases/` — 74 кейса; указатель `index/cases.md`.
 - `reference/` — боевые файлы и генераторы; указатель `reference/INDEX.md`.
 - `tools/` — `edt_lib.py` (сборка XML), `check_project.py`, `check_bsl.py`,
   `scaffold.py`, `make_examples.py`, `make_sandbox.py`, `check_links.py`, `platform.py`, `vanessa.py`.
