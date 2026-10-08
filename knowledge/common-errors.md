@@ -263,6 +263,10 @@
 - Причина: перерисовка `setOption(…, true)` (notMerge) прямо в обработчике `click` — подсказка пересоздаётся, её отложенный показ пишет в удалённый элемент.
 - Правильно: `setTimeout` после обработчика и `setOption(опции, {replaceMerge: ['series']})`. Case 076.
 
+### Библиотека в поле HTML: `getRootNode is not a function`, `structuredClone`, `matchAll is not a function`
+- Причина: WebKit поля HTML 1С 8.3.27 этих функций не знает (Edge знает — в браузере всё работает).
+- Правильно: замены в раннем скрипте до библиотек; перед встраиванием прогнать по библиотеке поиск современных API. Case 076.
+
 ### Headless Edge молча пуст (код 0) — запуск из Bash-инструмента
 - Причина: из Git Bash на Windows Server `msedge --headless --dump-dom/--screenshot` ничего не выводит даже для about:blank.
 - Правильно: проверки страниц запускать из PowerShell. Case 076.
