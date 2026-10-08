@@ -362,6 +362,11 @@ class Form:
     def spreadsheet(self, path, name=None, events=None):
         return ('sheet', path, name, events)
 
+    def html(self, path, name=None, events=None, width=70, height=10):
+        """Поле HTML документа. Ширина и высота — вместе с растяжением, иначе документ получает
+        окно нулевой высоты и страница схлопывается (html-field-and-templates.md §1, case 022)."""
+        return ('html', path, name, events, width, height)
+
     def table(self, name, path, columns, read_only=False, commands=(), events=None, change_rowset=False,
               header_height=None, autofill=False):
         """columns: элементы input()/check() с путём 'Колонка' (путь таблицы добавится)."""
@@ -489,6 +494,19 @@ class Form:
             out += self._cm_et(name, L + 1)
             out += self._events(events, L + 1)
             out.append(t(L) + '</SpreadSheetDocumentField>')
+        elif kind == 'html':
+            _, path, name, events, width, height = it
+            name = name or path.split('.')[-1]
+            out.append(t(L) + '<HTMLDocumentField name="%s" id="%d">' % (name, self._id()))
+            out.append(t(L + 1) + '<DataPath>%s</DataPath>' % path)
+            out.append(t(L + 1) + '<TitleLocation>None</TitleLocation>')
+            out.append(t(L + 1) + '<Width>%d</Width>' % width)
+            out.append(t(L + 1) + '<Height>%d</Height>' % height)
+            out.append(t(L + 1) + '<HorizontalStretch>true</HorizontalStretch>')
+            out.append(t(L + 1) + '<VerticalStretch>true</VerticalStretch>')
+            out += self._cm_et(name, L + 1)
+            out += self._events(events, L + 1)
+            out.append(t(L) + '</HTMLDocumentField>')
         elif kind == 'table':
             (_, name, path, columns, ro, commands, events, change_rowset, header_height, autofill) = it
             out.append(t(L) + '<Table name="%s" id="%d">' % (name, self._id()))
