@@ -1,0 +1,30 @@
+# отдельный Apache: служба Apache2.2-Azot, свой порт, модуль версии платформы базы
+ServerRoot "C:/Program Files/Apache"
+Listen 8083
+LoadModule alias_module modules/mod_alias.so
+LoadModule authz_host_module modules/mod_authz_host.so
+LoadModule _1cws_module "C:/Program Files/1cv8/8.3.27.2342/bin/wsap22.dll"
+PidFile logs/httpd-Azot.pid
+ErrorLog logs/Azot-error.log
+Alias "/Azot" "C:/gold/Public1C/Azot/"
+<Directory "C:/gold/Public1C/Azot/">
+    Order deny,allow
+    Deny from all
+    Allow from 127.0.0.1                # открыть всем — только после установки пароля
+    SetHandler 1c-application
+    ManagedApplicationDescriptor "C:/gold/Public1C/Azot/default.vrd"
+</Directory>
+
+rem publish_Azot.cmd — от имени администратора
+"C:\Program Files\Apache\bin\httpd.exe" -t -f "%CONF%"
+"C:\Program Files\Apache\bin\httpd.exe" -k install -n Apache2.2-Azot -f "%CONF%"
+net start Apache2.2-Azot
+
+# регистрация в «Дополнительных обработках» через COM
+cn.Константы.ИспользоватьДополнительныеОтчетыИОбработки.Установить(True)
+п.Вставить('АдресДанныхОбработки', cn.ПоместитьВоВременноеХранилище(cn.NewObject('ДвоичныеДанные', epf)))
+р = cn.ДополнительныеОтчетыИОбработки.ЗарегистрироватьОбработку(объект, п)
+объект.Разделы.Добавить().Раздел = cn.ОбщегоНазначения.ИдентификаторОбъектаМетаданных(cn.Метаданные.Подсистемы.торо_ОборудованиеИНормативы)
+
+# снимок тестового клиента — по своему порту
+SHOT_PS % ('TPort ' + порт, путь)

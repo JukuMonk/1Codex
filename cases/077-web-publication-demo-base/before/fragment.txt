@@ -1,0 +1,14 @@
+# раздел в рабочий Apache (модуль 8.5.1, как у соседних публикаций)
+LoadModule _1cws_module "C:/Program Files/1cv8/8.5.1.1529/bin/wsap22.dll"
+Alias "/Azot" "C:/gold/Public1C/Azot/"
+<Directory "C:/gold/Public1C/Azot/">
+    Order deny,allow
+    Deny from all
+    Allow from 127.0.0.1 ::1            # → «The specified IP address is invalid»
+    SetHandler 1c-application
+    ManagedApplicationDescriptor "C:/gold/Public1C/Azot/default.vrd"
+</Directory>
+# веб-клиент: «Сеанс отсутствует или удален»; журнал приложений: httpd.exe, сбойный модуль v8_….licenceaddin-x86_64.dll, 0xc0000005
+
+# снимок тестового клиента
+SHOT_PS % ('TESTCLIENT', путь)          # захватил окно тестов другого проекта

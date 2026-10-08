@@ -33,7 +33,7 @@ examples/               рабочие образцы с нейтральным�
   reports/              отчёт с параметрами периода и группировкой
   skd/                  указатель по схемам компоновки
   bsl/                  8 фрагментов модулей
-cases/NNN-slug/         76 кейсов: task.md, before/, after/, lessons.md, attempt-*/
+cases/NNN-slug/         77 кейсов: task.md, before/, after/, lessons.md, attempt-*/
 reference/              боевые файлы проекта-источника как есть + INDEX.md, edt-format-guide.md,
                         generators/ (техника идемпотентных правок)
 index/                  topics.md (по темам), patterns.md («хочу сделать X»), cases.md
