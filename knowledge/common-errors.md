@@ -259,6 +259,15 @@
 - Правильно: ранний отдельный `<script>` с `onerror`, состояние — в `textContent` обычного элемента. Case 075.
 
 
+### ECharts в поле HTML: `Cannot set properties of null (setting 'innerHTML')` после щелчка
+- Причина: перерисовка `setOption(…, true)` (notMerge) прямо в обработчике `click` — подсказка пересоздаётся, её отложенный показ пишет в удалённый элемент.
+- Правильно: `setTimeout` после обработчика и `setOption(опции, {replaceMerge: ['series']})`. Case 076.
+
+### Headless Edge молча пуст (код 0) — запуск из Bash-инструмента
+- Причина: из Git Bash на Windows Server `msedge --headless --dump-dom/--screenshot` ничего не выводит даже для about:blank.
+- Правильно: проверки страниц запускать из PowerShell. Case 076.
+
+
 ## Различия desktop / mobile
 
 - Смахивания по строке нет — только по страницам (030).

@@ -1,0 +1,21 @@
+<script>
+// до библиотеки: кадры rAF в поле 1С не гарантированы
+window.requestAnimationFrame = function (cb) { return setTimeout(function () { cb(new Date().getTime()); }, 16); };
+window.cancelAnimationFrame = function (id) { clearTimeout(id); };
+</script>
+<script>/*ECHARTS*/</script>          <!-- генератор: библиотека, строки ≤900 + chr(1) в конце куска -->
+
+// заменять только ряды, перерисовывать после обработчика ECharts
+var SET = { replaceMerge: ['series'] };
+chart.on('click', function (p) { var n = p.data.n; setTimeout(function () { select(n); }, 0); });
+function select(n) { sel = n; chart.setOption(построить(), SET); панель(); }
+
+// модуль объекта: склейка макета
+Текст = ПолучитьМакет("ГрафHTML").ПолучитьТекст();
+Текст = СтрЗаменить(Текст, Символ(1) + Символы.ВК + Символы.ПС, "");
+Текст = СтрЗаменить(Текст, Символ(1) + Символы.ПС, "");
+Текст = СтрЗаменить(Текст, Символ(1), "");
+Возврат СтрЗаменить(Текст, "/*МОДЕЛЬ*/null", МодельJSON);
+
+# проверка страниц — из PowerShell
+python -X utf8 инструменты\тест_графа.py --страница   # обход видов #tour + снимки #view=<вид>
