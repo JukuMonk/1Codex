@@ -964,7 +964,7 @@ def report_xml(name, title, forms=(), templates=('ОсновнаяСхемаКо
     Модуль объекта — Ext/ObjectModule.bsl (ПриКомпоновкеРезультата). Без БСП: VariantsStorage пустое."""
     key = 'Report.' + name
     p = [t(1) + '<Report uuid="%s">' % uid(key),
-         _internal_info(key, (('ReportObject', 'Object'), ('ReportManager', 'Manager')), 2),
+         '\n'.join(_internal_info(key, (('ReportObject', 'Object'), ('ReportManager', 'Manager')), 2)),
          t(2) + '<Properties>',
          t(3) + '<Name>%s</Name>' % name,
          ml_tag('Synonym', title, 3),
