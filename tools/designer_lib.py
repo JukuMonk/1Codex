@@ -303,6 +303,584 @@ def form_meta_xml(owner_key, name, title=None):
     return md_object_file('\n'.join(p))
 
 
+# ------------------------------------------------- объекты конфигурации (с нуля)
+# Эталоны — выгрузка 1С:ТОИР КОРП 3.0.8.1 на 8.3.27 (АЗОТ); проверено загрузкой своей
+# конфигурации «ЖДРМ ПУЛЬС» в пустую базу (проект ZHDRM, октябрь 2026).
+# Поле — кортеж (имя, тип[, заголовок[, опции]]); опции: index (True | 'additional'),
+# password, fill_checking ('ShowError'), multiline, tooltip, comment, main_filter (измерение),
+# master (измерение), deny_incomplete (измерение).
+
+def _internal_info(key, gens, level):
+    """gens: [(префикс_типа, категория)] → <InternalInfo> с устойчивыми TypeId/ValueId."""
+    name = key.split('.', 1)[1]
+    p = [t(level) + '<InternalInfo>']
+    for gen, cat in gens:
+        p += [t(level + 1) + '<xr:GeneratedType name="%s.%s" category="%s">' % (gen, name, cat),
+              t(level + 2) + '<xr:TypeId>%s</xr:TypeId>' % uid(key, gen, 'type'),
+              t(level + 2) + '<xr:ValueId>%s</xr:ValueId>' % uid(key, gen, 'value'),
+              t(level + 1) + '</xr:GeneratedType>']
+    p.append(t(level) + '</InternalInfo>')
+    return p
+
+
+def _field_parts(f):
+    name, spec = f[0], f[1]
+    title = f[2] if len(f) > 2 else None
+    opts = f[3] if len(f) > 3 else {}
+    return name, spec, title, opts
+
+
+def _indexing(opts):
+    i = opts.get('index')
+    return 'IndexWithAdditionalOrder' if i == 'additional' else ('Index' if i else 'DontIndex')
+
+
+def md_field(owner_key, tag, field, level=3, tail=()):
+    """Реквизит / измерение / ресурс объекта конфигурации: общий набор свойств выгрузки 8.3.27
+    + хвост, свой для вида владельца (tail — готовые строки без отступа)."""
+    name, spec, title, opts = _field_parts(field)
+    L = level
+    short = {'Attribute': 'attr', 'Dimension': 'dim', 'Resource': 'res'}.get(tag, tag)
+    p = [t(L) + '<%s uuid="%s">' % (tag, uid(owner_key, short, name)),
+         t(L + 1) + '<Properties>',
+         t(L + 2) + '<Name>%s</Name>' % name,
+         ml_tag('Synonym', title or synonym(name), L + 2),
+         t(L + 2) + ('<Comment>%s</Comment>' % escape(opts['comment']) if opts.get('comment') else '<Comment/>'),
+         type_xml(spec, L + 2),
+         t(L + 2) + '<PasswordMode>%s</PasswordMode>' % ('true' if opts.get('password') else 'false'),
+         t(L + 2) + '<Format/>',
+         t(L + 2) + '<EditFormat/>',
+         ml_tag('ToolTip', opts.get('tooltip'), L + 2),
+         t(L + 2) + '<MarkNegatives>false</MarkNegatives>',
+         t(L + 2) + '<Mask/>',
+         t(L + 2) + '<MultiLine>%s</MultiLine>' % ('true' if opts.get('multiline') else 'false'),
+         t(L + 2) + '<ExtendedEdit>%s</ExtendedEdit>' % ('true' if opts.get('multiline') else 'false'),
+         t(L + 2) + '<MinValue xsi:nil="true"/>',
+         t(L + 2) + '<MaxValue xsi:nil="true"/>',
+         t(L + 2) + '<FillFromFillingValue>false</FillFromFillingValue>',
+         t(L + 2) + ('<FillValue xsi:type="xs:string"/>' if _is_string(spec) else '<FillValue xsi:nil="true"/>'),
+         t(L + 2) + '<FillChecking>%s</FillChecking>' % opts.get('fill_checking', 'DontCheck'),
+         t(L + 2) + '<ChoiceFoldersAndItems>Items</ChoiceFoldersAndItems>',
+         t(L + 2) + '<ChoiceParameterLinks/>',
+         t(L + 2) + '<ChoiceParameters/>',
+         t(L + 2) + '<QuickChoice>Auto</QuickChoice>',
+         t(L + 2) + '<CreateOnInput>Auto</CreateOnInput>',
+         t(L + 2) + '<ChoiceForm/>',
+         t(L + 2) + '<LinkByType/>',
+         t(L + 2) + '<ChoiceHistoryOnInput>Auto</ChoiceHistoryOnInput>']
+    p += [t(L + 2) + x for x in tail]
+    p += [t(L + 1) + '</Properties>', t(L) + '</%s>' % tag]
+    return '\n'.join(p)
+
+
+def _tail_object(opts, use=None):
+    """Хвост реквизита справочника (use='ForItem') / документа / ТЧ."""
+    out = ['<Use>%s</Use>' % use] if use else []
+    return out + ['<Indexing>%s</Indexing>' % _indexing(opts), '<FullTextSearch>Use</FullTextSearch>',
+                  '<DataHistory>Use</DataHistory>']
+
+
+def md_object_tabular_section(kind, owner, ts, level=3):
+    """ТЧ справочника/документа. ts: (имя, [поля][, заголовок])."""
+    name, columns = ts[0], ts[1]
+    title = ts[2] if len(ts) > 2 else None
+    L = level
+    key = '%s.%s.%s' % (kind, owner, name)
+    p = [t(L) + '<TabularSection uuid="%s">' % uid(key), t(L + 1) + '<InternalInfo>']
+    for gen, cat in (('TabularSection', 'TabularSection'), ('TabularSectionRow', 'TabularSectionRow')):
+        p += [t(L + 2) + '<xr:GeneratedType name="%s%s.%s.%s" category="%s">' % (kind, gen, owner, name, cat),
+              t(L + 3) + '<xr:TypeId>%s</xr:TypeId>' % uid(key, gen, 'type'),
+              t(L + 3) + '<xr:ValueId>%s</xr:ValueId>' % uid(key, gen, 'value'),
+              t(L + 2) + '</xr:GeneratedType>']
+    p += [t(L + 1) + '</InternalInfo>',
+          t(L + 1) + '<Properties>',
+          t(L + 2) + '<Name>%s</Name>' % name,
+          ml_tag('Synonym', title or synonym(name), L + 2),
+          t(L + 2) + '<Comment/>',
+          t(L + 2) + '<ToolTip/>',
+          t(L + 2) + '<FillChecking>DontCheck</FillChecking>']
+    if kind == 'Catalog':
+        p.append(t(L + 2) + '<Use>ForItem</Use>')
+    p += [t(L + 2) + '<LineNumberLength>5</LineNumberLength>',
+          t(L + 1) + '</Properties>',
+          t(L + 1) + '<ChildObjects>']
+    for c in columns:
+        p.append(md_field(key, 'Attribute', c, L + 2, _tail_object(_field_parts(c)[3])))
+    p += [t(L + 1) + '</ChildObjects>', t(L) + '</TabularSection>']
+    return '\n'.join(p)
+
+
+def _children_tail(key, forms=(), templates=(), commands=(), level=3):
+    p = [t(level) + '<Form>%s</Form>' % f for f in forms]
+    p += [t(level) + '<Template>%s</Template>' % x for x in templates]
+    for c in commands:
+        p.append(md_command(key, c, level))
+    return p
+
+
+def md_command(owner_key, cmd, level=3):
+    """Команда объекта (ChildObjects/Command; модуль — Commands/<Имя>/Ext/CommandModule.bsl).
+    cmd: dict(name, title, group='FormCommandBarImportant', parameter='CatalogRef.X',
+    use_mode='Single', modifies=False, tooltip, representation='Auto', picture)."""
+    L = level
+    c = cmd
+    p = [t(L) + '<Command uuid="%s">' % uid(owner_key, 'command', c['name']),
+         t(L + 1) + '<Properties>',
+         t(L + 2) + '<Name>%s</Name>' % c['name'],
+         ml_tag('Synonym', c.get('title') or synonym(c['name']), L + 2),
+         t(L + 2) + '<Comment/>',
+         t(L + 2) + '<Group>%s</Group>' % c.get('group', 'FormCommandBarImportant')]
+    if c.get('parameter'):
+        p += [t(L + 2) + '<CommandParameterType>', t(L + 3) + '<v8:Type>cfg:%s</v8:Type>' % c['parameter'],
+              t(L + 2) + '</CommandParameterType>']
+    else:
+        p.append(t(L + 2) + '<CommandParameterType/>')
+    p += [t(L + 2) + '<ParameterUseMode>%s</ParameterUseMode>' % c.get('use_mode', 'Single'),
+          t(L + 2) + '<ModifiesData>%s</ModifiesData>' % ('true' if c.get('modifies') else 'false'),
+          t(L + 2) + '<Representation>%s</Representation>' % c.get('representation', 'Auto'),
+          ml_tag('ToolTip', c.get('tooltip'), L + 2)]
+    if c.get('picture'):
+        p += [t(L + 2) + '<Picture>', t(L + 3) + '<xr:Ref>%s</xr:Ref>' % c['picture'],
+              t(L + 3) + '<xr:LoadTransparent>true</xr:LoadTransparent>', t(L + 2) + '</Picture>']
+    else:
+        p.append(t(L + 2) + '<Picture/>')
+    p += [t(L + 2) + '<Shortcut/>',
+          t(L + 2) + '<OnMainServerUnavalableBehavior>Auto</OnMainServerUnavalableBehavior>',
+          t(L + 1) + '</Properties>',
+          t(L) + '</Command>']
+    return '\n'.join(p)
+
+
+def catalog_xml(name, title, attributes=(), tabular_sections=(), forms=(), templates=(), commands=(),
+                code_length=9, description_length=150, hierarchical=False, default_forms=None,
+                object_presentation=None, list_presentation=None, explanation=None, owners=()):
+    """Справочник. default_forms: {'Object': 'ФормаЭлемента', 'List': 'ФормаСписка', 'Choice': …}."""
+    key = 'Catalog.' + name
+    df = default_forms or {}
+    p = [t(1) + '<Catalog uuid="%s">' % uid(key)]
+    p += _internal_info(key, (('CatalogObject', 'Object'), ('CatalogRef', 'Ref'), ('CatalogSelection', 'Selection'),
+                              ('CatalogList', 'List'), ('CatalogManager', 'Manager')), 2)
+    p += [t(2) + '<Properties>',
+          t(3) + '<Name>%s</Name>' % name,
+          ml_tag('Synonym', title, 3),
+          t(3) + '<Comment/>',
+          t(3) + '<Hierarchical>%s</Hierarchical>' % ('true' if hierarchical else 'false'),
+          t(3) + '<HierarchyType>HierarchyFoldersAndItems</HierarchyType>',
+          t(3) + '<LimitLevelCount>false</LimitLevelCount>',
+          t(3) + '<LevelCount>2</LevelCount>',
+          t(3) + '<FoldersOnTop>true</FoldersOnTop>',
+          t(3) + '<UseStandardCommands>true</UseStandardCommands>']
+    if owners:
+        p.append(t(3) + '<Owners>')
+        p += [t(4) + '<xr:Item xsi:type="xr:MDObjectRef">%s</xr:Item>' % o for o in owners]
+        p.append(t(3) + '</Owners>')
+    else:
+        p.append(t(3) + '<Owners/>')
+    p += [t(3) + '<SubordinationUse>ToItems</SubordinationUse>',
+          t(3) + '<CodeLength>%d</CodeLength>' % code_length,
+          t(3) + '<DescriptionLength>%d</DescriptionLength>' % description_length,
+          t(3) + '<CodeType>String</CodeType>',
+          t(3) + '<CodeAllowedLength>Variable</CodeAllowedLength>',
+          t(3) + '<CodeSeries>WholeCatalog</CodeSeries>',
+          t(3) + '<CheckUnique>true</CheckUnique>',
+          t(3) + '<Autonumbering>true</Autonumbering>',
+          t(3) + '<DefaultPresentation>AsDescription</DefaultPresentation>',
+          t(3) + '<Characteristics/>',
+          t(3) + '<PredefinedDataUpdate>Auto</PredefinedDataUpdate>',
+          t(3) + '<EditType>InDialog</EditType>',
+          t(3) + '<QuickChoice>false</QuickChoice>',
+          t(3) + '<ChoiceMode>BothWays</ChoiceMode>',
+          t(3) + '<InputByString>',
+          t(4) + '<xr:Field>Catalog.%s.StandardAttribute.Description</xr:Field>' % name,
+          t(4) + '<xr:Field>Catalog.%s.StandardAttribute.Code</xr:Field>' % name,
+          t(3) + '</InputByString>',
+          t(3) + '<SearchStringModeOnInputByString>Begin</SearchStringModeOnInputByString>',
+          t(3) + '<FullTextSearchOnInputByString>DontUse</FullTextSearchOnInputByString>',
+          t(3) + '<ChoiceDataGetModeOnInputByString>Directly</ChoiceDataGetModeOnInputByString>']
+    for k in ('Object', 'Folder', 'List', 'Choice', 'FolderChoice'):
+        v = df.get(k)
+        p.append(t(3) + ('<Default%sForm>Catalog.%s.Form.%s</Default%sForm>' % (k, name, v, k) if v
+                         else '<Default%sForm/>' % k))
+    p += [t(3) + '<Auxiliary%sForm/>' % k for k in ('Object', 'Folder', 'List', 'Choice', 'FolderChoice')]
+    p += [t(3) + '<IncludeHelpInContents>false</IncludeHelpInContents>',
+          t(3) + '<BasedOn/>',
+          t(3) + '<DataLockFields/>',
+          t(3) + '<DataLockControlMode>Managed</DataLockControlMode>',
+          t(3) + '<FullTextSearch>Use</FullTextSearch>',
+          ml_tag('ObjectPresentation', object_presentation, 3),
+          t(3) + '<ExtendedObjectPresentation/>',
+          ml_tag('ListPresentation', list_presentation, 3),
+          t(3) + '<ExtendedListPresentation/>',
+          ml_tag('Explanation', explanation, 3),
+          t(3) + '<CreateOnInput>Use</CreateOnInput>',
+          t(3) + '<ChoiceHistoryOnInput>Auto</ChoiceHistoryOnInput>',
+          t(3) + '<DataHistory>DontUse</DataHistory>',
+          t(3) + '<UpdateDataHistoryImmediatelyAfterWrite>false</UpdateDataHistoryImmediatelyAfterWrite>',
+          t(3) + '<ExecuteAfterWriteDataHistoryVersionProcessing>false</ExecuteAfterWriteDataHistoryVersionProcessing>',
+          t(2) + '</Properties>']
+    body = [md_field(key, 'Attribute', a, 3, _tail_object(_field_parts(a)[3], 'ForItem')) for a in attributes]
+    body += [md_object_tabular_section('Catalog', name, ts, 3) for ts in tabular_sections]
+    body += _children_tail(key, forms, templates, commands)
+    p += ([t(2) + '<ChildObjects>'] + body + [t(2) + '</ChildObjects>']) if body else [t(2) + '<ChildObjects/>']
+    p.append(t(1) + '</Catalog>')
+    return md_object_file('\n'.join(p))
+
+
+def document_xml(name, title, attributes=(), tabular_sections=(), forms=(), templates=(), commands=(),
+                 register_records=(), posting=True, number_length=11, default_forms=None,
+                 object_presentation=None, list_presentation=None, explanation=None):
+    """Документ. register_records: ['InformationRegister.X', …]."""
+    key = 'Document.' + name
+    df = default_forms or {}
+    p = [t(1) + '<Document uuid="%s">' % uid(key)]
+    p += _internal_info(key, (('DocumentObject', 'Object'), ('DocumentRef', 'Ref'), ('DocumentSelection', 'Selection'),
+                              ('DocumentList', 'List'), ('DocumentManager', 'Manager')), 2)
+    p += [t(2) + '<Properties>',
+          t(3) + '<Name>%s</Name>' % name,
+          ml_tag('Synonym', title, 3),
+          t(3) + '<Comment/>',
+          t(3) + '<UseStandardCommands>true</UseStandardCommands>',
+          t(3) + '<Numerator/>',
+          t(3) + '<NumberType>String</NumberType>',
+          t(3) + '<NumberLength>%d</NumberLength>' % number_length,
+          t(3) + '<NumberAllowedLength>Variable</NumberAllowedLength>',
+          t(3) + '<NumberPeriodicity>Year</NumberPeriodicity>',
+          t(3) + '<CheckUnique>true</CheckUnique>',
+          t(3) + '<Autonumbering>true</Autonumbering>',
+          t(3) + '<Characteristics/>',
+          t(3) + '<BasedOn/>',
+          t(3) + '<InputByString>',
+          t(4) + '<xr:Field>Document.%s.StandardAttribute.Number</xr:Field>' % name,
+          t(3) + '</InputByString>',
+          t(3) + '<CreateOnInput>Use</CreateOnInput>',
+          t(3) + '<SearchStringModeOnInputByString>Begin</SearchStringModeOnInputByString>',
+          t(3) + '<FullTextSearchOnInputByString>DontUse</FullTextSearchOnInputByString>',
+          t(3) + '<ChoiceDataGetModeOnInputByString>Directly</ChoiceDataGetModeOnInputByString>']
+    for k in ('Object', 'List', 'Choice'):
+        v = df.get(k)
+        p.append(t(3) + ('<Default%sForm>Document.%s.Form.%s</Default%sForm>' % (k, name, v, k) if v
+                         else '<Default%sForm/>' % k))
+    p += [t(3) + '<Auxiliary%sForm/>' % k for k in ('Object', 'List', 'Choice')]
+    p += [t(3) + '<Posting>%s</Posting>' % ('Allow' if posting else 'Deny'),
+          t(3) + '<RealTimePosting>Deny</RealTimePosting>',
+          t(3) + '<RegisterRecordsDeletion>AutoDeleteOnUnpost</RegisterRecordsDeletion>',
+          t(3) + '<RegisterRecordsWritingOnPost>WriteSelected</RegisterRecordsWritingOnPost>',
+          t(3) + '<SequenceFilling>AutoFill</SequenceFilling>']
+    if register_records:
+        p.append(t(3) + '<RegisterRecords>')
+        p += [t(4) + '<xr:Item xsi:type="xr:MDObjectRef">%s</xr:Item>' % r for r in register_records]
+        p.append(t(3) + '</RegisterRecords>')
+    else:
+        p.append(t(3) + '<RegisterRecords/>')
+    p += [t(3) + '<PostInPrivilegedMode>true</PostInPrivilegedMode>',
+          t(3) + '<UnpostInPrivilegedMode>true</UnpostInPrivilegedMode>',
+          t(3) + '<IncludeHelpInContents>false</IncludeHelpInContents>',
+          t(3) + '<DataLockFields/>',
+          t(3) + '<DataLockControlMode>Managed</DataLockControlMode>',
+          t(3) + '<FullTextSearch>Use</FullTextSearch>',
+          ml_tag('ObjectPresentation', object_presentation, 3),
+          t(3) + '<ExtendedObjectPresentation/>',
+          ml_tag('ListPresentation', list_presentation, 3),
+          t(3) + '<ExtendedListPresentation/>',
+          ml_tag('Explanation', explanation, 3),
+          t(3) + '<ChoiceHistoryOnInput>Auto</ChoiceHistoryOnInput>',
+          t(3) + '<DataHistory>DontUse</DataHistory>',
+          t(3) + '<UpdateDataHistoryImmediatelyAfterWrite>false</UpdateDataHistoryImmediatelyAfterWrite>',
+          t(3) + '<ExecuteAfterWriteDataHistoryVersionProcessing>false</ExecuteAfterWriteDataHistoryVersionProcessing>',
+          t(2) + '</Properties>']
+    # порядок выгрузки документа: реквизиты, формы, ТЧ, макеты, команды (у справочника ТЧ — до форм)
+    body = [md_field(key, 'Attribute', a, 3, _tail_object(_field_parts(a)[3])) for a in attributes]
+    body += [t(3) + '<Form>%s</Form>' % f for f in forms]
+    body += [md_object_tabular_section('Document', name, ts, 3) for ts in tabular_sections]
+    body += _children_tail(key, (), templates, commands)
+    p += ([t(2) + '<ChildObjects>'] + body + [t(2) + '</ChildObjects>']) if body else [t(2) + '<ChildObjects/>']
+    p.append(t(1) + '</Document>')
+    return md_object_file('\n'.join(p))
+
+
+def information_register_xml(name, title, dimensions=(), resources=(), attributes=(), periodicity='Nonperiodical',
+                             write_mode='Independent', forms=(), commands=(), default_forms=None,
+                             record_presentation=None, list_presentation=None, explanation=None,
+                             use_standard_commands=True):
+    """Регистр сведений. periodicity: Nonperiodical | Second | Day | Month …; write_mode:
+    Independent | RecorderSubordinate. Измерение: опции main_filter (по умолчанию True), master."""
+    key = 'InformationRegister.' + name
+    df = default_forms or {}
+    p = [t(1) + '<InformationRegister uuid="%s">' % uid(key)]
+    p += _internal_info(key, (('InformationRegisterRecord', 'Record'), ('InformationRegisterManager', 'Manager'),
+                              ('InformationRegisterSelection', 'Selection'), ('InformationRegisterList', 'List'),
+                              ('InformationRegisterRecordSet', 'RecordSet'), ('InformationRegisterRecordKey', 'RecordKey'),
+                              ('InformationRegisterRecordManager', 'RecordManager')), 2)
+    p += [t(2) + '<Properties>',
+          t(3) + '<Name>%s</Name>' % name,
+          ml_tag('Synonym', title, 3),
+          t(3) + '<Comment/>',
+          t(3) + '<UseStandardCommands>%s</UseStandardCommands>' % ('true' if use_standard_commands else 'false'),
+          t(3) + '<EditType>InDialog</EditType>',
+          t(3) + ('<DefaultRecordForm>InformationRegister.%s.Form.%s</DefaultRecordForm>' % (name, df['Record'])
+                  if df.get('Record') else '<DefaultRecordForm/>'),
+          t(3) + ('<DefaultListForm>InformationRegister.%s.Form.%s</DefaultListForm>' % (name, df['List'])
+                  if df.get('List') else '<DefaultListForm/>'),
+          t(3) + '<AuxiliaryRecordForm/>',
+          t(3) + '<AuxiliaryListForm/>',
+          t(3) + '<InformationRegisterPeriodicity>%s</InformationRegisterPeriodicity>' % periodicity,
+          t(3) + '<WriteMode>%s</WriteMode>' % write_mode,
+          t(3) + '<MainFilterOnPeriod>%s</MainFilterOnPeriod>' % ('true' if periodicity != 'Nonperiodical' else 'false'),
+          t(3) + '<IncludeHelpInContents>false</IncludeHelpInContents>',
+          t(3) + '<DataLockControlMode>Managed</DataLockControlMode>',
+          t(3) + '<FullTextSearch>DontUse</FullTextSearch>',
+          t(3) + '<EnableTotalsSliceFirst>false</EnableTotalsSliceFirst>',
+          t(3) + '<EnableTotalsSliceLast>false</EnableTotalsSliceLast>',
+          ml_tag('RecordPresentation', record_presentation, 3),
+          t(3) + '<ExtendedRecordPresentation/>',
+          ml_tag('ListPresentation', list_presentation, 3),
+          t(3) + '<ExtendedListPresentation/>',
+          ml_tag('Explanation', explanation, 3),
+          t(3) + '<DataHistory>DontUse</DataHistory>',
+          t(3) + '<UpdateDataHistoryImmediatelyAfterWrite>false</UpdateDataHistoryImmediatelyAfterWrite>',
+          t(3) + '<ExecuteAfterWriteDataHistoryVersionProcessing>false</ExecuteAfterWriteDataHistoryVersionProcessing>',
+          t(2) + '</Properties>']
+    body = []
+    for r in resources:
+        body.append(md_field(key, 'Resource', r, 3, ['<Indexing>%s</Indexing>' % _indexing(_field_parts(r)[3]),
+                                                     '<FullTextSearch>Use</FullTextSearch>', '<DataHistory>Use</DataHistory>']))
+    for a in attributes:
+        body.append(md_field(key, 'Attribute', a, 3, ['<Indexing>%s</Indexing>' % _indexing(_field_parts(a)[3]),
+                                                      '<FullTextSearch>Use</FullTextSearch>', '<DataHistory>Use</DataHistory>']))
+    for d in dimensions:
+        o = _field_parts(d)[3]
+        body.append(md_field(key, 'Dimension', d, 3, [
+            '<Master>%s</Master>' % ('true' if o.get('master') else 'false'),
+            '<MainFilter>%s</MainFilter>' % ('false' if o.get('main_filter') is False else 'true'),
+            '<DenyIncompleteValues>%s</DenyIncompleteValues>' % ('true' if o.get('deny_incomplete') else 'false'),
+            '<Indexing>%s</Indexing>' % _indexing(o), '<FullTextSearch>Use</FullTextSearch>',
+            '<DataHistory>Use</DataHistory>', '<TypeReductionMode>TransformValues</TypeReductionMode>']))
+    body += _children_tail(key, forms, (), commands)
+    p += ([t(2) + '<ChildObjects>'] + body + [t(2) + '</ChildObjects>']) if body else [t(2) + '<ChildObjects/>']
+    p.append(t(1) + '</InformationRegister>')
+    return md_object_file('\n'.join(p))
+
+
+def enum_xml(name, title, values, explanation=None):
+    """Перечисление. values: [(имя[, синоним[, комментарий]])]."""
+    key = 'Enum.' + name
+    p = [t(1) + '<Enum uuid="%s">' % uid(key)]
+    p += _internal_info(key, (('EnumRef', 'Ref'), ('EnumManager', 'Manager'), ('EnumList', 'List')), 2)
+    p += [t(2) + '<Properties>',
+          t(3) + '<Name>%s</Name>' % name,
+          ml_tag('Synonym', title, 3),
+          t(3) + '<Comment/>',
+          t(3) + '<UseStandardCommands>false</UseStandardCommands>',
+          t(3) + '<Characteristics/>',
+          t(3) + '<QuickChoice>true</QuickChoice>',
+          t(3) + '<ChoiceMode>BothWays</ChoiceMode>',
+          t(3) + '<DefaultListForm/>',
+          t(3) + '<DefaultChoiceForm/>',
+          t(3) + '<AuxiliaryListForm/>',
+          t(3) + '<AuxiliaryChoiceForm/>',
+          t(3) + '<ListPresentation/>',
+          t(3) + '<ExtendedListPresentation/>',
+          ml_tag('Explanation', explanation, 3),
+          t(3) + '<ChoiceHistoryOnInput>Auto</ChoiceHistoryOnInput>',
+          t(2) + '</Properties>',
+          t(2) + '<ChildObjects>']
+    for v in values:
+        v = (v,) if isinstance(v, str) else v
+        p += [t(3) + '<EnumValue uuid="%s">' % uid(key, 'value', v[0]),
+              t(4) + '<Properties>',
+              t(5) + '<Name>%s</Name>' % v[0],
+              ml_tag('Synonym', v[1] if len(v) > 1 and v[1] else synonym(v[0]), 5),
+              t(5) + ('<Comment>%s</Comment>' % escape(v[2]) if len(v) > 2 and v[2] else '<Comment/>'),
+              t(4) + '</Properties>',
+              t(3) + '</EnumValue>']
+    p += [t(2) + '</ChildObjects>', t(1) + '</Enum>']
+    return md_object_file('\n'.join(p))
+
+
+def constant_xml(name, title, spec, explanation=None, tooltip=None, password=False):
+    key = 'Constant.' + name
+    p = [t(1) + '<Constant uuid="%s">' % uid(key)]
+    p += _internal_info(key, (('ConstantManager', 'Manager'), ('ConstantValueManager', 'ValueManager'),
+                              ('ConstantValueKey', 'ValueKey')), 2)
+    p += [t(2) + '<Properties>',
+          t(3) + '<Name>%s</Name>' % name,
+          ml_tag('Synonym', title, 3),
+          t(3) + '<Comment/>',
+          type_xml(spec, 3),
+          t(3) + '<UseStandardCommands>true</UseStandardCommands>',
+          t(3) + '<DefaultForm/>',
+          t(3) + '<ExtendedPresentation/>',
+          ml_tag('Explanation', explanation, 3),
+          t(3) + '<PasswordMode>%s</PasswordMode>' % ('true' if password else 'false'),
+          t(3) + '<Format/>',
+          t(3) + '<EditFormat/>',
+          ml_tag('ToolTip', tooltip, 3),
+          t(3) + '<MarkNegatives>false</MarkNegatives>',
+          t(3) + '<Mask/>',
+          t(3) + '<MultiLine>false</MultiLine>',
+          t(3) + '<ExtendedEdit>false</ExtendedEdit>',
+          t(3) + '<MinValue xsi:nil="true"/>',
+          t(3) + '<MaxValue xsi:nil="true"/>',
+          t(3) + '<FillChecking>DontCheck</FillChecking>',
+          t(3) + '<ChoiceFoldersAndItems>Items</ChoiceFoldersAndItems>',
+          t(3) + '<ChoiceParameterLinks/>',
+          t(3) + '<ChoiceParameters/>',
+          t(3) + '<QuickChoice>Auto</QuickChoice>',
+          t(3) + '<ChoiceForm/>',
+          t(3) + '<LinkByType/>',
+          t(3) + '<ChoiceHistoryOnInput>Auto</ChoiceHistoryOnInput>',
+          t(3) + '<DataLockControlMode>Managed</DataLockControlMode>',
+          t(3) + '<DataHistory>DontUse</DataHistory>',
+          t(3) + '<UpdateDataHistoryImmediatelyAfterWrite>false</UpdateDataHistoryImmediatelyAfterWrite>',
+          t(3) + '<ExecuteAfterWriteDataHistoryVersionProcessing>false</ExecuteAfterWriteDataHistoryVersionProcessing>',
+          t(2) + '</Properties>',
+          t(1) + '</Constant>']
+    return md_object_file('\n'.join(p))
+
+
+def common_module_xml(name, title, kind='server', privileged=False, reuse='DontUse'):
+    """kind: 'server' (Сервер + ВнешнееСоединение), 'server_call' (+ ВызовСервера), 'client'
+    (КлиентУправляемоеПриложение), 'client_server' (клиент + сервер + внешнее соединение), 'global_client'.
+    reuse: DontUse | DuringRequest | DuringSession. Модуль — CommonModules/<Имя>/Ext/Module.bsl."""
+    server = kind in ('server', 'server_call', 'client_server')
+    client = kind in ('client', 'client_server', 'global_client')
+    p = [t(1) + '<CommonModule uuid="%s">' % uid('CommonModule.' + name),
+         t(2) + '<Properties>',
+         t(3) + '<Name>%s</Name>' % name,
+         ml_tag('Synonym', title, 3),
+         t(3) + '<Comment/>',
+         t(3) + '<Global>%s</Global>' % ('true' if kind == 'global_client' else 'false'),
+         t(3) + '<ClientManagedApplication>%s</ClientManagedApplication>' % ('true' if client else 'false'),
+         t(3) + '<Server>%s</Server>' % ('true' if server else 'false'),
+         t(3) + '<ExternalConnection>%s</ExternalConnection>' % ('true' if server else 'false'),
+         t(3) + '<ClientOrdinaryApplication>%s</ClientOrdinaryApplication>' % ('true' if (server or client) else 'false'),
+         t(3) + '<ServerCall>%s</ServerCall>' % ('true' if kind == 'server_call' else 'false'),
+         t(3) + '<Privileged>%s</Privileged>' % ('true' if privileged else 'false'),
+         t(3) + '<ReturnValuesReuse>%s</ReturnValuesReuse>' % reuse,
+         t(2) + '</Properties>',
+         t(1) + '</CommonModule>']
+    return md_object_file('\n'.join(p))
+
+
+def subsystem_xml(name, title, content=(), children=(), include_in_ci=True, explanation=None, picture=None,
+                  parent_key=None):
+    """Подсистема. content: ['Catalog.X', …]; children: имена дочерних (их файлы —
+    Subsystems/<Имя>/Subsystems/<Дочерняя>.xml). parent_key — для устойчивого uuid дочерней."""
+    key = (parent_key + '.' if parent_key else '') + 'Subsystem.' + name
+    p = [t(1) + '<Subsystem uuid="%s">' % uid(key),
+         t(2) + '<Properties>',
+         t(3) + '<Name>%s</Name>' % name,
+         ml_tag('Synonym', title, 3),
+         t(3) + '<Comment/>',
+         t(3) + '<IncludeHelpInContents>true</IncludeHelpInContents>',
+         t(3) + '<IncludeInCommandInterface>%s</IncludeInCommandInterface>' % ('true' if include_in_ci else 'false'),
+         t(3) + '<UseOneCommand>false</UseOneCommand>',
+         ml_tag('Explanation', explanation, 3)]
+    if picture:
+        p += [t(3) + '<Picture>', t(4) + '<xr:Ref>%s</xr:Ref>' % picture,
+              t(4) + '<xr:LoadTransparent>true</xr:LoadTransparent>', t(3) + '</Picture>']
+    else:
+        p.append(t(3) + '<Picture/>')
+    if content:
+        p.append(t(3) + '<Content>')
+        p += [t(4) + '<xr:Item xsi:type="xr:MDObjectRef">%s</xr:Item>' % c for c in content]
+        p.append(t(3) + '</Content>')
+    else:
+        p.append(t(3) + '<Content/>')
+    p.append(t(2) + '</Properties>')
+    if children:
+        p += [t(2) + '<ChildObjects>'] + [t(3) + '<Subsystem>%s</Subsystem>' % c for c in children] + [t(2) + '</ChildObjects>']
+    else:
+        p.append(t(2) + '<ChildObjects/>')
+    p.append(t(1) + '</Subsystem>')
+    return md_object_file('\n'.join(p))
+
+
+def role_xml(name, title):
+    p = [t(1) + '<Role uuid="%s">' % uid('Role.' + name),
+         t(2) + '<Properties>',
+         t(3) + '<Name>%s</Name>' % name,
+         ml_tag('Synonym', title, 3),
+         t(3) + '<Comment/>',
+         t(2) + '</Properties>',
+         t(1) + '</Role>']
+    return md_object_file('\n'.join(p))
+
+
+def rights_xml(objects=(), set_for_new_objects=False):
+    """Roles/<Роль>/Ext/Rights.xml. set_for_new_objects=True и пустой objects — ВСЕ права на всё
+    (так устроена «ПолныеПрава» БСП: в ней перечислены только запреты). objects: [(объект, {право: bool})]."""
+    p = ['<?xml version="1.0" encoding="UTF-8"?>',
+         '<Rights xmlns="http://v8.1c.ru/8.2/roles" xmlns:xs="http://www.w3.org/2001/XMLSchema" '
+         'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="Rights" version="%s">' % VERSION,
+         t(1) + '<setForNewObjects>%s</setForNewObjects>' % ('true' if set_for_new_objects else 'false'),
+         t(1) + '<setForAttributesByDefault>true</setForAttributesByDefault>',
+         t(1) + '<independentRightsOfChildObjects>false</independentRightsOfChildObjects>']
+    for obj, rights in objects:
+        p += [t(1) + '<object>', t(2) + '<name>%s</name>' % obj]
+        for r, v in rights.items():
+            p += [t(2) + '<right>', t(3) + '<name>%s</name>' % r, t(3) + '<value>%s</value>' % ('true' if v else 'false'),
+                  t(2) + '</right>']
+        p.append(t(1) + '</object>')
+    p.append('</Rights>')
+    return '\n'.join(p) + '\n'
+
+
+def scheduled_job_xml(name, title, method, use=False, predefined=True, restart_count=3, restart_interval=10,
+                      description=None, key_=None):
+    """Регламентное задание. method: 'CommonModule.<Модуль>.<Процедура>'. Расписание в XML
+    выгрузки не хранится — задаётся в базе (РегламентныеЗадания) или кодом."""
+    p = [t(1) + '<ScheduledJob uuid="%s">' % uid('ScheduledJob.' + name),
+         t(2) + '<Properties>',
+         t(3) + '<Name>%s</Name>' % name,
+         ml_tag('Synonym', title, 3),
+         t(3) + '<Comment/>',
+         t(3) + '<MethodName>%s</MethodName>' % method,
+         t(3) + ('<Description>%s</Description>' % escape(description) if description else '<Description/>'),
+         t(3) + ('<Key>%s</Key>' % escape(key_) if key_ else '<Key/>'),
+         t(3) + '<Use>%s</Use>' % ('true' if use else 'false'),
+         t(3) + '<Predefined>%s</Predefined>' % ('true' if predefined else 'false'),
+         t(3) + '<RestartCountOnFailure>%d</RestartCountOnFailure>' % restart_count,
+         t(3) + '<RestartIntervalOnFailure>%d</RestartIntervalOnFailure>' % restart_interval,
+         t(2) + '</Properties>',
+         t(1) + '</ScheduledJob>']
+    return md_object_file('\n'.join(p))
+
+
+# порядок видов в ChildObjects Configuration.xml (по выгрузке 8.3.27)
+CONFIGURATION_KINDS = ('Language', 'Subsystem', 'StyleItem', 'CommonPicture', 'SessionParameter', 'Role',
+                       'CommonTemplate', 'FilterCriterion', 'CommonModule', 'CommonAttribute', 'ExchangePlan',
+                       'XDTOPackage', 'WebService', 'HTTPService', 'EventSubscription', 'ScheduledJob',
+                       'SettingsStorage', 'FunctionalOption', 'FunctionalOptionsParameter', 'DefinedType',
+                       'CommonCommand', 'CommandGroup', 'Constant', 'CommonForm', 'Catalog', 'Document',
+                       'DocumentJournal', 'Enum', 'Report', 'DataProcessor', 'InformationRegister',
+                       'AccumulationRegister', 'ChartOfCharacteristicTypes', 'BusinessProcess', 'Task',
+                       'ExternalDataSource')
+# папка выгрузки по виду
+KIND_DIRS = {'Language': 'Languages', 'Subsystem': 'Subsystems', 'Role': 'Roles', 'CommonModule': 'CommonModules',
+             'ScheduledJob': 'ScheduledJobs', 'Constant': 'Constants', 'Catalog': 'Catalogs', 'Document': 'Documents',
+             'Enum': 'Enums', 'Report': 'Reports', 'DataProcessor': 'DataProcessors',
+             'InformationRegister': 'InformationRegisters', 'AccumulationRegister': 'AccumulationRegisters',
+             'CommonForm': 'CommonForms', 'CommonTemplate': 'CommonTemplates', 'CommonCommand': 'CommonCommands',
+             'CommonPicture': 'CommonPictures', 'DefinedType': 'DefinedTypes', 'EventSubscription': 'EventSubscriptions',
+             'HTTPService': 'HTTPServices', 'SessionParameter': 'SessionParameters'}
+
+
+def configuration_child_objects(children, level=2):
+    """children: {вид: [имена]} → блок <ChildObjects> в порядке видов выгрузки."""
+    p = [t(level) + '<ChildObjects>']
+    for k in CONFIGURATION_KINDS:
+        p += [t(level + 1) + '<%s>%s</%s>' % (k, n, k) for n in children.get(k, ())]
+    p.append(t(level) + '</ChildObjects>')
+    return '\n'.join(p)
+
+
+def load_config(v8, ib, dump, log, **kw):
+    """ПОЛНАЯ загрузка выгрузки в базу. Только для СВОЕЙ конфигурации, написанной с нуля:
+    у типовой ломает защиту вендоров (load_files — частичная)."""
+    return designer(v8, ib, ['/LoadConfigFromFiles "%s"' % dump], log, **kw)
+
+
 # --------------------------------------------------------------------- форма
 class Form:
     """Построитель Ext/Form.xml. Элементы — вложенные списки, id раздаются по порядку.
