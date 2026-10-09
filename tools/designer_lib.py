@@ -33,12 +33,22 @@ MD_NS = ('xmlns="http://v8.1c.ru/8.3/MDClasses" xmlns:app="http://v8.1c.ru/8.2/m
          'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"')
 FORM_NS = ('xmlns="http://v8.1c.ru/8.3/xcf/logform" xmlns:app="http://v8.1c.ru/8.2/managed-application/core" '
            'xmlns:cfg="http://v8.1c.ru/8.1/data/enterprise/current-config" xmlns:dcscor="http://v8.1c.ru/8.1/data-composition-system/core" '
-           'xmlns:dcsset="http://v8.1c.ru/8.1/data-composition-system/settings" xmlns:ent="http://v8.1c.ru/8.1/data/enterprise" '
+           'xmlns:dcssch="http://v8.1c.ru/8.1/data-composition-system/schema" xmlns:dcsset="http://v8.1c.ru/8.1/data-composition-system/settings" xmlns:ent="http://v8.1c.ru/8.1/data/enterprise" '
            'xmlns:lf="http://v8.1c.ru/8.2/managed-application/logform" xmlns:style="http://v8.1c.ru/8.1/data/ui/style" '
            'xmlns:sys="http://v8.1c.ru/8.1/data/ui/fonts/system" xmlns:v8="http://v8.1c.ru/8.1/data/core" '
            'xmlns:v8ui="http://v8.1c.ru/8.1/data/ui" xmlns:web="http://v8.1c.ru/8.1/data/ui/colors/web" '
            'xmlns:win="http://v8.1c.ru/8.1/data/ui/colors/windows" xmlns:xr="http://v8.1c.ru/8.3/xcf/readable" '
            'xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"')
+# порядок событий формы в выгрузке 8.3.27 (Конфигуратор переставляет их при загрузке; снят по большинству форм
+# ТОИР КОРП). Иначе сверка «исходник = обратная выгрузка» показывает расхождение (ZHDRM, case 078).
+FORM_EVENT_ORDER = ('AfterWrite', 'OnSaveDataInSettingsAtServer', 'ChoiceProcessing', 'AfterWriteAtServer',
+                    'BeforeLoadVariantAtServer', 'NotificationProcessing', 'NavigationProcessing', 'NewWriteProcessing',
+                    'OnReadAtServer', 'OnOpen', 'BeforeLoadUserSettingsAtServer', 'BeforeClose', 'ExternalEvent',
+                    'OnReopen', 'OnSaveVariantAtServer', 'OnLoadDataFromSettingsAtServer', 'BeforeWrite',
+                    'OnLoadUserSettingsAtServer', 'OnLoadVariantAtServer', 'OnSaveUserSettingsAtServer',
+                    'OnCreateAtServer', 'BeforeWriteAtServer', 'OnMainServerAvailabilityChange', 'OnWriteAtServer',
+                    'OnClose', 'OnUpdateUserSettingSetAtServer', 'URLProcessing', 'FillCheckProcessingAtServer',
+                    'BeforeLoadDataFromSettingsAtServer')
 VERSION = '2.20'      # атрибут version у MetaDataObject/Form (8.3.27, совместимость 8.3.21)
 
 NS_UID = uuid.UUID('6f1c1c1e-6c1d-4d7a-9a8e-1c0de51a7e01')
@@ -900,6 +910,7 @@ class Form:
         self.items = []
         self.cmdbar = []        # кнопки командной панели формы: имена команд
         self.autofill_cmdbar = True
+        self.params = []        # параметры формы: (имя, тип, ключевой) — после Commands, как в выгрузке
 
     def _id(self):
         i = self.next_id
@@ -912,6 +923,10 @@ class Form:
 
     def command(self, name, title, action=None, tooltip=None, picture=None, representation=None):
         self.cmds.append((name, title, action or name, tooltip, picture, representation))
+
+    def param(self, name, spec, key=False):
+        """Параметр формы (Параметры.Имя в ПриСозданииНаСервере); key — ключевой (уникальность окна)."""
+        self.params.append((name, spec, key))
 
     # --- элементы: возвращают (функция_рендера) — id выдаются при рендере, по порядку
     def group(self, name, children, kind='vertical', title=None, show_title=False, representation='None'):
@@ -1167,6 +1182,9 @@ class Form:
                          t(3) + '</Button>']
             body.append(t(2) + '</ChildItems>')
         body.append(t(1) + '</AutoCommandBar>')
+        if events:
+            порядок = {e: i for i, e in enumerate(FORM_EVENT_ORDER)}
+            events = dict(sorted(events.items(), key=lambda kv: порядок.get(kv[0], len(порядок))))
         body += self._events(events, 1)
         body += self._children(self.items, 1)
         # реквизиты
@@ -1204,6 +1222,15 @@ class Form:
                     body.append(t(3) + '<Representation>%s</Representation>' % representation)
                 body.append(t(2) + '</Command>')
             body.append(t(1) + '</Commands>')
+        if self.params:
+            body.append(t(1) + '<Parameters>')
+            for name, spec, key in self.params:
+                body.append(t(2) + '<Parameter name="%s">' % name)
+                body.append(type_xml(spec, 3))
+                if key:
+                    body.append(t(3) + '<KeyParameter>true</KeyParameter>')
+                body.append(t(2) + '</Parameter>')
+            body.append(t(1) + '</Parameters>')
         return ('<?xml version="1.0" encoding="UTF-8"?>\n<Form %s version="%s">\n' % (FORM_NS, VERSION) +
                 '\n'.join(body) + '\n</Form>\n')
 
