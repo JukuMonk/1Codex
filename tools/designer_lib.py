@@ -205,9 +205,12 @@ def md_object_file(body):
 
 
 def data_processor_xml(name, title, attributes=(), tabular_sections=(), forms=(), default_form=None,
-                       explanation=None):
+                       explanation=None, templates=(), commands=()):
     """attributes: [(имя, тип[, заголовок])]; tabular_sections: [(имя, [колонки][, заголовок])];
-    forms: [имя]. Свой объект расширения — без ObjectBelonging (как в выгрузке)."""
+    forms: [имя]; templates: [имя] (файлы — template_meta_xml + Templates/<Имя>/Ext/Template.txt);
+    commands: [dict для md_command] (модуль — Commands/<Имя>/Ext/CommandModule.bsl). Порядок детей как в
+    выгрузке: реквизиты, табличные части, формы, макеты, команды. Свой объект расширения — без
+    ObjectBelonging (как в выгрузке)."""
     key = 'DataProcessor.' + name
     p = [t(1) + '<DataProcessor uuid="%s">' % uid(key),
          t(2) + '<InternalInfo>']
@@ -234,8 +237,7 @@ def data_processor_xml(name, title, attributes=(), tabular_sections=(), forms=()
         p.append(md_attribute(key, a[0], a[1], a[2] if len(a) > 2 else None, level=3))
     for ts in tabular_sections:
         p.append(md_tabular_section('DataProcessor', name, ts[0], ts[1], ts[2] if len(ts) > 2 else None, level=3))
-    for f in forms:
-        p.append(t(3) + '<Form>%s</Form>' % f)
+    p += _children_tail(key, forms, templates, commands, 3)
     p += [t(2) + '</ChildObjects>', t(1) + '</DataProcessor>']
     return md_object_file('\n'.join(p))
 
@@ -306,10 +308,12 @@ def form_meta_xml(owner_key, name, title=None):
          t(3) + '<UsePurposes>',
          t(4) + '<v8:Value xsi:type="app:ApplicationUsePurpose">PlatformApplication</v8:Value>',
          t(4) + '<v8:Value xsi:type="app:ApplicationUsePurpose">MobilePlatformApplication</v8:Value>',
-         t(3) + '</UsePurposes>',
-         t(3) + '<ExtendedPresentation/>',
-         t(2) + '</Properties>',
-         t(1) + '</Form>']
+         t(3) + '</UsePurposes>']
+    # у форм справочников и документов ExtendedPresentation в выгрузке нет (8.3.27, ZHDRM), у обработок — есть
+    if not owner_key.startswith(('Catalog.', 'Document.')):
+        p.append(t(3) + '<ExtendedPresentation/>')
+    p += [t(2) + '</Properties>',
+          t(1) + '</Form>']
     return md_object_file('\n'.join(p))
 
 
@@ -891,6 +895,192 @@ def load_config(v8, ib, dump, log, **kw):
     return designer(v8, ib, ['/LoadConfigFromFiles "%s"' % dump], log, **kw)
 
 
+# ------------------------------------------- картинки, макеты, отчёты, интерфейс (ZHDRM, итерация 9)
+# Форматы сняты с выгрузки 1С:ТОИР КОРП 3.0 на 8.3.27 (АЗОТ): CommonPictures/GoogleMaps (SVG),
+# CommonTemplates/EmptyProjectXMLDoc, Reports/АнализВерсийОбъектов, Ext/CommandInterface.xml подсистем,
+# Ext/HomePageWorkArea.xml и Ext/ClientApplicationInterface.xml конфигурации.
+EXT_NS = ('xmlns="http://v8.1c.ru/8.3/xcf/extrnprops" xmlns:xr="http://v8.1c.ru/8.3/xcf/readable" '
+          'xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"')
+
+
+def picture_ext_xml(file_name='Picture.svg'):
+    """Ext/Picture.xml общей картинки (и Ext/MainSectionPicture.xml конфигурации): сама картинка —
+    файл рядом, в папке Ext/Picture/ (Ext/MainSectionPicture/). SVG — один файл на все масштабы."""
+    return '\n'.join(['<?xml version="1.0" encoding="UTF-8"?>', '<ExtPicture %s version="%s">' % (EXT_NS, VERSION),
+                      t(1) + '<Picture>', t(2) + '<xr:Abs>%s</xr:Abs>' % file_name,
+                      t(2) + '<xr:LoadTransparent>false</xr:LoadTransparent>', t(1) + '</Picture>', '</ExtPicture>'])
+
+
+def common_picture_xml(name, title=None):
+    """CommonPictures/<Имя>.xml; файлы: <Имя>/Ext/Picture.xml (picture_ext_xml) + <Имя>/Ext/Picture/Picture.svg
+    (UTF-8 без BOM — как в выгрузке). Ссылка — 'CommonPicture.<Имя>' (subsystem_xml(picture=…), md_command)."""
+    p = [t(1) + '<CommonPicture uuid="%s">' % uid('CommonPicture.' + name),
+         t(2) + '<Properties>',
+         t(3) + '<Name>%s</Name>' % name,
+         ml_tag('Synonym', title or synonym(name), 3),
+         t(3) + '<Comment/>',
+         t(3) + '<AvailabilityForChoice>false</AvailabilityForChoice>',
+         t(3) + '<AvailabilityForAppearance>false</AvailabilityForAppearance>',
+         t(2) + '</Properties>',
+         t(1) + '</CommonPicture>']
+    return md_object_file('\n'.join(p))
+
+
+def common_template_xml(name, title=None, kind='TextDocument'):
+    """CommonTemplates/<Имя>.xml; текст — <Имя>/Ext/Template.txt (BOM, CRLF, строки ≤ 900 — html-field-and-templates.md §2).
+    В модуле: ПолучитьОбщийМакет("<Имя>").ПолучитьТекст()."""
+    p = [t(1) + '<CommonTemplate uuid="%s">' % uid('CommonTemplate.' + name),
+         t(2) + '<Properties>',
+         t(3) + '<Name>%s</Name>' % name,
+         ml_tag('Synonym', title or synonym(name), 3),
+         t(3) + '<Comment/>',
+         t(3) + '<TemplateType>%s</TemplateType>' % kind,
+         t(2) + '</Properties>',
+         t(1) + '</CommonTemplate>']
+    return md_object_file('\n'.join(p))
+
+
+def split_template_text(text, width=900):
+    """Текст для текстового макета: CRLF, строки длиннее width режутся с Символ(1) в КОНЦЕ куска (case 076).
+    Склейка в модуле: СтрЗаменить(Т, Символ(1) + Символы.ВК + Символы.ПС, "") и т.д."""
+    if '\x01' in text:
+        raise ValueError('в тексте уже есть Символ(1) — маркер разреза')
+    out = []
+    for line in text.replace('\r\n', '\n').split('\n'):
+        while len(line) > width:
+            out.append(line[:width - 1] + '\x01')
+            line = line[width - 1:]
+        out.append(line)
+    res = '\r\n'.join(out)
+    assert res.replace('\x01\r\n', '').replace('\r\n', '\n') == text.replace('\r\n', '\n')
+    return res
+
+
+def report_xml(name, title, forms=(), templates=('ОсновнаяСхемаКомпоновкиДанных',), commands=(),
+               main_dcs='ОсновнаяСхемаКомпоновкиДанных', default_form=None, settings_form=None, explanation=None,
+               attributes=()):
+    """Отчёт. Схема — Templates/<main_dcs>.xml (template_meta_xml(kind='DataCompositionSchema'))
+    + Templates/<main_dcs>/Ext/Template.xml (текст схемы, edt_lib.dcs_schema_ex — тот же XML).
+    Модуль объекта — Ext/ObjectModule.bsl (ПриКомпоновкеРезультата). Без БСП: VariantsStorage пустое."""
+    key = 'Report.' + name
+    p = [t(1) + '<Report uuid="%s">' % uid(key),
+         _internal_info(key, (('ReportObject', 'Object'), ('ReportManager', 'Manager')), 2),
+         t(2) + '<Properties>',
+         t(3) + '<Name>%s</Name>' % name,
+         ml_tag('Synonym', title, 3),
+         t(3) + '<Comment/>',
+         t(3) + '<UseStandardCommands>true</UseStandardCommands>',
+         t(3) + ('<DefaultForm>Report.%s.Form.%s</DefaultForm>' % (name, default_form) if default_form
+                 else '<DefaultForm/>'),
+         t(3) + '<AuxiliaryForm/>',
+         t(3) + ('<MainDataCompositionSchema>Report.%s.Template.%s</MainDataCompositionSchema>' % (name, main_dcs)
+                 if main_dcs else '<MainDataCompositionSchema/>'),
+         t(3) + ('<DefaultSettingsForm>Report.%s.Form.%s</DefaultSettingsForm>' % (name, settings_form)
+                 if settings_form else '<DefaultSettingsForm/>'),
+         t(3) + '<AuxiliarySettingsForm/>',
+         t(3) + '<DefaultVariantForm/>',
+         t(3) + '<VariantsStorage/>',
+         t(3) + '<SettingsStorage/>',
+         t(3) + '<IncludeHelpInContents>false</IncludeHelpInContents>',
+         t(3) + '<ExtendedPresentation/>',
+         ml_tag('Explanation', explanation, 3),
+         t(2) + '</Properties>',
+         t(2) + '<ChildObjects>']
+    for a in attributes:
+        p.append(md_attribute(key, a[0], a[1], a[2] if len(a) > 2 else None, level=3))
+    p += _children_tail(key, forms, templates, commands, 3)
+    p += [t(2) + '</ChildObjects>', t(1) + '</Report>']
+    return md_object_file('\n'.join(p))
+
+
+def command_interface_xml(visibility=(), placement=(), order=(), subsystems=(), groups=()):
+    """Ext/CommandInterface.xml подсистемы (и Ext/MainSectionCommandInterface.xml, Ext/CommandInterface.xml
+    конфигурации — там только subsystems: порядок разделов). Команды — полные имена:
+    'Catalog.X.StandardCommand.OpenList', 'DataProcessor.X.StandardCommand.Open', 'Report.X.Command.Y'.
+    visibility: [(команда, bool)]; placement: [(команда, группа)] — перенос в другую группу
+    (NavigationPanelImportant/Ordinary/SeeAlso, ActionsPanelCreate/Reports/Tools);
+    order: [(группа, [команды])]; subsystems: ['Subsystem.X', …]; groups: порядок групп."""
+    p = ['<?xml version="1.0" encoding="UTF-8"?>', '<CommandInterface %s version="%s">' % (EXT_NS, VERSION)]
+    if visibility:
+        p.append(t(1) + '<CommandsVisibility>')
+        for c, vis in visibility:
+            p += [t(2) + '<Command name="%s">' % c, t(3) + '<Visibility>',
+                  t(4) + '<xr:Common>%s</xr:Common>' % ('true' if vis else 'false'), t(3) + '</Visibility>',
+                  t(2) + '</Command>']
+        p.append(t(1) + '</CommandsVisibility>')
+    if placement:
+        p.append(t(1) + '<CommandsPlacement>')
+        for c, g in placement:
+            p += [t(2) + '<Command name="%s">' % c, t(3) + '<CommandGroup>%s</CommandGroup>' % g,
+                  t(3) + '<Placement>Auto</Placement>', t(2) + '</Command>']
+        p.append(t(1) + '</CommandsPlacement>')
+    if order:
+        p.append(t(1) + '<CommandsOrder>')
+        for g, cmds in order:
+            for c in cmds:
+                p += [t(2) + '<Command name="%s">' % c, t(3) + '<CommandGroup>%s</CommandGroup>' % g, t(2) + '</Command>']
+        p.append(t(1) + '</CommandsOrder>')
+    if subsystems:
+        p += [t(1) + '<SubsystemsOrder>'] + [t(2) + '<Subsystem>%s</Subsystem>' % s for s in subsystems] + \
+             [t(1) + '</SubsystemsOrder>']
+    if groups:
+        p += [t(1) + '<GroupsOrder>'] + [t(2) + '<Group>%s</Group>' % g for g in groups] + [t(1) + '</GroupsOrder>']
+    p.append('</CommandInterface>')
+    return '\n'.join(p)
+
+
+def home_page_xml(forms, template='OneColumn'):
+    """Ext/HomePageWorkArea.xml конфигурации: forms — [(форма, высота[, видимость])], форма —
+    'DataProcessor.X.Form.Y' | 'CommonForm.X'. Видимость явно true: пустая = скрыта для всех (case 061)."""
+    p = ['<?xml version="1.0" encoding="UTF-8"?>', '<HomePageWorkArea %s version="%s">' % (EXT_NS, VERSION),
+         t(1) + '<WorkingAreaTemplate>%s</WorkingAreaTemplate>' % template, t(1) + '<Column>']
+    for f in forms:
+        p += [t(2) + '<Item>', t(3) + '<Form>%s</Form>' % f[0], t(3) + '<Height>%d</Height>' % f[1],
+              t(3) + '<Visibility>', t(4) + '<xr:Common>%s</xr:Common>' % ('false' if len(f) > 2 and not f[2] else 'true'),
+              t(3) + '</Visibility>', t(2) + '</Item>']
+    p += [t(1) + '</Column>', '</HomePageWorkArea>']
+    return '\n'.join(p)
+
+
+# Раскладка панелей тонкого клиента 1С:ТОИР КОРП 3.0 (АЗОТ): разделы СЛЕВА «картинка слева и текст»,
+# панель открытых — сверху. Идентификаторы панелей — платформенные, менять нельзя.
+CLIENT_INTERFACE_LEFT_SECTIONS = '''<?xml version="1.0" encoding="UTF-8"?>
+<ClientApplicationInterface xmlns="http://v8.1c.ru/8.2/managed-application/core" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="InterfaceLayouter">
+	<top>
+		<panel id="b9693e0d-2d75-4e15-bfb9-9c55b716e958">
+			<uuid>cbab57f2-a0f3-4f0a-89ea-4cb19570ab75</uuid>
+			<height>1</height>
+		</panel>
+	</top>
+	<left>
+		<group id="a558db2a-807d-4dc1-b91f-0a6d9b6e6e93">
+			<group>
+				<panel id="02bdc45c-3ac2-45b6-b2a4-f98aa2c8f6c2">
+					<uuid>8e10648b-f52d-4ec2-b4dd-87de33778d95</uuid>
+				</panel>
+			</group>
+			<group>
+				<panel id="d14246f8-dc15-4233-ba8b-e7c52682b1d0">
+					<uuid>b553047f-c9aa-4157-978d-448ecad24248</uuid>
+				</panel>
+			</group>
+			<group>
+				<panel id="a79d7a1a-3fda-406f-b823-8e7aa8970514">
+					<uuid>13322b22-3960-4d68-93a6-fe2dd7f28ca3</uuid>
+				</panel>
+			</group>
+		</group>
+	</left>
+	<panelDef id="b553047f-c9aa-4157-978d-448ecad24248">
+		<spr>PictureOnLeftAndText</spr>
+	</panelDef>
+	<panelDef id="13322b22-3960-4d68-93a6-fe2dd7f28ca3"/>
+	<panelDef id="c933ac92-92cd-459d-81cc-e0c8a83ced99"/>
+	<panelDef id="cbab57f2-a0f3-4f0a-89ea-4cb19570ab75"/>
+	<panelDef id="b2735bd3-d822-4430-ba59-c9e869693b24"/>
+</ClientApplicationInterface>'''
+
+
 # --------------------------------------------------------------------- форма
 class Form:
     """Построитель Ext/Form.xml. Элементы — вложенные списки, id раздаются по порядку.
@@ -911,6 +1101,7 @@ class Form:
         self.cmdbar = []        # кнопки командной панели формы: имена команд
         self.autofill_cmdbar = True
         self.params = []        # параметры формы: (имя, тип, ключевой) — после Commands, как в выгрузке
+        self.navigation = []    # панель навигации формы: (команда, видимость) — 'InformationRegister.X.StandardCommand.OpenByValue.Измерение'
 
     def _id(self):
         i = self.next_id
@@ -939,9 +1130,12 @@ class Form:
         return ('page', name, title, children)
 
     def input(self, path, name=None, title=None, read_only=False, events=None, width=None, title_loc=None,
-              edit_mode=None, multiline=False, height=None, choice_button=None, clear_button=None):
+              edit_mode=None, multiline=False, height=None, choice_button=None, clear_button=None,
+              auto_max_width=None, stretch=None):
+        """auto_max_width=False — ширина не ограничена длиной данных; stretch — HorizontalStretch (порядок тегов
+        Width, AutoMaxWidth, Height, HorizontalStretch — по выгрузке ТОИР)."""
         return ('input', path, name, title, read_only, events, width, title_loc, edit_mode, multiline, height,
-                choice_button, clear_button)
+                choice_button, clear_button, auto_max_width, stretch)
 
     def check(self, path, name=None, title=None, events=None, edit_mode=None, read_only=False):
         return ('check', path, name, title, events, edit_mode, read_only)
@@ -1016,7 +1210,8 @@ class Form:
             out.append(t(L) + '</Page>')
         elif kind == 'input':
             (_, path, name, title, ro, events, width, title_loc, edit_mode, multiline, height,
-             choice_button, clear_button) = it
+             choice_button, clear_button) = it[:13]
+            auto_max_width, stretch = (it[13], it[14]) if len(it) > 14 else (None, None)
             full = table_path + '.' + path if table_path else path
             name = name or ((table_path.split('.')[-1] if table_path else '') + path.split('.')[-1])
             out.append(t(L) + '<InputField name="%s" id="%d">' % (name, self._id()))
@@ -1031,8 +1226,12 @@ class Form:
                 out.append(t(L + 1) + '<EditMode>%s</EditMode>' % (edit_mode or 'EnterOnInput'))
             if width:
                 out.append(t(L + 1) + '<Width>%d</Width>' % width)
+            if auto_max_width is not None:
+                out.append(t(L + 1) + '<AutoMaxWidth>%s</AutoMaxWidth>' % ('true' if auto_max_width else 'false'))
             if height:
                 out.append(t(L + 1) + '<Height>%d</Height>' % height)
+            if stretch is not None:
+                out.append(t(L + 1) + '<HorizontalStretch>%s</HorizontalStretch>' % ('true' if stretch else 'false'))
             if multiline:
                 out.append(t(L + 1) + '<MultiLine>true</MultiLine>')
             if choice_button is not None:
@@ -1100,9 +1299,10 @@ class Form:
             out.append(t(L + 1) + '<DataPath>%s</DataPath>' % path)
             out.append(t(L + 1) + '<TitleLocation>None</TitleLocation>')
             out.append(t(L + 1) + '<Width>%d</Width>' % width)
-            out.append(t(L + 1) + '<Height>%d</Height>' % height)
-            out.append(t(L + 1) + '<HorizontalStretch>true</HorizontalStretch>')
-            out.append(t(L + 1) + '<VerticalStretch>true</VerticalStretch>')
+            # высота 10 и растяжение по обеим осям — умолчания поля HTML в выгрузке Конфигуратора (8.3.27):
+            # платформа их не пишет, сверка требует того же (ZHDRM, итерация 9)
+            if height != 10:
+                out.append(t(L + 1) + '<Height>%d</Height>' % height)
             out += self._cm_et(name, L + 1)
             out += self._events(events, L + 1)
             out.append(t(L) + '</HTMLDocumentField>')
@@ -1205,6 +1405,8 @@ class Form:
             body.append(type_xml(spec, 3))
             if main:
                 body.append(t(3) + '<MainAttribute>true</MainAttribute>')
+                if spec.startswith(('cfg:CatalogObject.', 'cfg:DocumentObject.')):
+                    body.append(t(3) + '<SavedData>true</SavedData>')     # форма объекта: «Записать» (как в выгрузке)
             if save:
                 body += [t(3) + '<Save>', t(4) + '<Field>%s</Field>' % name, t(3) + '</Save>']
             if columns:
@@ -1240,6 +1442,16 @@ class Form:
                     body.append(t(3) + '<KeyParameter>true</KeyParameter>')
                 body.append(t(2) + '</Parameter>')
             body.append(t(1) + '</Parameters>')
+        if self.navigation:
+            # связанные списки в панели навигации формы объекта (формат — ТОИР, Catalogs/ВидыЦен/ФормаЭлемента)
+            body += [t(1) + '<CommandInterface>', t(2) + '<NavigationPanel>']
+            for cmd, visible in self.navigation:
+                body += [t(3) + '<Item>', t(4) + '<Command>%s</Command>' % cmd, t(4) + '<Type>Auto</Type>']
+                if not visible:
+                    body += [t(4) + '<DefaultVisible>false</DefaultVisible>', t(4) + '<Visible>',
+                             t(5) + '<xr:Common>false</xr:Common>', t(4) + '</Visible>']
+                body.append(t(3) + '</Item>')
+            body += [t(2) + '</NavigationPanel>', t(1) + '</CommandInterface>']
         return ('<?xml version="1.0" encoding="UTF-8"?>\n<Form %s version="%s">\n' % (FORM_NS, VERSION) +
                 '\n'.join(body) + '\n</Form>\n')
 
