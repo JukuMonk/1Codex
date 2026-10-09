@@ -946,8 +946,9 @@ class Form:
     def check(self, path, name=None, title=None, events=None, edit_mode=None, read_only=False):
         return ('check', path, name, title, events, edit_mode, read_only)
 
-    def label(self, name, text, font_bold=False):
-        return ('label', name, text, font_bold)
+    def label(self, name, text, font_bold=False, wide=False):
+        """wide — AutoMaxWidth=false: длинный текст (строка состояния) не переносится по словам в узкой колонке."""
+        return ('label', name, text, font_bold, wide)
 
     def button(self, command, name=None, kind='UsualButton', default=False):
         return ('button', command, name, kind, default)
@@ -1056,8 +1057,11 @@ class Form:
             out += self._events(events, L + 1)
             out.append(t(L) + '</CheckBoxField>')
         elif kind == 'label':
-            _, name, text, bold = it
+            _, name, text, bold = it[:4]
+            wide = it[4] if len(it) > 4 else False
             out.append(t(L) + '<LabelDecoration name="%s" id="%d">' % (name, self._id()))
+            if wide:
+                out.append(t(L + 1) + '<AutoMaxWidth>false</AutoMaxWidth>')   # порядок — по выгрузке ТОИР: первым
             if bold:
                 out.append(t(L + 1) + '<Font ref="style:NormalTextFont" bold="true" italic="false" underline="false" strikeout="false" kind="StyleItem" scale="100"/>')
             out.append(ml_tag('Title', text, L + 1).replace('<Title>', '<Title formatted="false">'))
