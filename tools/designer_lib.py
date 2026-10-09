@@ -962,9 +962,11 @@ class Form:
         return ('html', path, name, events, width, height)
 
     def table(self, name, path, columns, read_only=False, commands=(), events=None, change_rowset=False,
-              header_height=None, autofill=False):
-        """columns: элементы input()/check() с путём 'Колонка' (путь таблицы добавится)."""
-        return ('table', name, path, columns, read_only, commands, events, change_rowset, header_height, autofill)
+              header_height=None, autofill=False, height_rows=None):
+        """columns: элементы input()/check() с путём 'Колонка' (путь таблицы добавится).
+        height_rows — высота в строках (HeightInTableRows): короткая таблица не растягивается на пол-формы."""
+        return ('table', name, path, columns, read_only, commands, events, change_rowset, header_height, autofill,
+                height_rows)
 
     # --- рендер элементов
     def _title(self, text, L):
@@ -1105,13 +1107,16 @@ class Form:
             out += self._events(events, L + 1)
             out.append(t(L) + '</HTMLDocumentField>')
         elif kind == 'table':
-            (_, name, path, columns, ro, commands, events, change_rowset, header_height, autofill) = it
+            (_, name, path, columns, ro, commands, events, change_rowset, header_height, autofill) = it[:10]
+            height_rows = it[10] if len(it) > 10 else None
             out.append(t(L) + '<Table name="%s" id="%d">' % (name, self._id()))
             out.append(t(L + 1) + '<Representation>List</Representation>')
             if ro:
                 out.append(t(L + 1) + '<ReadOnly>true</ReadOnly>')
             out.append(t(L + 1) + '<ChangeRowSet>%s</ChangeRowSet>' % ('true' if change_rowset else 'false'))
             out.append(t(L + 1) + '<ChangeRowOrder>false</ChangeRowOrder>')
+            if height_rows:
+                out.append(t(L + 1) + '<HeightInTableRows>%d</HeightInTableRows>' % height_rows)   # по выгрузке ТОИР
             if header_height:
                 out.append(t(L + 1) + '<HeaderHeight>%d</HeaderHeight>' % header_height)
             out.append(t(L + 1) + '<AutoInsertNewRow>true</AutoInsertNewRow>')
