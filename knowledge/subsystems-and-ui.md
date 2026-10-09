@@ -83,3 +83,12 @@ hdpi, `300.png` 48 xdpi, `400.png` 64 udpi) + `Picture.png` 16 px для
 (пространство `homePageWorkArea`): шаблон колонок и формы слева/справа,
 образец — `cases/061-home-page-work-area-file/after/`. Настройка
 пользователя (Вид → Настройка начальной страницы) сильнее умолчания.
+
+## 7. То же в выгрузке Конфигуратора, без EDT (HIGH, case 079)
+
+`designer_lib`: `subsystem_xml(picture='CommonPicture.X')`, `common_picture_xml` + `picture_ext_xml` (SVG одним
+файлом, UTF-8 без BOM), `command_interface_xml` (подсистема: `Subsystems/X/Ext/CommandInterface.xml`;
+конфигурация: `Ext/CommandInterface.xml` — порядок разделов), `home_page_xml` (`Ext/HomePageWorkArea.xml`),
+`CLIENT_INTERFACE_LEFT_SECTIONS` (`Ext/ClientApplicationInterface.xml`, разделы слева как в ТОИР), картинка
+«Главного» — `Ext/MainSectionPicture.xml` + `Ext/MainSectionPicture/Picture.svg`. Configuration.xml эти файлы
+не упоминает. Снимки форм — клиент с `/URL"e1cib/…"` (список, app, command, data?ref=<UUID частями 4+5+3+2+1>).
