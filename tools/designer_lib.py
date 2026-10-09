@@ -309,8 +309,9 @@ def form_meta_xml(owner_key, name, title=None):
          t(4) + '<v8:Value xsi:type="app:ApplicationUsePurpose">PlatformApplication</v8:Value>',
          t(4) + '<v8:Value xsi:type="app:ApplicationUsePurpose">MobilePlatformApplication</v8:Value>',
          t(3) + '</UsePurposes>']
-    # у форм справочников и документов ExtendedPresentation в выгрузке нет (8.3.27, ZHDRM), у обработок — есть
-    if not owner_key.startswith(('Catalog.', 'Document.')):
+    # ExtendedPresentation в выгрузке есть только у форм обработок и отчётов; у справочников, документов и регистров
+    # — нет (8.3.27, сверка ZHDRM)
+    if owner_key.startswith(('DataProcessor.', 'Report.', 'ExternalDataProcessor.', 'ExternalReport.')):
         p.append(t(3) + '<ExtendedPresentation/>')
     p += [t(2) + '</Properties>',
           t(1) + '</Form>']
