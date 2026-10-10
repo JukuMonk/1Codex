@@ -350,9 +350,10 @@ def _indexing(opts):
     return 'IndexWithAdditionalOrder' if i == 'additional' else ('Index' if i else 'DontIndex')
 
 
-def md_field(owner_key, tag, field, level=3, tail=()):
+def md_field(owner_key, tag, field, level=3, tail=(), fill=True):
     """Реквизит / измерение / ресурс объекта конфигурации: общий набор свойств выгрузки 8.3.27
-    + хвост, свой для вида владельца (tail — готовые строки без отступа)."""
+    + хвост, свой для вида владельца (tail — готовые строки без отступа). fill=False — без
+    FillFromFillingValue/FillValue: так Конфигуратор пишет реквизиты ТЧ документа (сверка ZHDRM, итерация 10)."""
     name, spec, title, opts = _field_parts(field)
     L = level
     short = {'Attribute': 'attr', 'Dimension': 'dim', 'Resource': 'res'}.get(tag, tag)
@@ -371,10 +372,11 @@ def md_field(owner_key, tag, field, level=3, tail=()):
          t(L + 2) + '<MultiLine>%s</MultiLine>' % ('true' if opts.get('multiline') else 'false'),
          t(L + 2) + '<ExtendedEdit>%s</ExtendedEdit>' % ('true' if opts.get('multiline') else 'false'),
          t(L + 2) + '<MinValue xsi:nil="true"/>',
-         t(L + 2) + '<MaxValue xsi:nil="true"/>',
-         t(L + 2) + '<FillFromFillingValue>false</FillFromFillingValue>',
-         t(L + 2) + ('<FillValue xsi:type="xs:string"/>' if _is_string(spec) else '<FillValue xsi:nil="true"/>'),
-         t(L + 2) + '<FillChecking>%s</FillChecking>' % opts.get('fill_checking', 'DontCheck'),
+         t(L + 2) + '<MaxValue xsi:nil="true"/>']
+    if fill:
+        p += [t(L + 2) + '<FillFromFillingValue>false</FillFromFillingValue>',
+              t(L + 2) + ('<FillValue xsi:type="xs:string"/>' if _is_string(spec) else '<FillValue xsi:nil="true"/>')]
+    p += [t(L + 2) + '<FillChecking>%s</FillChecking>' % opts.get('fill_checking', 'DontCheck'),
          t(L + 2) + '<ChoiceFoldersAndItems>Items</ChoiceFoldersAndItems>',
          t(L + 2) + '<ChoiceParameterLinks/>',
          t(L + 2) + '<ChoiceParameters/>',
@@ -420,7 +422,7 @@ def md_object_tabular_section(kind, owner, ts, level=3):
           t(L + 1) + '</Properties>',
           t(L + 1) + '<ChildObjects>']
     for c in columns:
-        p.append(md_field(key, 'Attribute', c, L + 2, _tail_object(_field_parts(c)[3])))
+        p.append(md_field(key, 'Attribute', c, L + 2, _tail_object(_field_parts(c)[3]), fill=False))
     p += [t(L + 1) + '</ChildObjects>', t(L) + '</TabularSection>']
     return '\n'.join(p)
 
@@ -1121,8 +1123,9 @@ class Form:
         self.params.append((name, spec, key))
 
     # --- элементы: возвращают (функция_рендера) — id выдаются при рендере, по порядку
-    def group(self, name, children, kind='vertical', title=None, show_title=False, representation='None'):
-        return ('group', name, children, kind, title, show_title, representation)
+    def group(self, name, children, kind='vertical', title=None, show_title=False, representation='None', help=None):
+        """help — короткая справка: кнопка «?» у заголовка группы (ToolTipRepresentation=Button), текст по щелчку."""
+        return ('group', name, children, kind, title, show_title, representation, help)
 
     def pages(self, name, pages):
         return ('pages', name, pages)
@@ -1132,14 +1135,15 @@ class Form:
 
     def input(self, path, name=None, title=None, read_only=False, events=None, width=None, title_loc=None,
               edit_mode=None, multiline=False, height=None, choice_button=None, clear_button=None,
-              auto_max_width=None, stretch=None):
+              auto_max_width=None, stretch=None, help=None, password=False):
         """auto_max_width=False — ширина не ограничена длиной данных; stretch — HorizontalStretch (порядок тегов
-        Width, AutoMaxWidth, Height, HorizontalStretch — по выгрузке ТОИР)."""
+        Width, AutoMaxWidth, Height, HorizontalStretch — по выгрузке ТОИР); help — справка «?» у поля;
+        password — ввод пароля (PasswordMode, перед ChoiceButton — по выгрузке ТОИР)."""
         return ('input', path, name, title, read_only, events, width, title_loc, edit_mode, multiline, height,
-                choice_button, clear_button, auto_max_width, stretch)
+                choice_button, clear_button, auto_max_width, stretch, help, password)
 
-    def check(self, path, name=None, title=None, events=None, edit_mode=None, read_only=False):
-        return ('check', path, name, title, events, edit_mode, read_only)
+    def check(self, path, name=None, title=None, events=None, edit_mode=None, read_only=False, help=None):
+        return ('check', path, name, title, events, edit_mode, read_only, help)
 
     def label(self, name, text, font_bold=False, wide=False):
         """wide — AutoMaxWidth=false: длинный текст (строка состояния) не переносится по словам в узкой колонке."""
@@ -1176,6 +1180,13 @@ class Form:
         out.append(t(L) + '</Events>')
         return out
 
+    def _help(self, text, L):
+        """Справка «?»: текст подсказки и отображение кнопкой (порядок тегов — по выгрузке ТОИР: после Title и
+        TitleLocation, перед Group / EditMode)."""
+        if not text:
+            return []
+        return [ml_tag('ToolTip', text, L), t(L) + '<ToolTipRepresentation>Button</ToolTipRepresentation>']
+
     def _cm_et(self, name, L):
         return [t(L) + '<ContextMenu name="%sКонтекстноеМеню" id="%d"/>' % (name, self._id()),
                 t(L) + '<ExtendedTooltip name="%sРасширеннаяПодсказка" id="%d"/>' % (name, self._id())]
@@ -1184,10 +1195,12 @@ class Form:
         kind = it[0]
         out = []
         if kind == 'group':
-            _, name, children, gkind, title, show_title, representation = it
+            _, name, children, gkind, title, show_title, representation = it[:7]
+            help_ = it[7] if len(it) > 7 else None
             out.append(t(L) + '<UsualGroup name="%s" id="%d">' % (name, self._id()))
             if title:
                 out.append(ml_tag('Title', title, L + 1))
+            out += self._help(help_, L + 1)
             out.append(t(L + 1) + '<Group>%s</Group>' % {'vertical': 'Vertical', 'horizontal': 'AlwaysHorizontal',
                                                           'h': 'Horizontal'}[gkind])
             out.append(t(L + 1) + '<Representation>%s</Representation>' % representation)
@@ -1213,6 +1226,7 @@ class Form:
             (_, path, name, title, ro, events, width, title_loc, edit_mode, multiline, height,
              choice_button, clear_button) = it[:13]
             auto_max_width, stretch = (it[13], it[14]) if len(it) > 14 else (None, None)
+            help_, password = (it[15], it[16]) if len(it) > 16 else (None, False)
             full = table_path + '.' + path if table_path else path
             name = name or ((table_path.split('.')[-1] if table_path else '') + path.split('.')[-1])
             out.append(t(L) + '<InputField name="%s" id="%d">' % (name, self._id()))
@@ -1223,6 +1237,7 @@ class Form:
                 out.append(ml_tag('Title', title, L + 1))
             if title_loc:
                 out.append(t(L + 1) + '<TitleLocation>%s</TitleLocation>' % title_loc)
+            out += self._help(help_, L + 1)
             if edit_mode or table_path:
                 out.append(t(L + 1) + '<EditMode>%s</EditMode>' % (edit_mode or 'EnterOnInput'))
             if width:
@@ -1235,6 +1250,8 @@ class Form:
                 out.append(t(L + 1) + '<HorizontalStretch>%s</HorizontalStretch>' % ('true' if stretch else 'false'))
             if multiline:
                 out.append(t(L + 1) + '<MultiLine>true</MultiLine>')
+            if password:
+                out.append(t(L + 1) + '<PasswordMode>true</PasswordMode>')
             if choice_button is not None:
                 out.append(t(L + 1) + '<ChoiceButton>%s</ChoiceButton>' % ('true' if choice_button else 'false'))
             if clear_button is not None:
@@ -1243,7 +1260,8 @@ class Form:
             out += self._events(events, L + 1)
             out.append(t(L) + '</InputField>')
         elif kind == 'check':
-            _, path, name, title, events, edit_mode, ro = it
+            _, path, name, title, events, edit_mode, ro = it[:7]
+            help_ = it[7] if len(it) > 7 else None
             full = table_path + '.' + path if table_path else path
             name = name or ((table_path.split('.')[-1] if table_path else '') + path.split('.')[-1])
             out.append(t(L) + '<CheckBoxField name="%s" id="%d">' % (name, self._id()))
@@ -1252,6 +1270,7 @@ class Form:
                 out.append(t(L + 1) + '<ReadOnly>true</ReadOnly>')
             if title:
                 out.append(ml_tag('Title', title, L + 1))
+            out += self._help(help_, L + 1)
             if edit_mode or table_path:
                 out.append(t(L + 1) + '<EditMode>%s</EditMode>' % (edit_mode or 'EnterOnInput'))
             out.append(t(L + 1) + '<CheckBoxType>Auto</CheckBoxType>')
@@ -1314,7 +1333,8 @@ class Form:
             out.append(t(L + 1) + '<Representation>List</Representation>')
             if ro:
                 out.append(t(L + 1) + '<ReadOnly>true</ReadOnly>')
-            out.append(t(L + 1) + '<ChangeRowSet>%s</ChangeRowSet>' % ('true' if change_rowset else 'false'))
+            if not change_rowset:                 # true — умолчание: Конфигуратор его не пишет
+                out.append(t(L + 1) + '<ChangeRowSet>false</ChangeRowSet>')
             out.append(t(L + 1) + '<ChangeRowOrder>false</ChangeRowOrder>')
             if height_rows:
                 out.append(t(L + 1) + '<HeightInTableRows>%d</HeightInTableRows>' % height_rows)   # по выгрузке ТОИР
@@ -1326,7 +1346,10 @@ class Form:
             out.append(t(L + 1) + '<DataPath>%s</DataPath>' % path)
             out.append(t(L + 1) + '<RowFilter xsi:nil="true"/>')
             out.append(t(L + 1) + '<ContextMenu name="%sКонтекстноеМеню" id="%d"/>' % (name, self._id()))
-            out.append(t(L + 1) + '<AutoCommandBar name="%sКоманднаяПанель" id="%d">' % (name, self._id()))
+            if autofill and not commands:         # пустая панель с автозаполнением — одним тегом, как в выгрузке
+                out.append(t(L + 1) + '<AutoCommandBar name="%sКоманднаяПанель" id="%d"/>' % (name, self._id()))
+            else:
+                out.append(t(L + 1) + '<AutoCommandBar name="%sКоманднаяПанель" id="%d">' % (name, self._id()))
             if not autofill:
                 out.append(t(L + 2) + '<Autofill>false</Autofill>')
             if commands:
@@ -1339,7 +1362,8 @@ class Form:
                             t(L + 4) + '<ExtendedTooltip name="%sРасширеннаяПодсказка" id="%d"/>' % (bname, self._id()),
                             t(L + 3) + '</Button>']
                 out.append(t(L + 2) + '</ChildItems>')
-            out.append(t(L + 1) + '</AutoCommandBar>')
+            if not (autofill and not commands):
+                out.append(t(L + 1) + '</AutoCommandBar>')
             out.append(t(L + 1) + '<ExtendedTooltip name="%sРасширеннаяПодсказка" id="%d"/>' % (name, self._id()))
             for add, typ in (('СтрокаПоиска', 'SearchStringRepresentation'), ('СостояниеПросмотра', 'ViewStatusRepresentation'),
                              ('УправлениеПоиском', 'SearchControl')):
@@ -1378,7 +1402,10 @@ class Form:
         if self.title:
             body.append(ml_tag('Title', self.title, 1))
         body += list(extra_props)
-        body.append(t(1) + '<AutoCommandBar name="ФормаКоманднаяПанель" id="-1">')
+        if self.autofill_cmdbar and not self.cmdbar:      # пустая автозаполняемая панель — одним тегом (выгрузка 8.3.27)
+            body.append(t(1) + '<AutoCommandBar name="ФормаКоманднаяПанель" id="-1"/>')
+        else:
+            body.append(t(1) + '<AutoCommandBar name="ФормаКоманднаяПанель" id="-1">')
         if not self.autofill_cmdbar:
             body.append(t(2) + '<Autofill>false</Autofill>')
         if self.cmdbar:
@@ -1391,7 +1418,8 @@ class Form:
                          t(4) + '<ExtendedTooltip name="%sРасширеннаяПодсказка" id="%d"/>' % (bname, self._id()),
                          t(3) + '</Button>']
             body.append(t(2) + '</ChildItems>')
-        body.append(t(1) + '</AutoCommandBar>')
+        if not (self.autofill_cmdbar and not self.cmdbar):
+            body.append(t(1) + '</AutoCommandBar>')
         if events:
             порядок = {e: i for i, e in enumerate(FORM_EVENT_ORDER)}
             events = dict(sorted(events.items(), key=lambda kv: порядок.get(kv[0], len(порядок))))
@@ -1462,8 +1490,9 @@ def write(path, text):
     """UTF-8 с BOM, CRLF — как пишет Конфигуратор. Возвращает True, если файл изменился."""
     data = text.replace('\r\n', '\n').replace('\n', '\r\n')
     if os.path.exists(path):
-        with io.open(path, encoding='utf-8-sig', newline='') as f:
-            if f.read() == data:
+        # по байтам вместе с BOM: файл с CRLF, но без BOM (Python в текстовом режиме на Windows) — не «в норме»
+        with open(path, 'rb') as f:
+            if f.read() == b'\xef\xbb\xbf' + data.encode('utf-8'):
                 return False
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with io.open(path, 'w', encoding='utf-8-sig', newline='') as f:
