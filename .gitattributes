@@ -1,0 +1,4 @@
+# Параллельные правки из разных проектов (CLAUDE.md): добавочные указатели при слиянии сохраняют обе стороны.
+# Порядок строк и дубли после слияния — python tools/cases_sync.py проверить.
+index/cases.md merge=union
+knowledge/common-errors.md merge=union
