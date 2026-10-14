@@ -23,6 +23,7 @@
 | Раздел / группа подсистем | `examples/metadata/subsystem/` | `edt_lib.subsystem_mdo + command_interface_cmi`; картинка `make_examples.make_picture` | parentSubsystem (019), только верхняя в корне (021), полное обновление (020), zip картинки (040) |
 | Роль | `examples/metadata/role/` | `edt_lib.rights_file` | имя целевой конфигурации в `Configuration.<Имя>`; базовые роли типовой |
 | Изменить ТИПОВУЮ форму | `examples/bsl/hide-by-constant.bsl`; `reference/generators/упростить_форму_заказа.py` | `edt_lib.insert_into_procedure` | в модуле под константой, не в XML (037); `;` и CRLF (026); якорь директива+объявление (012); своя область целиком |
+| Вынести доработки типовой в расширение / обновить поставку под расширением | `cases/081-…/after/build_ext.py` (генератор по двум выгрузкам), `082-…/after/migrate.py`, `083-…/after/` | `/DumpConfigToFiles`, `git merge-file`, `/LoadConfigFromFiles -Extension`, COM | поставка из ParentConfigurations; регистры-спутники ≤8.3.25 (081); перенос данных до замены (082); слияние и ошибки обработчиков при скачке (083) |
 | Запрос | `examples/bsl/query-patterns.bsl` | `check_bsl.py --hier …` | кавычки (015), ключевые слова (016), ЭтоГруппа (017), ВЫРАЗИТЬ для строк (031), индексы пакета (042), разделители (046) |
 | Запись в чужой объект / регистр | `examples/bsl/register-read-by-query.bsl` | — | ОбменДанными.Загрузка (014), ПустаяСсылка() (032), пропуски при записи (044), украшения в Попытка (043) |
 | Периодическое обновление формы | `examples/bsl/timer-refresh.bsl` | — | отключать на время записи |
