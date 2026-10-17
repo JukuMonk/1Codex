@@ -104,6 +104,10 @@
     <dataHistory>Use</dataHistory>
   </attributes>
   <tabularSections uuid="aa040bbf-af33-512e-955a-51d46f64d922">
+    <producedTypes>
+      <objectType typeId="37e8bd34-9a3c-5db2-8929-1bb0e01def0f" valueTypeId="3124d55b-e51a-51b1-ae6d-e23073db9c51"/>
+      <rowType typeId="14359d9e-ab73-5287-a0d8-5bdb19067735" valueTypeId="94bb7e84-8c48-5005-9ef7-01a07d6439eb"/>
+    </producedTypes>
     <name>Строки</name>
     <synonym>
       <key>ru</key>

@@ -172,6 +172,10 @@
     <dataHistory>Use</dataHistory>
   </attributes>
   <tabularSections uuid="dab631da-cdc0-5814-a031-1d7c91a002b3">
+    <producedTypes>
+      <objectType typeId="af4ba6b4-485d-5065-a76a-344d7e97c775" valueTypeId="472d6947-d340-5b76-9d11-21929a29f891"/>
+      <rowType typeId="bba942c6-a64f-5c3a-ae03-ceeed6e6ffa7" valueTypeId="683c0203-78da-5701-8a88-436b671007df"/>
+    </producedTypes>
     <name>Точки</name>
     <synonym>
       <key>ru</key>
