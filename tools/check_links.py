@@ -8,7 +8,7 @@
 (knowledge/, examples/, cases/, reference/, tools/, tests/, index/) или с
 CLAUDE.md / README.md. Хвост после «:» (`tools/edt_lib.py:make_picture`),
 после «.» у имени функции (`tools/edt_lib.stable_uid`) и шаблоны с «*»/«…»
-разрешаются по правилам ниже.
+или номером-заготовкой `NNN`/`MMM` (`cases/NNN-slug/`) разрешаются по правилам ниже.
 """
 import io
 import os
@@ -52,6 +52,8 @@ def resolve(link, base_dir):
     link = link.split('#')[0]
     if not link:
         return None
+    # cases/NNN-slug/ — заготовка номера кейса в правилах набора, а не ссылка на кейс
+    link = re.sub(r'(?<![A-Za-z])(?:NNN|MMM)(?![A-Za-z])', '*', link)
     if '…' in link or '*' in link:
         # шаблон: проверяем существование части до первого шаблона
         head = re.split(r'[…*]', link)[0].rstrip('/')
