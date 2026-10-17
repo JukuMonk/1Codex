@@ -19,6 +19,11 @@ UI:  1cv8c /TESTCLIENT -TPort N /Execute <.epf>  +  1cv8c /TESTMANAGER /Execute 
 - Командная строка 1cv8 — СТРОКОЙ (`/P""`), с `/DisableStartupDialogs /DisableStartupMessages`
   (`testing.md`). Выгрузка ТОИР КОРП (22 тыс. файлов, 1,2 ГБ) — 2 минуты.
 - Файлы выгрузки: UTF-8 с BOM, CRLF, табуляция. `designer_lib.write/normalize`.
+- **8.5.1 (UP, case 085):** `designer_lib` по умолчанию пишет формат 8.3.27 — ставить `dl.VERSION = '2.21'`. Загрузка
+  проходит, но выгрузка Конфигуратора 8.5.1 отличается косметикой: пространство имён `pal` в заголовке, в описании формы
+  `UseInInterfaceCompatibilityMode`, порядок тегов поля `DataPath, ReadOnly, Title, ToolTip, ToolTipRepresentation,
+  EditMode, Width…, ChoiceParameterLinks, TextSize, ContextMenu`. Для «база = исходник» после первой загрузки принять
+  выгрузку как исходник (сверка 0), генератор считать разовым.
 
 ## 2. Что выбирать: внешняя обработка, расширение или конфигурация (HIGH)
 
