@@ -31,7 +31,7 @@
 - Анатомия, три пространства номеров, обязательные теги → `knowledge/managed-forms.md` §1–2 → `examples/forms/simple-item-form/` → cases 001, 002, 003, 004.
 - Порядок тегов как у EDT, умолчания не писать → `knowledge/managed-forms.md` §3 → case 027 → `reference/generators/выделить_правки.py`.
 - Элементы: поле, группа (4 свойства), таблица (спутники), кнопка, страницы, поле HTML → `knowledge/managed-forms.md` §4 → `tools/edt_lib.py` (field, usual_group, value_table, page_button, html_field) → cases 007, 008, 009, 022, 038.
-- Реквизиты формы, `numberQualifiers`, таблица значений с колонками, динамический список → `knowledge/managed-forms.md` §5 → `examples/forms/list-form/` → cases 001, 003, 038.
+- Реквизиты формы, `numberQualifiers`, таблица значений с колонками, динамический список → `knowledge/managed-forms.md` §5 → `examples/forms/list-form/` → cases 001, 003, 038, 063 (запрос списка не компилируется при загрузке).
 - Модуль формы (директивы, имена) → `knowledge/managed-forms.md` §6, `knowledge/bsl.md` §1–2 → `examples/bsl/form-module-skeleton.bsl` → cases 010, 011, 012.
 - Правка ТИПОВОЙ формы (вставки, константа) → `knowledge/managed-forms.md` §7 → `examples/bsl/hide-by-constant.bsl` → `reference/generators/упростить_форму_заказа.py` → cases 026, 037.
 - Формы выбора, параметры, отбор списка → `knowledge/managed-forms.md` §8 → `examples/bsl/open-form-with-callback.bsl`, `dynamic-list-filter.bsl` → cases 033, 036.
@@ -84,6 +84,6 @@
 
 - Только через EDT; полное/инкрементальное обновление; что ломает обновление → `knowledge/deployment.md` §1–3 → cases 020, 024, 028.
 - Уровни проверки и отчёт → `knowledge/validation.md` → `tools/check_project.py`, `tools/check_bsl.py`.
-- Генераторы: идемпотентность, якоря, правки пользователя → `knowledge/generators.md` → `reference/generators/` → cases 027, 056.
+- Генераторы: идемпотентность, якоря, правки пользователя → `knowledge/generators.md` → `reference/generators/` → cases 027, 056, 070 (вся цепочка).
 - Начальная страница базы (`HomePageWorkArea.hpwa`) → `knowledge/subsystems-and-ui.md` §6 → case 061.
 - Каталог ошибок по симптомам → `knowledge/common-errors.md`.
