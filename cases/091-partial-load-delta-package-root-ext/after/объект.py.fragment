@@ -1,0 +1,15 @@
+def объект(отн):
+    """Объект верхнего уровня выгрузки: Documents/X/… → Documents/X; корень — один объект «Configuration»."""
+    части = отн.replace('\\', '/').split('/')
+    # Корень конфигурации — Configuration.xml и все корневые Ext (модули приложения и сеанса, интерфейс, справка,
+    # ParentConfigurations — поддержка). Частичная загрузка Configuration.xml без них корневые Ext СТИРАЕТ.
+    if части[0] == 'Ext' or отн == 'Configuration.xml':
+        return 'Configuration'
+    if len(части) == 1:
+        return части[0][:-4] if части[0].endswith('.xml') else части[0]
+    return части[0] + '/' + (части[1][:-4] if части[1].endswith('.xml') else части[1])
+
+# Пакет: изменённые объекты целиком (все их файлы); корень — если изменился ИЛИ в пакете есть новые объекты.
+# Сравнение выгрузок — по содержимому файлов, ConfigDumpInfo.xml пропускать.
+# Проверка пакета: копия эталона → LoadConfigFromFiles <files> -listFile <список> → UpdateDBCfg →
+# DumpConfigToFiles → сравнить со «стало»: расхождений, кроме ConfigDumpInfo.xml, быть не должно.
