@@ -337,14 +337,15 @@ def list_form():
 
 def record_form():
     ids = L.Ids()
-    items = L.usual_group(ids, 'Объект', None, L.field(ids, 'Объект', 'Запись.Объект', 4), 2,
+    # имена групп не совпадают с именами полей: повтор имени элемента роняет клиент 8.5.1 при закрытии (case 086)
+    items = L.usual_group(ids, 'ГруппаОбъект', None, L.field(ids, 'Объект', 'Запись.Объект', 4), 2,
                           direction='Vertical', representation='WeakSeparation')
     items += L.usual_group(ids, 'Окно', 'Когда недоступен', L.usual_group(
         ids, 'Период', None,
         L.field(ids, 'НедоступенС', 'Запись.НедоступенС', 6, width=16, max_width=True)
         + L.field(ids, 'НедоступенПо', 'Запись.НедоступенПо', 6, width=16, max_width=True), 4,
         direction='AlwaysHorizontal'), 2, direction='Vertical', representation='WeakSeparation')
-    items += L.usual_group(ids, 'Причина', None, L.field(ids, 'Причина', 'Запись.Причина', 4), 2,
+    items += L.usual_group(ids, 'ГруппаПричина', None, L.field(ids, 'Причина', 'Запись.Причина', 4), 2,
                            direction='Vertical', representation='WeakSeparation')
     nums = L.Ids()
     attrs = L.form_attribute(nums, 'Запись', None, 'InformationRegisterRecordManager.' + REG,

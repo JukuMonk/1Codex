@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <form:Form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:core="http://g5.1c.ru/v8/dt/mcore" xmlns:form="http://g5.1c.ru/v8/dt/form">
   <items xsi:type="form:FormGroup">
-    <name>Объект</name>
+    <name>ГруппаОбъект</name>
     <id>4</id>
     <items xsi:type="form:FormField">
       <name>Объект</name>
@@ -49,7 +49,7 @@
       <common>true</common>
     </userVisible>
     <extendedTooltip>
-      <name>ОбъектРасширеннаяПодсказка</name>
+      <name>ГруппаОбъектРасширеннаяПодсказка</name>
       <id>5</id>
       <type>Label</type>
       <autoMaxWidth>true</autoMaxWidth>
@@ -211,7 +211,7 @@
     </extInfo>
   </items>
   <items xsi:type="form:FormGroup">
-    <name>Причина</name>
+    <name>ГруппаПричина</name>
     <id>19</id>
     <items xsi:type="form:FormField">
       <name>Причина</name>
@@ -259,7 +259,7 @@
       <common>true</common>
     </userVisible>
     <extendedTooltip>
-      <name>ПричинаРасширеннаяПодсказка</name>
+      <name>ГруппаПричинаРасширеннаяПодсказка</name>
       <id>20</id>
       <type>Label</type>
       <autoMaxWidth>true</autoMaxWidth>
