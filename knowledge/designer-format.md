@@ -24,6 +24,7 @@ UI:  1cv8c /TESTCLIENT -TPort N /Execute <.epf>  +  1cv8c /TESTMANAGER /Execute 
   `UseInInterfaceCompatibilityMode`, порядок тегов поля `DataPath, ReadOnly, Title, ToolTip, ToolTipRepresentation,
   EditMode, Width…, ChoiceParameterLinks, TextSize, ContextMenu`. Для «база = исходник» после первой загрузки принять
   выгрузку как исходник (сверка 0), генератор считать разовым.
+- **Правка готовой выгрузки (case 092):** `designer_lib` — `read_lf`, `xml_block`, `FormIds`, `form_field_xml`, `form_add_commands`, `form_add_event`, `form_item_event`, `form_hide`, `form_collapsible_group` (свёрнутая группа «Дополнительно»), `form_wrap_in_pages`, `form_add_page`, `form_related_list` (вкладка со связанным динамическим списком), `form_reorder_columns`, `form_move_element`, `md_add_ts_column`, `md_add_form`, `catalog_list_form` (своя форма списка: произвольный запрос + основная таблица, порядок тегов 8.5.1), `check_query`. Все идемпотентны.
 
 ## 2. Что выбирать: внешняя обработка, расширение или конфигурация (HIGH)
 

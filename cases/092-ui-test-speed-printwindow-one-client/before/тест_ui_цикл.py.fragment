@@ -1,0 +1,41 @@
+EPF = os.path.join(пл.КОРЕНЬ, '.platform', ИМЯ + '.epf')
+# списки с реальными данными открываются медленно: 5 списков — около 300 с (ЛОВУШКИ.md У-7)
+ОЖИДАНИЕ = 900
+
+
+def собрать_менеджер(база):
+    код, текст, сек = dl.build_epf(пл.V8, пл.БАЗЫ[база], os.path.join(КОРЕНЬ_XML, ИМЯ + '.xml'), EPF,
+                                   os.path.join(пл.ЛОГИ, 'сборка_менеджера.log'),
+                                   user=пл.пользователь(база), pwd=пл.пароль(база))
+    if код:
+        sys.exit('менеджер не собран:\n' + текст)
+
+
+def main(сценарий, база='песочница', порт='48133'):
+    сценарий = os.path.abspath(сценарий)
+    os.makedirs(клиент.СНИМКИ, exist_ok=True)
+    os.makedirs(пл.ЛОГИ, exist_ok=True)
+    пл.закрыть_клиентов(база)
+    собрать_менеджер(база)
+    журнал = os.path.join(пл.ЛОГИ, 'ui_журнал.txt')
+    if os.path.exists(журнал):
+        os.remove(журнал)
+    subprocess.Popen(клиент.команда_клиента(база, ' /TESTCLIENT -TPort %s' % порт))
+    time.sleep(5)
+    subprocess.Popen(клиент.команда_клиента(база, ' /TESTMANAGER /Execute "%s" /C "%s;%s;%s"' % (
+        EPF, сценарий, журнал, порт)))
+    t0 = time.time()
+    запрос = журнал + '.снимок'
+    while not os.path.exists(журнал) and time.time() - t0 < ОЖИДАНИЕ:
+        if os.path.exists(запрос):
+            time.sleep(1)
+            имя = open(запрос, encoding='utf-8-sig').read().strip() or 'снимок'
+            путь = os.path.join(клиент.СНИМКИ, 'ui_%s.png' % имя)
+            print('снимок', путь if клиент.снимок(путь, 'TPort ' + порт) else '— НЕ СНЯТ')
+            os.remove(запрос)
+        time.sleep(1)
+    time.sleep(2)
+    клиент.снимок(os.path.join(клиент.СНИМКИ, 'ui_итог.png'), 'TPort ' + порт)
+    пл.закрыть_клиентов(база)
+    if not os.path.exists(журнал):
+        print('журнала нет: менеджер не отработал за %d с' % ОЖИДАНИЕ + ' (диалог на старте? — смотреть ui_итог.png)')

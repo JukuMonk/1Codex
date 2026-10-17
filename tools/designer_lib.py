@@ -1626,3 +1626,458 @@ def dump(v8, ib, out, log, extension=None, **kw):
     if extension:
         args.append('-Extension "%s"' % extension)
     return designer(v8, ib, args, log, **kw)
+
+
+# ===================================================================== правки готовой выгрузки (8.5.1)
+# Отработано на «ФРЕГАТ: управление проектами» (ДиЗ-03/04 и редизайн «Методологии», 17.10.2026): правки XML
+# существующих форм и метаданных фрагментами по образцу соседних элементов той же выгрузки. Текст — с LF
+# (read_lf), запись — write (BOM, CRLF). Всё идемпотентно: повторный вызов ничего не меняет. После полной загрузки
+# Конфигуратор 8.5.1 переписывает часть тегов по-своему — «база = исходник» восстанавливается приёмом выгрузки
+# (designer-format.md, case 085).
+
+def read_lf(path):
+    """Текст файла выгрузки с LF (якоря правок пишутся с \\n); записывать — write()."""
+    return read(path).replace('\r\n', '\n')
+
+
+QUERY_ALIAS_OK = {'ИЗМЕНЕНИЯ'}    # ключевое слово («ДЛЯ ИЗМЕНЕНИЯ»), но псевдонимом 8.5.1 принимает (UP, 17.10.2026)
+
+
+def check_query(text):
+    """Проверка текста запроса до выполнения (COM, запросы форм в Python): псевдоним после КАК — ключевое слово
+    («Ожидается имя», case 016: КАК В / По / Из …), непарные кавычки. Возвращает список замечаний."""
+    import edt_lib  # noqa: E402 — список ключевых слов один на набор
+    problems = []
+    for m in re.finditer(r'\bКАК\s+([А-Яа-яЁёA-Za-z_][А-Яа-яЁёA-Za-z_0-9]*)', text, re.I):
+        if m.group(1).upper() in edt_lib.QUERY_KEYWORDS - QUERY_ALIAS_OK:
+            problems.append('псевдоним «%s» — ключевое слово запроса («Ожидается имя», case 016)' % m.group(1))
+    if text.count('"') % 2:
+        problems.append('непарная кавычка в тексте запроса')
+    return problems
+
+
+def xml_block(text, start, tag, frm=0):
+    """(начало, конец) элемента, открывающий тег которого начинается строкой start (с позиции frm); None — нет."""
+    i = text.find(start, frm)
+    if i < 0:
+        return None
+    depth = 0
+    for m in re.finditer(r'<(/?)%s(\s[^>]*?)?(/?)>' % re.escape(tag), text[i:]):
+        if m.group(3) and not m.group(1):
+            if depth == 0:
+                return i, i + m.end()
+            continue
+        depth += -1 if m.group(1) else 1
+        if depth == 0:
+            return i, i + m.end()
+    raise ValueError('не закрыт <%s> от %r' % (tag, start))
+
+
+def line_indent(text, pos):
+    return text[text.rfind('\n', 0, pos) + 1:pos]
+
+
+class FormIds:
+    """Новые id элементов формы — после максимального в тексте."""
+    def __init__(self, text):
+        self.n = max([int(x) for x in re.findall(r' id="(\d+)"', text)] or [0]) + 1
+
+    def __call__(self):
+        self.n += 1
+        return self.n - 1
+
+
+def ml_xml(tag, text, indent):
+    """<Tag><v8:item>ru…</v8:item></Tag> с отступом indent (строка табуляций)."""
+    o = indent
+    return ('%s<%s>\n%s\t<v8:item>\n%s\t\t<v8:lang>ru</v8:lang>\n%s\t\t<v8:content>%s</v8:content>\n%s\t</v8:item>\n'
+            '%s</%s>\n' % (o, tag, o, o, o, escape(text), o, o, tag))
+
+
+def form_field_xml(tag, name, path, ids, indent, title=None, width=None, extra=(), events=()):
+    """InputField / LabelField / CheckBoxField в порядке тегов выгрузки 8.5.1: DataPath, Title, EditMode, Width,
+    extra (готовые строки без отступа: ChoiceParameterLinks, TextSize…), ContextMenu, ExtendedTooltip, Events.
+    Канон 8.5.1: ChoiceParameterLinks — перед TextSize (иначе Конфигуратор переставит, case 085)."""
+    o = indent
+    p = ['%s<%s name="%s" id="%d">\n' % (o, tag, name, ids()), '%s\t<DataPath>%s</DataPath>\n' % (o, path)]
+    if title:
+        p.append(ml_xml('Title', title, o + '\t'))
+    if tag == 'InputField':
+        p.append('%s\t<EditMode>EnterOnInput</EditMode>\n' % o)
+    if width:
+        p.append('%s\t<Width>%d</Width>\n' % (o, width))
+    p += ['%s\t%s\n' % (o, e) for e in extra]
+    p.append('%s\t<ContextMenu name="%sКонтекстноеМеню" id="%d"/>\n' % (o, name, ids()))
+    p.append('%s\t<ExtendedTooltip name="%sРасширеннаяПодсказка" id="%d"/>\n' % (o, name, ids()))
+    if events:
+        p.append('%s\t<Events>\n' % o + ''.join('%s\t\t<Event name="%s">%s</Event>\n' % (o, e, h) for e, h in events)
+                 + '%s\t</Events>\n' % o)
+    p.append('%s</%s>\n' % (o, tag))
+    return ''.join(p)
+
+
+def form_add_commands(text, commands):
+    """commands [(имя, заголовок, подсказка)] → <Commands> формы (раздел создаётся при отсутствии). Для панели
+    множественного выделения 8.5 команде нужны ещё AssociatedTable и SelectedRowsUse — задаются кодом (case 085)."""
+    new = [c for c in commands if '<Command name="%s"' % c[0] not in text]
+    if not new:
+        return text
+    ids = [int(i) for i in re.findall(r'<Command name="[^"]+" id="(\d+)"', text)] or [0]
+    frag = ''
+    for n, (name, title, tip) in enumerate(new):
+        frag += ('\t\t<Command name="%s" id="%d">\n' % (name, max(ids) + n + 1) + ml_xml('Title', title, '\t\t\t')
+                 + ml_xml('ToolTip', tip, '\t\t\t') + '\t\t\t<Action>%s</Action>\n\t\t</Command>\n' % name)
+    if '\t</Commands>' in text:
+        return text.replace('\t</Commands>', frag + '\t</Commands>', 1)
+    return text.replace('</Form>', '\t<Commands>\n' + frag + '\t</Commands>\n</Form>', 1)
+
+
+def form_add_event(text, event, handler):
+    """Событие формы: в корневой <Events> или новым разделом перед корневым <ChildItems>."""
+    if '<Event name="%s">' % event in text:
+        return text
+    i = text.index('\n\t<ChildItems>\n')
+    if '\n\t<Events>\n' in text[:i]:
+        return text.replace('\n\t<Events>\n', '\n\t<Events>\n\t\t<Event name="%s">%s</Event>\n' % (event, handler), 1)
+    return text[:i + 1] + '\t<Events>\n\t\t<Event name="%s">%s</Event>\n\t</Events>\n' % (event, handler) + text[i + 1:]
+
+
+def form_item_event(text, name, tag, event, handler):
+    """Событие элемента формы (поле, таблица): в его <Events> или новым разделом."""
+    a, b = xml_block(text, '<%s name="%s"' % (tag, name), tag)
+    el = text[a:b]
+    o = line_indent(text, a)
+    own = el.split('\n%s\t<ChildItems>' % o)[0]          # без вложенных элементов
+    if '<Event name="%s">' % event in own:
+        return text
+    ev = '%s\t\t<Event name="%s">%s</Event>\n' % (o, event, handler)
+    if '\n%s\t<Events>\n' % o in own:
+        el = el.replace('\n%s\t<Events>\n' % o, '\n%s\t<Events>\n' % o + ev, 1)
+    elif '\n%s\t<ChildItems>' % o in el:                 # таблица: события — перед колонками
+        el = el.replace('\n%s\t<ChildItems>' % o, '\n%s\t<Events>\n%s%s\t</Events>\n%s\t<ChildItems>' % (o, ev, o, o), 1)
+    else:
+        k = el.rfind('\n%s</%s>' % (o, tag))
+        el = el[:k] + '\n%s\t<Events>\n%s%s\t</Events>' % (o, ev.rstrip('\n'), o) + el[k:]
+    return text[:a] + el + text[b:]
+
+
+def form_hide(text, name, tag='InputField'):
+    """Visible=false у элемента (после DataPath или сразу после открывающего тега)."""
+    a, b = xml_block(text, '<%s name="%s"' % (tag, name), tag)
+    el = text[a:b]
+    o = line_indent(text, a) + '\t'
+    if '\n%s<Visible>false</Visible>' % o in el:
+        return text
+    m = re.search(r'\n%s<DataPath>[^<]*</DataPath>' % o, el)
+    k = m.end() if m else el.index('>') + 1
+    return text[:a] + el[:k] + '\n%s<Visible>false</Visible>' % o + el[k:] + text[b:]
+
+
+ITEM_TAGS = ('InputField', 'UsualGroup', 'LabelField', 'CheckBoxField', 'Table', 'Pages', 'LabelDecoration', 'Button')
+
+
+def _cut(text, name, tags=ITEM_TAGS):
+    """Вынуть элемент целыми строками: (текст без него, блок, начало); не найден — (текст, None, None)."""
+    for tag in tags:
+        bl = xml_block(text, '<%s name="%s"' % (tag, name), tag)
+        if bl:
+            start = text.rfind('\n', 0, bl[0]) + 1
+            return text[:start] + text[bl[1] + 1:], text[start:bl[1] + 1], start
+    return text, None, None
+
+
+def _reindent(block, level):
+    old = len(re.match(r'\t*', block).group(0))
+    return '\n'.join('\t' * level + s[old:] if s.strip() else s for s in block.rstrip('\n').split('\n')) + '\n'
+
+
+def form_collapsible_group(text, names, ids, title='Дополнительно', name='ГруппаДополнительно'):
+    """Элементы верхнего уровня (по имени) → свёрнутая группа в конце формы: Behavior=Collapsible, Collapsed=true,
+    ControlRepresentation=Button — так редко нужные поля не мешают (редизайн UP, case 085)."""
+    if '<UsualGroup name="%s"' % name in text:
+        return text
+    blocks = []
+    for n in names:
+        text, bl, _ = _cut(text, n)
+        if bl:
+            blocks.append(_reindent(bl, 4))
+    if not blocks:
+        return text
+    group = ('\t\t<UsualGroup name="%s" id="%d">\n' % (name, ids()) + ml_xml('Title', title, '\t\t\t')
+             + '\t\t\t<Group>Vertical</Group>\n\t\t\t<Behavior>Collapsible</Behavior>\n\t\t\t<Collapsed>true</Collapsed>\n'
+             '\t\t\t<ControlRepresentation>Button</ControlRepresentation>\n'
+             '\t\t\t<Representation>WeakSeparation</Representation>\n\t\t\t<ShowTitle>true</ShowTitle>\n'
+             '\t\t\t<ExtendedTooltip name="%sРасширеннаяПодсказка" id="%d"/>\n\t\t\t<ChildItems>\n' % (name, ids())
+             + ''.join(blocks) + '\t\t\t</ChildItems>\n\t\t</UsualGroup>\n')
+    k = text.index('\t</ChildItems>\n\t<Attributes>')
+    return text[:k] + group + text[k:]
+
+
+def _list_settings(main_table, name, order=('Наименование',), group_by=None):
+    s = ('\t\t\t\t<ListSettings>\n\t\t\t\t\t<dcsset:filter>\n\t\t\t\t\t\t<dcsset:viewMode>Normal</dcsset:viewMode>\n'
+         '\t\t\t\t\t\t<dcsset:userSettingID>%s</dcsset:userSettingID>\n\t\t\t\t\t</dcsset:filter>\n'
+         '\t\t\t\t\t<dcsset:order>\n' % uid(main_table, name, 'filter'))
+    for f in order:
+        s += ('\t\t\t\t\t\t<dcsset:item xsi:type="dcsset:OrderItemField">\n\t\t\t\t\t\t\t<dcsset:field>%s</dcsset:field>\n'
+              '\t\t\t\t\t\t\t<dcsset:orderType>Asc</dcsset:orderType>\n\t\t\t\t\t\t</dcsset:item>\n' % f)
+    s += ('\t\t\t\t\t\t<dcsset:viewMode>Normal</dcsset:viewMode>\n'
+          '\t\t\t\t\t\t<dcsset:userSettingID>%s</dcsset:userSettingID>\n\t\t\t\t\t</dcsset:order>\n'
+          '\t\t\t\t\t<dcsset:conditionalAppearance>\n\t\t\t\t\t\t<dcsset:viewMode>Normal</dcsset:viewMode>\n'
+          '\t\t\t\t\t\t<dcsset:userSettingID>%s</dcsset:userSettingID>\n\t\t\t\t\t</dcsset:conditionalAppearance>\n'
+          % (uid(main_table, name, 'order'), uid(main_table, name, 'ca')))
+    if group_by:
+        s += ('\t\t\t\t\t<dcsset:item xsi:type="dcsset:StructureItemGroup">\n\t\t\t\t\t\t<dcsset:groupItems>\n'
+              '\t\t\t\t\t\t\t<dcsset:item xsi:type="dcsset:GroupItemField">\n'
+              '\t\t\t\t\t\t\t\t<dcsset:field>%s</dcsset:field>\n\t\t\t\t\t\t\t\t<dcsset:groupType>Items</dcsset:groupType>\n'
+              '\t\t\t\t\t\t\t\t<dcsset:periodAdditionType>None</dcsset:periodAdditionType>\n'
+              '\t\t\t\t\t\t\t\t<dcsset:periodAdditionBegin xsi:type="xs:dateTime">0001-01-01T00:00:00'
+              '</dcsset:periodAdditionBegin>\n\t\t\t\t\t\t\t\t<dcsset:periodAdditionEnd xsi:type="xs:dateTime">'
+              '0001-01-01T00:00:00</dcsset:periodAdditionEnd>\n\t\t\t\t\t\t\t</dcsset:item>\n'
+              '\t\t\t\t\t\t</dcsset:groupItems>\n\t\t\t\t\t</dcsset:item>\n' % group_by)
+    s += ('\t\t\t\t\t<dcsset:itemsViewMode>Normal</dcsset:itemsViewMode>\n'
+          '\t\t\t\t\t<dcsset:itemsUserSettingID>%s</dcsset:itemsUserSettingID>\n\t\t\t\t</ListSettings>\n'
+          % uid(main_table, name, 'items'))
+    return s
+
+
+def dynamic_list_attribute(name, main_table, attr_id, order=('Наименование',), title=None):
+    """Реквизит формы — динамический список по основной таблице (без произвольного запроса); отбор — кодом
+    в ПриСозданииНаСервере (Список.Отбор…)."""
+    p = ['\t\t<Attribute name="%s" id="%d">\n' % (name, attr_id)]
+    if title:
+        p.append(ml_xml('Title', title, '\t\t\t'))
+    p.append('\t\t\t<Type>\n\t\t\t\t<v8:Type>cfg:DynamicList</v8:Type>\n\t\t\t</Type>\n'
+             '\t\t\t<Settings xsi:type="DynamicList">\n\t\t\t\t<ManualQuery>false</ManualQuery>\n'
+             '\t\t\t\t<DynamicDataRead>true</DynamicDataRead>\n\t\t\t\t<MainTable>%s</MainTable>\n' % main_table)
+    p.append(_list_settings(main_table, name, order))
+    p.append('\t\t\t</Settings>\n\t\t</Attribute>\n')
+    return ''.join(p)
+
+
+def dynamic_list_table(name, columns, ids, indent, height=None, default_item=False):
+    """Таблица динамического списка: columns [(поле, заголовок|None, ширина|None)] → колонки-надписи."""
+    o = indent
+    p = ['%s<Table name="%s" id="%d">\n' % (o, name, ids()), '%s\t<Representation>List</Representation>\n' % o]
+    if default_item:
+        p.append('%s\t<DefaultItem>true</DefaultItem>\n' % o)
+    if height:
+        p.append('%s\t<HeightInTableRows>%d</HeightInTableRows>\n' % (o, height))
+    p += ['%s\t<RowSelectionMode>Cell</RowSelectionMode>\n%s\t<EnableStartDrag>true</EnableStartDrag>\n' % (o, o),
+          '%s\t<DataPath>%s</DataPath>\n%s\t<RowPictureDataPath>%s.DefaultPicture</RowPictureDataPath>\n'
+          % (o, name, o, name),
+          '%s\t<AutoRefresh>false</AutoRefresh>\n%s\t<AutoRefreshPeriod>60</AutoRefreshPeriod>\n' % (o, o),
+          '%s\t<Period>\n%s\t\t<v8:variant xsi:type="v8:StandardPeriodVariant">Custom</v8:variant>\n'
+          '%s\t\t<v8:startDate>0001-01-01T00:00:00</v8:startDate>\n'
+          '%s\t\t<v8:endDate>0001-01-01T00:00:00</v8:endDate>\n%s\t</Period>\n' % (o, o, o, o, o),
+          '%s\t<ChoiceFoldersAndItems>Items</ChoiceFoldersAndItems>\n'
+          '%s\t<RestoreCurrentRow>false</RestoreCurrentRow>\n' % (o, o),
+          '%s\t<TopLevelParent xsi:nil="true"/>\n%s\t<ShowRoot>true</ShowRoot>\n'
+          '%s\t<AllowRootChoice>false</AllowRootChoice>\n' % (o, o, o),
+          '%s\t<UpdateOnDataChange>Auto</UpdateOnDataChange>\n'
+          '%s\t<AllowGettingCurrentRowURL>true</AllowGettingCurrentRowURL>\n' % (o, o),
+          '%s\t<ContextMenu name="%sКонтекстноеМеню" id="%d"/>\n' % (o, name, ids()),
+          '%s\t<AutoCommandBar name="%sКоманднаяПанель" id="%d"/>\n' % (o, name, ids()),
+          '%s\t<ExtendedTooltip name="%sРасширеннаяПодсказка" id="%d"/>\n' % (o, name, ids())]
+    for add, typ, tag in (('СтрокаПоиска', 'SearchStringRepresentation', 'SearchStringAddition'),
+                          ('СостояниеПросмотра', 'ViewStatusRepresentation', 'ViewStatusAddition'),
+                          ('УправлениеПоиском', 'SearchControl', 'SearchControlAddition')):
+        p.append('%s\t<%s name="%s%s" id="%d">\n%s\t\t<AdditionSource>\n%s\t\t\t<Item>%s</Item>\n'
+                 '%s\t\t\t<Type>%s</Type>\n%s\t\t</AdditionSource>\n'
+                 '%s\t\t<ContextMenu name="%s%sКонтекстноеМеню" id="%d"/>\n'
+                 '%s\t\t<ExtendedTooltip name="%s%sРасширеннаяПодсказка" id="%d"/>\n%s\t</%s>\n'
+                 % (o, tag, name, add, ids(), o, o, name, o, typ, o, o, name, add, ids(), o, name, add, ids(), o, tag))
+    p.append('%s\t<ChildItems>\n' % o)
+    for field, title, width in columns:
+        p.append(form_field_xml('LabelField', name + field.replace('.', ''), '%s.%s' % (name, field), ids,
+                                o + '\t\t', title, width))
+    p.append('%s\t</ChildItems>\n%s</Table>\n' % (o, o))
+    return ''.join(p)
+
+
+def form_page_xml(name, title, content, ids, indent):
+    o = indent
+    return ('%s<Page name="%s" id="%d">\n' % (o, name, ids()) + ml_xml('Title', title, o + '\t')
+            + '%s\t<Group>Vertical</Group>\n%s\t<ScrollOnCompress>false</ScrollOnCompress>\n' % (o, o)
+            + '%s\t<ExtendedTooltip name="%sРасширеннаяПодсказка" id="%d"/>\n' % (o, name, ids())
+            + '%s\t<ChildItems>\n' % o + content + '%s\t</ChildItems>\n%s</Page>\n' % (o, o))
+
+
+def form_add_page(text, pages_name, page_xml, after=None):
+    """Страница (готовый XML с нужным отступом) — в конец набора страниц или после страницы after."""
+    if after:
+        a, b = xml_block(text, '<Page name="%s"' % after, 'Page')
+        return text[:b] + '\n' + page_xml.rstrip('\n') + text[b:]
+    a, b = xml_block(text, '<Pages name="%s"' % pages_name, 'Pages')
+    body = text[a:b]
+    k = body.rfind('</ChildItems>')
+    k = body.rfind('\n', 0, k) + 1
+    return text[:a] + body[:k] + page_xml + body[k:] + text[b:]
+
+
+def form_wrap_in_pages(text, names, pages_name, first, first_title, ids):
+    """Элементы верхнего уровня → набор страниц, первая страница — из них (для форм без страниц)."""
+    if '<Pages name="%s"' % pages_name in text:
+        return text
+    blocks, start = [], None
+    for n in names:
+        text, bl, pos = _cut(text, n)
+        if bl:
+            start = pos if start is None else min(start, pos)
+            blocks.append(_reindent(bl, 5))
+    if not blocks:
+        return text
+    pages = ('\t\t<Pages name="%s" id="%d">\n' % (pages_name, ids())
+             + '\t\t\t<ExtendedTooltip name="%sРасширеннаяПодсказка" id="%d"/>\n\t\t\t<ChildItems>\n'
+             % (pages_name, ids())
+             + form_page_xml(first, first_title, ''.join(blocks), ids, '\t\t\t\t') + '\t\t\t</ChildItems>\n\t\t</Pages>\n')
+    return text[:start] + pages + text[start:]
+
+
+def form_related_list(text, pages_name, page, title, list_name, main_table, columns, ids, order=('Наименование',),
+                      note=None, after=None):
+    """Вкладка со связанным списком (динамический список; отбор по владельцу — в ПриСозданииНаСервере). В
+    интерфейсе 8.5 переходы к подчинённым справочникам свёрнуты в меню «Основное˅» — вкладкой их видно (UP)."""
+    if '<Page name="%s"' % page in text:
+        return text
+    o = '\t\t\t\t\t\t'
+    content = ''
+    if note:
+        content += ('%s<LabelDecoration name="%sПояснение" id="%d">\n%s\t<AutoMaxWidth>false</AutoMaxWidth>\n'
+                    % (o, list_name, ids(), o)
+                    + ml_xml('Title', note, o + '\t').replace('<Title>', '<Title formatted="false">', 1)
+                    + '%s\t<ContextMenu name="%sПояснениеКонтекстноеМеню" id="%d"/>\n' % (o, list_name, ids())
+                    + '%s\t<ExtendedTooltip name="%sПояснениеРасширеннаяПодсказка" id="%d"/>\n%s</LabelDecoration>\n'
+                    % (o, list_name, ids(), o))
+    content += dynamic_list_table(list_name, columns, ids, o)
+    a = xml_block(text, '<Pages name="%s"' % pages_name, 'Pages')[0]
+    ind = line_indent(text, a) + '\t\t'
+    page_xml = form_page_xml(page, title, _reindent(content, len(ind) + 2) if content else '', ids, ind)
+    text = form_add_page(text, pages_name, page_xml, after)
+    attr_id = max(int(i) for i in re.findall(r'<Attribute name="[^"]+" id="(\d+)"', text)) + 1
+    return text.replace('\t</Attributes>', dynamic_list_attribute(list_name, main_table, attr_id, order)
+                        + '\t</Attributes>', 1)
+
+
+def form_reorder_columns(text, table, order):
+    """Колонки таблицы формы — в порядке order (имена элементов), остальные — после, как были."""
+    a, b = xml_block(text, '<Table name="%s"' % table, 'Table')
+    body = text[a:b]
+    ci, ce = body.rfind('<ChildItems>'), body.rfind('</ChildItems>')
+    kids = body[ci + len('<ChildItems>') + 1:body.rfind('\n', 0, ce) + 1]
+    blocks, names, pos = {}, [], 0
+    while True:
+        m = re.search(r'^\t*<(InputField|LabelField|CheckBoxField|ColumnGroup) name="(\w+)"', kids[pos:], re.M)
+        if not m:
+            break
+        s = pos + m.start()
+        e = xml_block(kids, '<%s name="%s"' % (m.group(1), m.group(2)), m.group(1), s)[1] + 1
+        names.append(m.group(2))
+        blocks[m.group(2)] = kids[s:e]
+        pos = e
+    new = [n for n in order if n in blocks] + [n for n in names if n not in order]
+    if new == names:
+        return text
+    head = ci + len('<ChildItems>') + 1
+    body = body[:head] + ''.join(blocks[n] for n in new) + body[body.rfind('\n', 0, ce) + 1:]
+    return text[:a] + body + text[b:]
+
+
+def form_move_element(text, name, group, tag='InputField'):
+    """Элемент — в конец ChildItems группы (с переотступом)."""
+    text, bl, _ = _cut(text, name, (tag,))
+    if bl is None:
+        raise ValueError('нет элемента %s' % name)
+    ga, gb = xml_block(text, '<UsualGroup name="%s"' % group, 'UsualGroup')
+    g = text[ga:gb]
+    k = g.rfind('</ChildItems>')
+    ind = line_indent(g, k)
+    k = g.rfind('\n', 0, k) + 1
+    g = g[:k] + _reindent(bl, len(ind) + 1) + g[k:]
+    return text[:ga] + g + text[gb:]
+
+
+def md_add_ts_column(text, kind, obj, ts, name, synonym_text, type_ref, sample_column):
+    """Колонка ТЧ объекта (kind: Catalog/Document…) по образцу соседней колонки sample_column, тип — type_ref
+    (cfg:CatalogRef.X, xs:string не годится — у строк квалификаторы); uuid — uid(объект, ТЧ, имя)."""
+    pos = text.find('<xr:GeneratedType name="%sTabularSection.%s.%s"' % (kind, obj, ts))
+    start = text.rfind('<TabularSection uuid', 0, pos)
+    a, b = xml_block(text, '<TabularSection uuid', 'TabularSection', start)
+    body = text[a:b]
+    if '<Name>%s</Name>' % name in body:
+        return text
+    oa, ob = xml_block(body, '<Attribute uuid', 'Attribute',
+                       body.rfind('<Attribute uuid', 0, body.find('<Name>%s</Name>' % sample_column)))
+    ind = line_indent(body, oa)
+    col = re.sub(r'<Attribute uuid="[^"]+">', '<Attribute uuid="%s">' % uid(obj, ts, name), body[oa:ob], count=1)
+    col = re.sub(r'<Name>[^<]*</Name>', '<Name>%s</Name>' % name, col, count=1)
+    col = re.sub(r'(<Synonym>\s*<v8:item>\s*<v8:lang>ru</v8:lang>\s*<v8:content>)[^<]*', lambda m: m.group(1)
+                 + escape(synonym_text), col, count=1)
+    col = re.sub(r'<Type>.*?</Type>', lambda m: '<Type>\n%s\t\t\t<v8:Type>%s</v8:Type>\n%s\t\t</Type>'
+                 % (ind, type_ref, ind), col, count=1, flags=re.S)
+    end = body.rfind('</ChildObjects>')
+    end = body.rfind('\n', 0, end) + 1
+    body = body[:end] + ind + col + '\n' + body[end:]
+    return text[:a] + body + text[b:]
+
+
+def md_add_form(text, form_name):
+    """<Form>Имя</Form> в ChildObjects объекта (после последней формы или в начало)."""
+    if '<Form>%s</Form>' % form_name in text:
+        return text
+    last = text.rfind('<Form>', 0, text.rfind('</ChildObjects>'))
+    if last < 0:
+        last = text.find('<ChildObjects>')
+        end = text.find('\n', last) + 1
+        return text[:end] + line_indent(text, last) + '\t<Form>%s</Form>\n' % form_name + text[end:]
+    end = text.find('\n', last) + 1
+    return text[:end] + line_indent(text, last) + '<Form>%s</Form>\n' % form_name + text[end:]
+
+
+def catalog_list_form(dump, obj, title, query, fields, columns, params=(), attrs_xml='', header_xml='',
+                      group_by=None, order=('Наименование',), finish=None, version=None):
+    """Своя форма списка справочника: динамический список с произвольным запросом И основной таблицей (колонки-
+    счётчики — левым соединением с подзапросом СГРУППИРОВАТЬ ПО), быстрые отборы (header_xml, attrs_xml — готовые
+    фрагменты). Порядок тегов Settings, проверенный загрузкой 8.5.1: ManualQuery, DynamicDataRead, QueryText,
+    Field…, Parameter…, MainTable, ListSettings (case 085). fields [(псевдоним, заголовок|None)], columns
+    [(поле, заголовок, ширина)], params [(имя, тип v8)]. finish(text) — доработка текста формы перед записью.
+    Модуль формы (ПриСозданииНаСервере) пишет вызывающий."""
+    form = 'ФормаСписка'
+    problems = check_query(query)
+    if problems:
+        raise ValueError('запрос формы списка %s: %s' % (obj, '; '.join(problems)))
+    md_path = os.path.join(dump, 'Catalogs', obj + '.xml')
+    md = md_add_form(read_lf(md_path), form)
+    md = re.sub(r'<DefaultListForm>[^<]*</DefaultListForm>|<DefaultListForm/>',
+                '<DefaultListForm>Catalog.%s.Form.%s</DefaultListForm>' % (obj, form), md, count=1)
+    write(md_path, md)
+    write(os.path.join(dump, 'Catalogs', obj, 'Forms', form + '.xml'),
+          form_meta_xml('Catalog.' + obj, form, 'Форма списка'))
+    ids = FormIds('<x id="20"/>')
+    p = ['<?xml version="1.0" encoding="UTF-8"?>\n<Form %s version="%s">\n' % (FORM_NS, version or VERSION),
+         ml_xml('Title', title, '\t'), '\t<AutoTitle>false</AutoTitle>\n',
+         '\t<AutoCommandBar name="ФормаКоманднаяПанель" id="-1"/>\n',
+         '\t<Events>\n\t\t<Event name="OnCreateAtServer">ПриСозданииНаСервере</Event>\n\t</Events>\n',
+         '\t<ChildItems>\n', header_xml, dynamic_list_table('Список', columns, ids, '\t\t', default_item=True),
+         '\t</ChildItems>\n\t<Attributes>\n\t\t<Attribute name="Список" id="1">\n\t\t\t<Type>\n'
+         '\t\t\t\t<v8:Type>cfg:DynamicList</v8:Type>\n\t\t\t</Type>\n\t\t\t<MainAttribute>true</MainAttribute>\n'
+         '\t\t\t<Settings xsi:type="DynamicList">\n\t\t\t\t<ManualQuery>true</ManualQuery>\n'
+         '\t\t\t\t<DynamicDataRead>true</DynamicDataRead>\n\t\t\t\t<QueryText>%s</QueryText>\n' % escape(query)]
+    for f, ftitle in fields:
+        p.append('\t\t\t\t<Field xsi:type="dcssch:DataSetFieldField">\n\t\t\t\t\t<dcssch:dataPath>%s</dcssch:dataPath>\n'
+                 '\t\t\t\t\t<dcssch:field>%s</dcssch:field>\n' % (f, f))
+        if ftitle:
+            p.append('\t\t\t\t\t<dcssch:title xsi:type="v8:LocalStringType">\n' + ml(ftitle, 6)
+                     + '\n\t\t\t\t\t</dcssch:title>\n')
+        p.append('\t\t\t\t</Field>\n')
+    for pname, ptype in params:
+        p.append('\t\t\t\t<Parameter>\n\t\t\t\t\t<dcssch:name>%s</dcssch:name>\n\t\t\t\t\t<dcssch:valueType>\n'
+                 '\t\t\t\t\t\t<v8:Type>%s</v8:Type>\n\t\t\t\t\t</dcssch:valueType>\n'
+                 '\t\t\t\t\t<dcssch:value xsi:nil="true"/>\n'
+                 '\t\t\t\t\t<dcssch:useRestriction>true</dcssch:useRestriction>\n\t\t\t\t</Parameter>\n'
+                 % (pname, ptype))
+    p += ['\t\t\t\t<MainTable>Catalog.%s</MainTable>\n' % obj, _list_settings('Catalog.' + obj, 'Список', order, group_by),
+          '\t\t\t</Settings>\n\t\t</Attribute>\n', attrs_xml, '\t</Attributes>\n</Form>\n']
+    text = ''.join(p)
+    if finish:
+        text = finish(text)
+    return write(os.path.join(dump, 'Catalogs', obj, 'Forms', form, 'Ext', 'Form.xml'), text)
