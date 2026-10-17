@@ -152,10 +152,11 @@ UTF-8 **без BOM**, **CRLF**, отступы 2 пробела в `.mdo`/`.form
 - `knowledge/testing.md` — проверка в платформе, 9 уровней (загрузка, обновление ИБ, COM, снимки и все формы, заполненность, сценарии, поле HTML, настоящие нажатия); `tools/platform.py`, `tools/register_com.py`.
 - `knowledge/new-project.md` — старт нового проекта из `.dt`; `tools/new_project.py` + `bootstrap/`.
 - `knowledge/designer-format.md` — работа БЕЗ EDT: выгрузка Конфигуратора, внешние обработки, сборка и загрузка пакетным Конфигуратором, проверка через COM и TestManager; `tools/designer_lib.py`.
-- `knowledge/` — 14 тем (`edt-project-structure`, `metadata`, `managed-forms`,
+- `knowledge/` — 17 тем (`edt-project-structure`, `metadata`, `managed-forms`,
   `mobile-forms`, `bsl`, `skd`, `subsystems-and-ui`, `roles`,
   `html-field-and-templates`, `uuid-and-references`, `deployment`,
-  `generators`, `validation`, `common-errors`).
+  `generators`, `validation`, `common-errors`, `testing`, `new-project`,
+  `designer-format`).
 - `examples/` — 12 видов метаданных, 4 формы, мобильная форма, 2 отчёта,
   8 фрагментов BSL; README у каждого; собираются `tools/make_examples.py`.
 - `cases/` — 85 кейсов; указатель `index/cases.md`.
