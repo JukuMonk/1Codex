@@ -70,6 +70,9 @@
     (`knowledge/validation.md` §5), что не проверено и почему. Новая ошибка →
     новый кейс в `cases/` (папка `NNN-slug`) по шаблону (task / before / after / lessons)
     и строка в `knowledge/common-errors.md`.
+    После каждой большой работы в отчёте — **чистое время Claude** на неё:
+    `python <skill>/tools/claude_time.py --с "фрагмент запроса"` из каталога проекта (по транскрипту сессии;
+    ожидание пользователя и фоновых прогонов не считается). В документах для заказчика — по просьбе пользователя.
 
 ## Чего не делать никогда
 
@@ -162,6 +165,7 @@ UTF-8 **без BOM**, **CRLF**, отступы 2 пробела в `.mdo`/`.form
 - `cases/` — 88 кейсов; указатель `index/cases.md`.
 - `reference/` — боевые файлы и генераторы; указатель `reference/INDEX.md`.
 - `tools/` — `edt_lib.py` (сборка XML), `check_project.py`, `check_bsl.py`,
-  `scaffold.py`, `make_examples.py`, `make_sandbox.py`, `check_links.py`, `platform.py`, `vanessa.py`.
+  `scaffold.py`, `make_examples.py`, `make_sandbox.py`, `check_links.py`, `platform.py`, `vanessa.py`,
+  `claude_time.py` (чистое время Claude по транскрипту — для отчёта).
 - `tests/tasks.md` — 24 задачи с критериями; решения в `tests/expected/`;
   песочница `tests/sandbox/`.
