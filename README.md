@@ -33,7 +33,7 @@ examples/               рабочие образцы с нейтральным�
   reports/              отчёт с параметрами периода и группировкой
   skd/                  указатель по схемам компоновки
   bsl/                  8 фрагментов модулей
-cases/NNN-slug/         97 кейсов: task.md, before/, after/, lessons.md, attempt-*/
+cases/NNN-slug/         98 кейсов: task.md, before/, after/, lessons.md, attempt-*/
 reference/              боевые файлы проекта-источника как есть + INDEX.md, edt-format-guide.md,
                         generators/ (техника идемпотентных правок)
 index/                  topics.md (по темам), patterns.md («хочу сделать X»), cases.md
@@ -41,7 +41,7 @@ tests/                  tasks.md (24 задачи с критериями), expe
                         sandbox/ (все примеры как проект для инструментов)
 bootstrap/              стартовый набор нового проекта: шаблон CLAUDE.md, .gitignore, скрипт резервной копии
 tools/                  edt_lib.py, designer_lib.py, check_project.py, check_bsl.py, scaffold.py, new_project.py,
-                        platform.py, ui_test.py, ui_capture.py, lint_dump.py, hook_heredoc.py, claude_time.py,
+                        platform.py, ui_test.py, ui_capture.py, lint_dump.py, hook_heredoc.py, claude_time.py, claude_stages.py,
                         make_examples.py, make_sandbox.py, check_links.py, _cases_*.py
 ```
 
