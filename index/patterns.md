@@ -29,6 +29,7 @@
 | Периодическое обновление формы | `examples/bsl/timer-refresh.bsl` | — | отключать на время записи |
 | Условное оформление | `examples/bsl/conditional-appearance.bsl` | — | из модуля, не из XML |
 | Без EDT: документ и своя форма документа; нативная форма «красиво» без поля HTML | `cases/084-…/after/формы_и_документы.py`, `Module_ЗаданияМастера.bsl` | `designer_lib.document_xml`, `Form`; полная загрузка + сверка | оформление кодом в `ПриСозданииНаСервере`; клиентский код — в веб-клиенте, ошибки — журнал регистрации (084) |
+| Внешняя компонента Native API без Visual Studio (C++, zig) + опрос оборудования из 1С | `cases/094-…/after/` (`компонента.cpp`, `include/addin_abi.h`, `сборка_zig.py`, `Module_ОпросЧПУ.bsl`) | `designer_lib.common_template_xml(kind='AddIn')`, COM-тест | ABI деструктора; zip — из макета; логика — в BSL, компонента — только связь (094) |
 | .dt демо-базы для показа на другом сервере | `cases/084-…/after/dt_выгрузка.py` | `/DumpIB`, `CREATEINFOBASE` + `/RestoreIB`, COM | «до сейчас» досчитать на весь период показа; `/RestoreIB` без `/N` (084) |
 | Проверить проект перед EDT | `tests/sandbox/` | `tools/check_project.py <root> --prefix X` | `knowledge/validation.md`: check → EDT → база (полная при новых объектах) → платформа |
 | Найти, что сломало форму (пустой лист) | case 006 | `reference/generators/проба_мобильной_формы.py` | лесенка проб; не гадать по «мобильности» |
