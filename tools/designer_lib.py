@@ -1522,6 +1522,16 @@ def write(path, text):
     return True
 
 
+
+def write_new(path, text):
+    """Новый объект целиком (enum_xml, catalog_xml, form_meta_xml…) — только если файла ещё нет: после «принять
+    выгрузку» (формат Конфигуратора 8.5.1) повторный запуск генератора не должен возвращать свой формат — иначе сверка
+    снова находит расхождения (case 096). Возвращает True, если файл создан."""
+    if os.path.exists(path):
+        return False
+    return write(path, text)
+
+
 def read(path):
     with io.open(path, encoding='utf-8-sig', newline='') as f:
         return f.read()
