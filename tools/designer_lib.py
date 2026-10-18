@@ -2081,3 +2081,40 @@ def catalog_list_form(dump, obj, title, query, fields, columns, params=(), attrs
     if finish:
         text = finish(text)
     return write(os.path.join(dump, 'Catalogs', obj, 'Forms', form, 'Ext', 'Form.xml'), text)
+
+
+DUMP_KINDS = {'Catalogs': 'Catalog', 'Documents': 'Document', 'DataProcessors': 'DataProcessor', 'Reports': 'Report',
+              'InformationRegisters': 'InformationRegister', 'AccumulationRegisters': 'AccumulationRegister',
+              'ChartsOfCharacteristicTypes': 'ChartOfCharacteristicTypes', 'BusinessProcesses': 'BusinessProcess',
+              'Tasks': 'Task', 'ExchangePlans': 'ExchangePlan', 'Enums': 'Enum', 'Constants': 'Constant'}
+
+
+def changed_objects(dump, commit='HEAD'):
+    """Объекты выгрузки (вид, имя) с правками относительно коммита (по умолчанию — незакоммиченные) и новые файлы —
+    для выборочного UI-прогона после правки 1–3 форм (case 092: 14 шагов за 14 с вместо обзора 176 шагов).
+    Изменённый общий модуль добавляет объекты, в модулях которых он упоминается («Модуль.»)."""
+    dump = os.path.abspath(dump)
+    git = ['git', '-C', dump, '-c', 'core.quotepath=off']
+    files = subprocess.run(git + ['diff', '--name-only', '--relative', commit, '--', '.'], capture_output=True,
+                           text=True, encoding='utf-8').stdout.split()
+    files += subprocess.run(git + ['ls-files', '--others', '--exclude-standard', '--', '.'], capture_output=True,
+                            text=True, encoding='utf-8').stdout.split()
+    objects, modules = set(), set()
+    for f in files:
+        parts = f.replace('\\', '/').split('/')
+        if len(parts) < 2:
+            continue
+        name = parts[1].split('.')[0]
+        if parts[0] in DUMP_KINDS:
+            objects.add((DUMP_KINDS[parts[0]], name))
+        elif parts[0] == 'CommonModules':
+            modules.add(name)
+    for m in modules:
+        pattern = re.compile(r'\b%s\.' % re.escape(m))
+        for root, _, names in os.walk(dump):
+            rel = os.path.relpath(root, dump).replace('\\', '/').split('/')
+            if rel[0] not in DUMP_KINDS or len(rel) < 2:
+                continue
+            if any(n.endswith('.bsl') and pattern.search(read(os.path.join(root, n))) for n in names):
+                objects.add((DUMP_KINDS[rel[0]], rel[1]))
+    return objects

@@ -40,7 +40,8 @@ index/                  topics.md (по темам), patterns.md («хочу с�
 tests/                  tasks.md (24 задачи с критериями), expected/ (решения и сломанные фикстуры),
                         sandbox/ (все примеры как проект для инструментов)
 bootstrap/              стартовый набор нового проекта: шаблон CLAUDE.md, .gitignore, скрипт резервной копии
-tools/                  edt_lib.py, check_project.py, check_bsl.py, scaffold.py, new_project.py,
+tools/                  edt_lib.py, designer_lib.py, check_project.py, check_bsl.py, scaffold.py, new_project.py,
+                        platform.py, ui_test.py, ui_capture.py, lint_dump.py, hook_heredoc.py, claude_time.py,
                         make_examples.py, make_sandbox.py, check_links.py, _cases_*.py
 ```
 
@@ -67,6 +68,10 @@ python tools/check_links.py [--sensitive]                                     # 
 python tools/new_project.py <корень EDT> <папка инструментов> --prefix <пф>  # старт нового проекта: справочник метаданных, CLAUDE.md, .gitignore, резервная копия
 python tools/platform.py <platform.json> load|quick|update|com …|screens …    # проверка в платформе: загрузка в пустую базу, обновление ИБ, COM (отчёты, запросы), снимки форм
 python tools/register_com.py <comcntr.dll> [V83.COMConnector]                # COM-коннектор 1С на пользователя, без прав администратора
+python tools/ui_test.py <сценарий.txt> --ib <база> --cred <учётка.json>          # настоящие нажатия без вставок (менеджер — внешняя обработка)
+python tools/ui_capture.py <pid> <файл.png>                                   # снимок окна клиента копией экрана (без PrintWindow)
+python tools/lint_dump.py <выгрузка Конфигуратора> [--remember]               # модули и запросы форм до загрузки; только новые замечания
+python tools/new_project.py --hook <папка проекта>                            # хук Claude Code: heredoc с обратной косой — отклонить
 ```
 
 Виды для `scaffold`: `catalog`, `enum`, `constant`, `information-register`,

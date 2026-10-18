@@ -13,11 +13,16 @@
   3. .gitignore в проекте EDT (бинарник поставщика, служебные папки) и в папке
      инструментов; инструкция по резервной копии.
   4. Первый прогон check_project по объектам с префиксом.
+  5. .claude/settings.json в папке инструментов: PreToolUse-хук tools/hook_heredoc.py — heredoc с обратной косой
+     чертой в Git Bash отклоняется с подсказкой «Write + python файл.py» (правило само не держится, case 092).
+
+  python tools/new_project.py --hook <папка проекта>   # только хук — для проекта без EDT (выгрузка Конфигуратора)
 
 Порядок старта проекта целиком — knowledge/new-project.md.
 """
 import csv
 import io
+import json
 import os
 import re
 import subprocess
@@ -129,7 +134,23 @@ def write_once(path, text):
     return True
 
 
+def claude_settings(project_dir):
+    """Хуки Claude Code проекта (.claude/settings.json); существующий файл не трогать — дописать руками."""
+    hook = os.path.join(HERE, 'hook_heredoc.py').replace('\\', '/')
+    settings = {'hooks': {'PreToolUse': [{'matcher': 'Bash', 'hooks': [
+        {'type': 'command', 'command': 'python "%s"' % hook, 'timeout': 10}]}]}}
+    if not write_once(os.path.join(project_dir, '.claude', 'settings.json'),
+                      json.dumps(settings, ensure_ascii=False, indent=2) + '\n'):
+        print('  (хук heredoc — добавить в существующий .claude/settings.json: %s)' % hook)
+
+
 def main():
+    if '--hook' in sys.argv:
+        dirs = [a for a in sys.argv[1:] if not a.startswith('--')]
+        if not dirs:
+            sys.exit(__doc__)
+        claude_settings(os.path.abspath(dirs[0]))
+        return
     args = [a for a in sys.argv[1:] if not a.startswith('--')]
     if len(args) < 2:
         sys.exit(__doc__)
@@ -166,6 +187,7 @@ def main():
     write_once(os.path.join(tools_dir, 'инструменты', 'отправить_всё.py'),
                read(os.path.join(PACK, 'bootstrap', 'отправить_всё.py.template'))
                .replace('{{ИНСТРУМЕНТЫ}}', tools_dir).replace('{{ПРОЕКТ_EDT}}', root))   # подстановка в r'…'
+    claude_settings(tools_dir)
 
     print('\nПроверка объектов с префиксом %s:' % prefix)
     r = subprocess.run([sys.executable, os.path.join(HERE, 'check_project.py'), root, '--prefix', prefix, '--quiet'],

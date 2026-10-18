@@ -49,7 +49,13 @@ python <skill>/tools/new_project.py <проект EDT> <папка инстру�
 `метаданные/реквизиты.csv` — grep по нему заменяет память модели о полях),
 `CLAUDE.md` проекта из шаблона (`bootstrap/CLAUDE.md.template`), `.gitignore`
 обеих папок, `инструменты/отправить_всё.py` для резервной копии, первый прогон
-`check_project` по префиксу. Существующие файлы не трогает.
+`check_project` по префиксу, `.claude/settings.json` с хуком `tools/hook_heredoc.py`. Существующие файлы
+не трогает.
+
+**Хук Claude Code (case 092).** Heredoc с обратной косой чертой (`python - <<'EOF'` с `\n`, `\d` в коде) в Git Bash
+ломается раз за разом, и правило в CLAUDE.md этого не останавливает. PreToolUse-хук отклоняет такую команду с
+подсказкой «Write + python файл.py». Проект без EDT (выгрузка Конфигуратора) — только хук:
+`python <skill>/tools/new_project.py --hook <папка проекта>`.
 
 Затем:
 

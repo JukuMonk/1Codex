@@ -1113,7 +1113,7 @@ def cmd_ui(cfg):
     si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
     si.wShowWindow = 1
     base = client_cmd(cfg, ib, 'x').rsplit(' /C ', 1)[0]
-    subprocess.Popen(base + ' /TESTCLIENT -TPort %d' % port, startupinfo=si)
+    tc = subprocess.Popen(base + ' /TESTCLIENT -TPort %d' % port, startupinfo=si)
     time.sleep(15)  # второй клиент той же базы сразу после первого не стартует
     subprocess.Popen(base + ' /TESTMANAGER /C "СценарийUI"', startupinfo=si)
     shots = os.path.join(w, 'screens')
@@ -1121,10 +1121,18 @@ def cmd_ui(cfg):
     ib_ps = ib.replace("'", "''") + '*TESTCLIENT'  # снимать тестируемого, не управляющего
 
     def shot(name):
+        # копия экрана (tools/ui_capture.py, case 092): PrintWindow тормозит клиент на минуты; «ui_printwindow»: true
+        # в platform.json — прежний способ (снимает и при свёрнутом RDP, медленно)
         path = os.path.join(shots, 'ui_%s.png' % name)
-        subprocess.run(['powershell', '-NoProfile', '-Command', SHOT_PS % (ib_ps, path.replace("'", "''"))],
-                       capture_output=True)
-        print('снимок:', path)
+        if cfg.get('ui_printwindow'):
+            subprocess.run(['powershell', '-NoProfile', '-Command', SHOT_PS % (ib_ps, path.replace("'", "''"))],
+                           capture_output=True)
+            print('снимок:', path)
+            return
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import ui_capture
+        ок, причина = ui_capture.grab(tc.pid, path)
+        print('снимок:', path if ок else 'НЕ СНЯТ (%s)' % причина)
 
     итог, t0 = None, time.time()
     while time.time() - t0 < int(cfg.get('ui_timeout', 900)):
