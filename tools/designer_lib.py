@@ -1116,6 +1116,8 @@ class Form:
         self.attrs.append((name, spec, title, main, columns, save))
 
     def command(self, name, title, action=None, tooltip=None, picture=None, representation=None):
+        """representation команды: Auto | Text | Picture | TextPicture (НЕ PictureAndText — XDTO-ошибка загрузки,
+        PictureAndText — у кнопок; case 095)."""
         self.cmds.append((name, title, action or name, tooltip, picture, representation))
 
     def param(self, name, spec, key=False):
@@ -1148,6 +1150,12 @@ class Form:
     def label(self, name, text, font_bold=False, wide=False):
         """wide — AutoMaxWidth=false: длинный текст (строка состояния) не переносится по словам в узкой колонке."""
         return ('label', name, text, font_bold, wide)
+
+    def picture(self, path, name=None, width=None, height=None, stretch=True):
+        """Поле картинки (PictureField) по реквизиту-строке: адрес картинки во временном хранилище. Так рисуют
+        прогресс и диаграммы SVG-строкой без поля HTML (case 095): Новый Картинка(ПолучитьДвоичныеДанныеИзСтроки(SVG)),
+        координаты — с точкой (Формат «ЧРД=.»); размер картинки — кодом: Элементы.Х.РазмерКартинки."""
+        return ('picture', path, name, width, height, stretch)
 
     def button(self, command, name=None, kind='UsualButton', default=False):
         return ('button', command, name, kind, default)
@@ -1288,6 +1296,20 @@ class Form:
             out.append(ml_tag('Title', text, L + 1).replace('<Title>', '<Title formatted="false">'))
             out += self._cm_et(name, L + 1)
             out.append(t(L) + '</LabelDecoration>')
+        elif kind == 'picture':
+            _, path, name, width, height, stretch = it
+            name = name or path.split('.')[-1]
+            out.append(t(L) + '<PictureField name="%s" id="%d">' % (name, self._id()))
+            out.append(t(L + 1) + '<DataPath>%s</DataPath>' % path)
+            out.append(t(L + 1) + '<TitleLocation>None</TitleLocation>')
+            if width:
+                out.append(t(L + 1) + '<Width>%d</Width>' % width)
+            if height:
+                out.append(t(L + 1) + '<Height>%d</Height>' % height)
+            if stretch:
+                out.append(t(L + 1) + '<HorizontalStretch>true</HorizontalStretch>')
+            out += self._cm_et(name, L + 1)
+            out.append(t(L) + '</PictureField>')
         elif kind == 'button':
             _, command, name, bkind, default = it
             name = name or command

@@ -105,6 +105,11 @@ def run(scenario, ib, v8, user='', pwd='', work=None, port=48133, printwindow=Fa
         time.sleep(0.05)
     time.sleep(1)
     снять('итог')
+    if не_снято and не_снято[-1][0] == 'итог':
+        # после последнего шага клиенту тормозить уже нечего — итоговый кадр можно снять PrintWindow (case 095)
+        ок, _ = ui_capture.grab(клиент.pid, os.path.join(work, 'ui_итог.png'), printwindow=True)
+        if ок:
+            не_снято.pop()
     close_clients(ib)
     if не_снято:
         print('\nНЕ СНЯТО снимков: %d (%s). Снимки — копией экрана: окно удалённого рабочего стола открыто, окно 1С '
