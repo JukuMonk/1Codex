@@ -78,14 +78,16 @@ def maximize_quietly(h, size=SIZE):
                           win32con.SWP_NOACTIVATE | win32con.SWP_NOZORDER)
 
 
-def frame(pids):
+def frame(pids, resize=True):
+    """Кадр окон процесса. resize=False — окно как есть: если ужать окно и сразу снять, клиент 1С ещё не перестроил
+    форму под новый размер — в кадре старая раскладка, обрезанная справа (UP, отчёт ДиЗ-06, 18.10.2026)."""
     wins = windows_of(pids)
     if not wins:
         return None
     main = max(wins, key=lambda x: (x[1][2] - x[1][0]) * (x[1][3] - x[1][1]))
     l, t, r, b = main[1]
     # размер проверяется на каждом кадре: первым находится окно-заставка, главное окно появляется позже
-    if r - l > SIZE[0] + 20 or b - t > SIZE[1] + 20:
+    if resize and (r - l > SIZE[0] + 20 or b - t > SIZE[1] + 20):
         maximize_quietly(main[0])
         wins = windows_of(pids)
         main = max(wins, key=lambda x: (x[1][2] - x[1][0]) * (x[1][3] - x[1][1]))

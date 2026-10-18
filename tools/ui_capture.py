@@ -62,7 +62,7 @@ def grab(pid, path, retries=6, printwindow=False):
     """Снять главное окно процесса pid в path. → (True, '') или (False, причина). retries — попыток копии экрана
     с паузой 0,5 с (мгновенные «screen grab failed» бывают); перекрытое окно не повторяется."""
     if printwindow:
-        кадр = window_shots.frame([pid])
+        кадр = window_shots.frame([pid], resize=False)   # ужатое окно не успевает перестроиться (ДиЗ-06)
         if кадр is None:
             return False, 'нет окон процесса'
         кадр.save(path)
