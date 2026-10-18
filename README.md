@@ -41,7 +41,7 @@ tests/                  tasks.md (24 задачи с критериями), expe
                         sandbox/ (все примеры как проект для инструментов)
 bootstrap/              стартовый набор нового проекта: шаблон CLAUDE.md, .gitignore, скрипт резервной копии
 tools/                  edt_lib.py, designer_lib.py, check_project.py, check_bsl.py, scaffold.py, new_project.py,
-                        platform.py, ui_test.py, ui_capture.py, lint_dump.py, hook_heredoc.py, claude_time.py, claude_stages.py,
+                        platform.py, ui_test.py, ui_capture.py, lint_dump.py, hook_heredoc.py, claude_time.py, claude_stages.py, config_map.py,
                         make_examples.py, make_sandbox.py, check_links.py, _cases_*.py
 ```
 
