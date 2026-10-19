@@ -104,7 +104,9 @@
 
 ## Пополнение набора (из любого проекта)
 
-Набор один на машине: репозиторий `C:\1c-edt-skill` (git `JukuMonk/1c-edt-skill`);
+Набор один на машине: репозиторий `C:\1c-edt-skill` (git `Fregat-vrn/1c-edt-skill`, организация ФРЕГАТ;
+до 19.10.2026 — `JukuMonk/1c-edt-skill`, GitHub перенаправляет со старого адреса; клон со старым адресом —
+`git -C C:\1c-edt-skill remote set-url origin https://github.com/Fregat-vrn/1c-edt-skill.git`);
 `~/.claude/skills/1c-edt-skill` и папки `1c-edt-skill` в проектах — ССЫЛКИ
 (junction) на него. Поэтому:
 

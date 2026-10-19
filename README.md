@@ -6,6 +6,19 @@
 `CLAUDE.md` (алгоритм и принцип **WORKING EXAMPLE > ABSTRACT KNOWLEDGE >
 MODEL MEMORY**); для человека — этот файл.
 
+## Подключение
+
+Репозиторий закрытый, в организации `Fregat-vrn`: читать могут её участники. Подключение — клон в папку навыков
+Claude Code, после перезапуска навык виден как `1c-edt-skill`:
+
+```bash
+git clone https://github.com/Fregat-vrn/1c-edt-skill.git ~/.claude/skills/1c-edt-skill
+git -C ~/.claude/skills/1c-edt-skill pull          # обновление
+```
+
+Клон со старым адресом `JukuMonk/1c-edt-skill` (до 19.10.2026) работает через перенаправление GitHub;
+адрес лучше сменить: `git remote set-url origin https://github.com/Fregat-vrn/1c-edt-skill.git`.
+
 ## Откуда взято
 
 Из одного реального внедрения: доработки типовой 1С:ТЛЭиУА КОРП 1.1.36
