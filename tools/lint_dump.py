@@ -2,7 +2,8 @@
 """Линт XML-выгрузки Конфигуратора без платформы (за секунды, до минутной загрузки; case 092).
 
 Модули `.bsl` — edt_lib.check_bsl (директивы, клиентские методы на сервере, кавычки и ключевые слова в запросах…),
-тексты запросов динамических списков форм (`<QueryText>` в Form.xml) — designer_lib.check_query. Замечания к
+тексты запросов динамических списков форм (`<QueryText>` в Form.xml) — designer_lib.check_query, не ключевые
+параметры формы в клиентском коде — designer_lib.check_form_params. Замечания к
 унаследованному коду, который компилируется и работает, кладутся в базовый список (без номеров строк — они плывут
 при правках) — показываются только НОВЫЕ. Код 1 — есть новые замечания.
 
@@ -33,6 +34,9 @@ def problems(dump):
                 формы = os.sep + 'Forms' + os.sep in п
                 out += ['%s — %s' % (отн, з) for з in edt_lib.check_bsl(dl.read(п), is_form_module=формы)
                         if not str(з).startswith('предупреждение')]
+                xml = os.path.join(os.path.dirname(корень), 'Form.xml')  # …/Ext/Form/Module.bsl → …/Ext/Form.xml
+                if формы and и == 'Module.bsl' and os.path.exists(xml):
+                    out += ['%s — %s' % (отн, з) for з in dl.check_form_params(dl.read(п), dl.read(xml))]
             elif и == 'Form.xml':
                 for м in re.finditer(r'<QueryText>(.*?)</QueryText>', dl.read(п), re.S):
                     текст = м.group(1).replace('&amp;', '&').replace('&quot;', '"').replace('&lt;', '<').replace('&gt;', '>')
