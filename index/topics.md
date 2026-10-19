@@ -75,6 +75,7 @@
 ## Проверка в платформе
 
 - Загрузка в пустую базу, обновление ИБ, внешнее соединение, снимки форм → `knowledge/testing.md` → `tools/platform.py`, `tools/register_com.py`, `bootstrap/platform.json.example` → `knowledge/validation.md` §5.
+- Демоданные: откуда база, посев (метка, одна транзакция, пропуски с причиной), сброс, перенос со сверкой → `knowledge/demo-data.md` → `tools/platform.py` (`com call`, `com fill`) → `knowledge/testing.md` §6–7 → cases 044, 064, 077, 080, 082.
 
 ## Новый проект
 
