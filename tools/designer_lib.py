@@ -678,6 +678,49 @@ def information_register_xml(name, title, dimensions=(), resources=(), attribute
     return md_object_file('\n'.join(p))
 
 
+def accumulation_register_xml(name, title, dimensions=(), resources=(), attributes=(),
+                              register_type='Balance', forms=(), default_list_form=None,
+                              list_presentation=None, explanation=None):
+    """Designer accumulation register. Balance / Turnovers; resources precede dimensions.
+
+    Structural reference: fokusov/MyMoney, AccumulationRegisters/ДвижениеДенегПоСчетам.xml.
+    Field specification and stable identifiers follow the existing builders.
+    """
+    if register_type not in ('Balance', 'Turnovers'):
+        raise ValueError('register_type must be Balance or Turnovers')
+    key = 'AccumulationRegister.' + name
+    p = [t(1) + '<AccumulationRegister uuid="%s">' % uid(key)]
+    p += _internal_info(key, tuple(('AccumulationRegister' + kind, kind)
+                                  for kind in ('Record', 'Manager', 'Selection', 'List', 'RecordSet', 'RecordKey')), 2)
+    p += [t(2) + '<Properties>', t(3) + '<Name>%s</Name>' % name,
+          ml_tag('Synonym', title, 3), t(3) + '<Comment/>',
+          t(3) + '<UseStandardCommands>true</UseStandardCommands>',
+          t(3) + ('<DefaultListForm>%s.Form.%s</DefaultListForm>' % (key, default_list_form)
+                  if default_list_form else '<DefaultListForm/>'),
+          t(3) + '<AuxiliaryListForm/>', t(3) + '<RegisterType>%s</RegisterType>' % register_type,
+          t(3) + '<IncludeHelpInContents>false</IncludeHelpInContents>',
+          t(3) + '<DataLockControlMode>Managed</DataLockControlMode>',
+          t(3) + '<FullTextSearch>DontUse</FullTextSearch>',
+          t(3) + '<EnableTotalsSplitting>true</EnableTotalsSplitting>',
+          ml_tag('ListPresentation', list_presentation, 3), t(3) + '<ExtendedListPresentation/>',
+          ml_tag('Explanation', explanation, 3), t(2) + '</Properties>',
+          t(2) + '<ChildObjects>']
+    for field in resources:
+        p.append(md_field(key, 'Resource', field, 3, ['<FullTextSearch>Use</FullTextSearch>'], fill=False))
+    for field in attributes:
+        p.append(md_field(key, 'Attribute', field, 3, ['<Indexing>DontIndex</Indexing>',
+                                                    '<FullTextSearch>Use</FullTextSearch>'], fill=False))
+    for field in dimensions:
+        opts = _field_parts(field)[3]
+        p.append(md_field(key, 'Dimension', field, 3, [
+            '<DenyIncompleteValues>%s</DenyIncompleteValues>' % ('true' if opts.get('deny_incomplete') else 'false'),
+            '<Indexing>%s</Indexing>' % _indexing(opts), '<FullTextSearch>Use</FullTextSearch>',
+            '<UseInTotals>true</UseInTotals>'], fill=False))
+    p += _children_tail(key, forms, (), ())
+    p += [t(2) + '</ChildObjects>', t(1) + '</AccumulationRegister>']
+    return md_object_file('\n'.join(p))
+
+
 def enum_xml(name, title, values, explanation=None):
     """Перечисление. values: [(имя[, синоним[, комментарий]])]."""
     key = 'Enum.' + name

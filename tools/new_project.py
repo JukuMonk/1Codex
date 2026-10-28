@@ -1,25 +1,18 @@
 # -*- coding: utf-8 -*-
-"""new_project — стартовый набор для нового проекта доработок в 1C:EDT.
+"""Prepare a 1C project: Codex and Designer XML by default.
 
-  python tools/new_project.py <корень проекта EDT> <папка инструментов> --prefix <префикс> [--name "Название"]
+  python tools/new_project.py <dump> <tools-dir> --prefix <prefix> [--name <name>]
+  Optional connection hints: --v8 <1cv8.exe> --ib <test-infobase-folder>.
 
-Что делает (идемпотентно, существующие файлы не перезаписывает, кроме справочника):
-  1. Справочник метаданных конфигурации из .mdo проекта EDT:
-       <папка инструментов>/метаданные/объекты.md    — объекты по видам: имя + синоним
-       <папка инструментов>/метаданные/реквизиты.csv — вид;объект;раздел;имя;синоним;тип
-     Это то, чем модель ищет поля для запросов (grep по CSV), а не память.
-  2. CLAUDE.md в папке инструментов — заготовка памяти проекта с правилами,
-     которые не зависят от предметной области (из bootstrap/CLAUDE.md.template).
-  3. .gitignore в проекте EDT (бинарник поставщика, служебные папки) и в папке
-     инструментов; инструкция по резервной копии.
-  4. Первый прогон check_project по объектам с префиксом.
-  5. .claude/settings.json в папке инструментов: PreToolUse-хук tools/hook_heredoc.py — heredoc с обратной косой
-     чертой в Git Bash отклоняется с подсказкой «Write + python файл.py» (правило само не держится, case 092).
+Creates AGENTS.md, a configuration map, ignore files and platform.json with
+unset runtime paths unless explicitly supplied. Never loads or creates a base,
+registers COM, configures Claude hooks or publishes to GitHub by default.
+Existing instructions and settings are preserved.
 
-  python tools/new_project.py --hook <папка проекта>   # только хук — для проекта без EDT (выгрузка Конфигуратора)
-
-Порядок старта проекта целиком — knowledge/new-project.md.
+Legacy EDT/Claude setup: --format edt --agent claude.
+Legacy hook only: --hook <project-folder> --agent claude.
 """
+import argparse
 import csv
 import io
 import json
@@ -27,6 +20,7 @@ import os
 import re
 import subprocess
 import sys
+import xml.etree.ElementTree as ET
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PACK = os.path.dirname(HERE)
@@ -144,7 +138,7 @@ def claude_settings(project_dir):
         print('  (хук heredoc — добавить в существующий .claude/settings.json: %s)' % hook)
 
 
-def main():
+def legacy_main():
     if '--hook' in sys.argv:
         dirs = [a for a in sys.argv[1:] if not a.startswith('--')]
         if not dirs:
@@ -196,5 +190,92 @@ def main():
     print('\nДальше — knowledge/new-project.md: git init, remote, первый объект через scaffold.py.')
 
 
+def designer_main(root, tools_dir, prefix, name=None, v8=None, ib=None):
+    """Prepare Codex instructions for an existing Designer dump, without touching a base."""
+    root, tools_dir = os.path.abspath(root), os.path.abspath(tools_dir)
+    config = os.path.join(root, 'Configuration.xml')
+    if not os.path.isfile(config):
+        raise ValueError('нет Configuration.xml: укажите XML-выгрузку Конфигуратора')
+    tree = ET.parse(config)
+    configuration = tree.getroot().find('{*}Configuration')
+    if configuration is None:
+        raise ValueError('Configuration.xml не содержит объект Configuration')
+    props = configuration.find('{*}Properties')
+    cfg_name = props.findtext('{*}Name') if props is not None else None
+    if not cfg_name:
+        raise ValueError('в Configuration.xml отсутствует имя конфигурации')
+    name = name or cfg_name
+    version = tree.getroot().get('version', '')
+    os.makedirs(tools_dir, exist_ok=True)
+    map_path = os.path.join(tools_dir, 'КАРТА.md')
+    run = subprocess.run([sys.executable, os.path.join(HERE, 'config_map.py'), root,
+                          '--итог', map_path], capture_output=True, text=True,
+                         encoding='utf-8', errors='replace',
+                         env={**os.environ, 'PYTHONIOENCODING': 'utf-8'})
+    if run.returncode:
+        raise ValueError('не удалось построить карту: ' + run.stdout + run.stderr)
+    print(run.stdout.strip())
+    tpl = read(os.path.join(PACK, 'bootstrap', 'AGENTS.md.template'))
+    for marker, value in {'ИМЯ': name, 'КОНФИГУРАЦИЯ': cfg_name, 'ПРЕФИКС': prefix,
+                          'ВЫГРУЗКА': root, 'ИНСТРУМЕНТЫ': tools_dir, 'SKILL': PACK}.items():
+        tpl = tpl.replace('{{' + marker + '}}', value)
+    write_once(os.path.join(tools_dir, 'AGENTS.md'), tpl)
+    if root != tools_dir:
+        write_once(os.path.join(root, 'AGENTS.md'), tpl)
+    ignore = read(os.path.join(PACK, 'bootstrap', 'gitignore.designer'))
+    for folder in dict.fromkeys([root, tools_dir]):
+        write_once(os.path.join(folder, '.gitignore'), ignore)
+    settings = {'format': 'designer', 'agent': 'codex', 'project_name': name,
+                'configuration_name': cfg_name, 'metadata_version': version,
+                'compatibility_mode': props.findtext('{*}CompatibilityMode'),
+                'v8': os.path.abspath(v8) if v8 else None, 'dump': root,
+                'work': os.path.join(tools_dir, '.platform'), 'prefix': prefix,
+                'test_ib': os.path.abspath(ib) if ib else None,
+                'ib': 'File="%s";' % os.path.abspath(ib) if ib else None,
+                'configuration_kind': None, 'com': None,
+                'test_usr': '', 'ui_port': 48123}
+    write_once(os.path.join(tools_dir, 'platform.json'),
+               json.dumps(settings, ensure_ascii=False, indent=2) + '\n')
+    print('Codex / Конфигуратор: база не изменялась; заполните настройки перед запуском платформы.')
+
+
+def main():
+    sys.stdout.reconfigure(encoding='utf-8')
+    sys.stderr.reconfigure(encoding='utf-8')
+    parser = argparse.ArgumentParser(description='Подготовка проекта 1С: по умолчанию Codex, без EDT.')
+    parser.add_argument('root', nargs='?', help='XML-выгрузка Конфигуратора')
+    parser.add_argument('tools_dir', nargs='?', help='папка инструментов и карты')
+    parser.add_argument('--prefix')
+    parser.add_argument('--name')
+    parser.add_argument('--v8', help='путь к 1cv8.exe выбранной версии')
+    parser.add_argument('--ib', help='отдельная файловая тестовая база')
+    parser.add_argument('--format', choices=['designer', 'edt'], default='designer')
+    parser.add_argument('--agent', choices=['codex', 'claude'], default='codex')
+    parser.add_argument('--hook', action='store_true', help='исторический хук только Claude Code')
+    args = parser.parse_args()
+    if args.hook:
+        if args.agent != 'claude' or not args.root:
+            parser.error('--hook предназначен только для явно выбранного --agent claude и папки root')
+        claude_settings(os.path.abspath(args.root))
+        return 0
+    if not args.root or not args.tools_dir or not args.prefix:
+        parser.error('нужны root, tools_dir и --prefix')
+    if args.format == 'edt':
+        if args.agent != 'claude':
+            parser.error('исторический режим EDT доступен только с --agent claude; Codex работает без EDT')
+        sys.argv = [sys.argv[0], args.root, args.tools_dir, '--prefix', args.prefix]
+        if args.name:
+            sys.argv += ['--name', args.name]
+        legacy_main()
+        return 0
+    if args.agent != 'codex':
+        parser.error('режим designer в этом стартовом наборе предназначен для Codex')
+    try:
+        designer_main(args.root, args.tools_dir, args.prefix, args.name, args.v8, args.ib)
+    except (ValueError, OSError, ET.ParseError) as error:
+        parser.exit(1, 'ОШИБКА: %s\n' % error)
+    return 0
+
+
 if __name__ == '__main__':
-    main()
+    sys.exit(main())

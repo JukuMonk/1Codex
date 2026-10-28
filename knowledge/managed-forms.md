@@ -1,3 +1,7 @@
+> Codex: текущий проект работает без EDT; порядок выполнения — `knowledge/codex.md`.
+> Указания EDT/Claude ниже относятся к исходным проектам; для XML Конфигуратора
+> применять `knowledge/designer-format.md` и `knowledge/validation.md`.
+
 # Управляемые формы: `Form.form` и `Module.bsl`
 
 Главное правило (HIGH, четыре кейса подряд): форма собирается ТОЛЬКО по

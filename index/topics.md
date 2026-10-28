@@ -1,3 +1,7 @@
+> Codex: текущий проект работает без EDT; порядок выполнения — `knowledge/codex.md`.
+> Указания EDT/Claude ниже относятся к исходным проектам; для XML Конфигуратора
+> применять `knowledge/designer-format.md` и `knowledge/validation.md`.
+
 # index/topics — по темам
 
 Формат строки: тема → knowledge (раздел) → рабочий пример → боевой образец → кейсы.

@@ -1,3 +1,5 @@
+> Исторический материал Claude/EDT. В Codex читать `knowledge/codex.md`.
+
 # CLAUDE.md — память проекта для Claude Code
 
 Этот файл Claude Code читает в начале каждой сессии. Держите его коротким (~100–150

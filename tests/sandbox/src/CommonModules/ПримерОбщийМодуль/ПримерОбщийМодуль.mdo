@@ -6,6 +6,5 @@
     <value>Пример общего модуля</value>
   </synonym>
   <server>true</server>
-  <clientOrdinaryApplication>false</clientOrdinaryApplication>
   <serverCall>true</serverCall>
 </mdclass:CommonModule>

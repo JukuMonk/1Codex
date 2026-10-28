@@ -26,4 +26,4 @@
 поставщика, а слияние позже (`ОбщегоНазначения.ЗаменитьСсылки`) должно их однозначно находить. Значения
 перечисления загружать до `/UpdateDBCfg` пакетом из файла перечисления — без `Configuration.xml` (case 091).
 
-Источник: `C:\gold\mix` (`tools/update_ib.py`, `deferred_status.py`, `vat_rates.py`, `РЕГЛАМЕНТ.md`).
+Источник: `C:\gold\mix` (`C:/gold/mix/tools/update_ib.py`, `deferred_status.py`, `vat_rates.py`, `РЕГЛАМЕНТ.md`).

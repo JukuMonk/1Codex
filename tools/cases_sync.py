@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Согласованность кейсов набора при правках из разных проектов (раздел «Параллельные правки» в CLAUDE.md).
+"""Согласованность кейсов набора при правках из разных проектов (правила текущей редакции — knowledge/codex.md).
 
   python tools/cases_sync.py проверить                     # папки cases/ ↔ строки index/cases.md ↔ счётчики; дубли номеров
   python tools/cases_sync.py следующий                     # свободный номер: максимум из своих папок, origin/main и указателя + 1
@@ -32,6 +32,13 @@ COUNTERS = [
     ('SKILL.md', r'`cases/` — (\d+) кейсов'),
     ('index/cases.md', r'^# index/cases — (\d+) кейсов'),
 ]
+if os.path.isfile(os.path.join(ROOT, 'knowledge', 'codex.md')):
+    # Codex entrypoints intentionally do not duplicate counters in CLAUDE.md.
+    COUNTERS = [
+        ('README.md', r'(\d+) кейсов'),
+        ('SKILL.md', r'Набор содержит (\d+) кейсов'),
+        ('index/cases.md', r'^# index/cases — (\d+) кейсов'),
+    ]
 TEXT = ('.md', '.py', '.txt', '.bsl', '.json')
 
 
