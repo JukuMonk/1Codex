@@ -503,3 +503,6 @@
 
 
 - Код 9999 не уникален после увеличения длины — [кейс 110](../cases/110-string-code-range-exhaustion/lessons.md).
+
+
+- Не определен каталог получения файла — [кейс 111](../cases/111-client-file-download-dialog/lessons.md).
