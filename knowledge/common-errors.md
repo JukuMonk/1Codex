@@ -500,3 +500,6 @@
 - [Кейс 107: ui-error-probe-implicit-wait](../cases/107-ui-error-probe-implicit-wait/lessons.md).
 - [Кейс 108: frozen-release-and-ui-resources](../cases/108-frozen-release-and-ui-resources/lessons.md).
 - [Кейс 109: dynamic-list-runtime-order](../cases/109-dynamic-list-runtime-order/lessons.md).
+
+
+- Код 9999 не уникален после увеличения длины — [кейс 110](../cases/110-string-code-range-exhaustion/lessons.md).
