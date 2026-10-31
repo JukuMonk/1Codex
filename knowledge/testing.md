@@ -389,3 +389,6 @@ Vanessa. `platform.json`: `"ffmpeg"` (или ffmpeg в PATH), `"va_video_dir"` �
 
 Серверные базы (`Srvr=`) для `load` (создание базы на кластере), конфигурации
 без БСП для уровней 2, 4 и 5.
+
+
+Обязательные [замеры этапов](task-timing.md); [защита выпуска и UI](reliable-workflow.md).

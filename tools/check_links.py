@@ -44,6 +44,10 @@ def files(exts):
 def resolve(link, base_dir):
     """Существует ли то, на что указывает ссылка. Возвращает None (ок) или причину."""
     link = link.strip()
+    # Real resources (including BSL/XML under tools/) take precedence over
+    # dotted Python helper notation such as tools/edt_lib.stable_uid.
+    if any(os.path.exists(os.path.join(folder, link)) for folder in (ROOT, base_dir)):
+        return None
     # tools/edt_lib.py:make_picture, tools/edt_lib.stable_uid, tools/edt_lib.dcs_schema(groups=…)
     link = link.split('(')[0]
     if link.startswith('tools/') and not link.endswith('.py') and '.' in os.path.basename(link):

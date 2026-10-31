@@ -489,3 +489,14 @@
 - **«Поле объекта не обнаружено (Имя)» при нажатии кнопки формы, открытой с параметром** — `Параметры.Имя` прочитан в процедуре `&НаКлиенте`: не ключевой параметр формы доступен только в `ПриСозданииНаСервере` (ключевой, `<KeyParameter>true`, — всегда). Сохранить в реквизит формы при создании. Ловит `tools/lint_dump.py` (`designer_lib.check_form_params`) до загрузки. Проект UP, 19.10.2026.
 
 - Текущий остаток положительный, а между документами минус: кейс 101, `cases/101-historical-stock-guard/lessons.md`. Контроль по регистраторам и блокировка до записи движений.
+
+
+Обязательные [замеры этапов](task-timing.md); [защита выпуска и UI](reliable-workflow.md).
+- [Кейс 102: test-base-lock-and-phone-shots](../cases/102-test-base-lock-and-phone-shots/lessons.md).
+- [Кейс 103: html-field-svg-gradient-black](../cases/103-html-field-svg-gradient-black/lessons.md).
+- [Кейс 104: enum-role-load-loop](../cases/104-enum-role-load-loop/lessons.md).
+- [Кейс 105: editable-table-commandbar](../cases/105-editable-table-commandbar/lessons.md).
+- [Кейс 106: choice-parameters-form-context](../cases/106-choice-parameters-form-context/lessons.md).
+- [Кейс 107: ui-error-probe-implicit-wait](../cases/107-ui-error-probe-implicit-wait/lessons.md).
+- [Кейс 108: frozen-release-and-ui-resources](../cases/108-frozen-release-and-ui-resources/lessons.md).
+- [Кейс 109: dynamic-list-runtime-order](../cases/109-dynamic-list-runtime-order/lessons.md).
