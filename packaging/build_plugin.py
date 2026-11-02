@@ -65,6 +65,8 @@ def main():
     manifest = json.loads((TEMPLATES / 'plugin.json').read_text(encoding='utf-8'))
     if args.version:
         manifest['version'] = args.version
+    case_count = sum(1 for path in (ROOT / 'cases').iterdir() if path.is_dir() and re.match(r'^\d{3}-', path.name))
+    manifest['description'] = re.sub(r'\d+ кейс', f'{case_count} кейс', manifest['description'])
     version = manifest['version']
     assert re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*', manifest['name'])
     assert re.fullmatch(r'\d+\.\d+\.\d+', version)
@@ -99,11 +101,8 @@ def main():
             'рабочий цикл и материалы ниже.', 1)
         entry.write_text(body, encoding='utf-8', newline='\n')
         readme = skill / 'README.md'
-        text = readme.read_text(encoding='utf-8-sig')
-        start = text.index('Для передачи в формате плагина ChatGPT/Codex')
-        end = text.index('Репозиторий:', start)
-        readme.write_text(text[:start] + 'Инструкция установки плагина — [README пакета](../../README.md).\n\n'
-                          + text[end:], encoding='utf-8', newline='\n')
+        readme.write_text('# Навык 1Codex\n\nИнструкция установки — [README пакета](../../README.md).\n'
+                          'Начало работы — [SKILL.md](SKILL.md).\n', encoding='utf-8', newline='\n')
         (skill / 'knowledge' / 'chatgpt.md').write_bytes((TEMPLATES / 'chatgpt.md').read_bytes())
         setup = plugin / 'skills' / 'setup' / 'SKILL.md'
         setup.parent.mkdir(parents=True)
