@@ -1,7 +1,7 @@
 {
   "plugin": "1codex",
-  "version": "1.0.4",
-  "source_commit": "0561b5d2aed7662df37d54452a6c0324fa9c30f2",
+  "version": "1.0.5",
+  "source_commit": "b52354339f8ee87b8816441548b71e2d936bbcd2",
   "checks": {
     "zip_integrity_and_safe_paths": "PASS",
     "skill_frontmatter": "PASS",
@@ -19,13 +19,13 @@
   "host_installation_tested": false,
   "note": "Archive and bundled-tool checks only; target ChatGPT installation still requires acceptance tests.",
   "archives": {
-    "1Codex-1.0.4.zip": {
+    "1Codex-1.0.5.zip": {
       "bytes": 1497934,
-      "sha256": "9c865c1f1b5490208739716752fe5d00555d3350397cf33a84cce4a0d9008b62"
+      "sha256": "bc85bdf08df0b4f57a2c8d31234b9a1112aed8eeabd2e6bf6f089d2016bb29e8"
     },
-    "1Codex-local-1.0.4.zip": {
+    "1Codex-local-1.0.5.zip": {
       "bytes": 1523451,
-      "sha256": "cfb07d3ae5091d1b2a2347bda7a4a2837c4b3d23a64dfaf7f6965b03acfae4bc"
+      "sha256": "12ad57500b103fa5cfc9709ebdf84451fac8898922a669f73bf922754347fbf7"
     }
   }
 }

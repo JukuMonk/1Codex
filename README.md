@@ -11,7 +11,7 @@ ChatGPT/Codex с поддержкой плагинов, вход в свой а�
 3. В распакованной папке откройте PowerShell и выполните:
 
    ```powershell
-   .\Install-1Codex.ps1
+   powershell -NoProfile -ExecutionPolicy RemoteSigned -File .\Install-1Codex.ps1
    ```
 
 4. Перезапустите настольное приложение. В **Plugins → Installed** должен появиться
@@ -26,7 +26,9 @@ ChatGPT/Codex с поддержкой плагинов, вход в свой а�
 
 Если Windows блокирует запуск скрипта, можно разблокировать два скачанных файла
 через **Свойства → Разблокировать**, если это допускается правилами вашей организации.
-Скрипты не меняют ExecutionPolicy. Если запрещены PowerShell-скрипты или задачи,
+Команды используют RemoteSigned только для запущенного процесса; постоянная
+ExecutionPolicy не меняется. Политики организации имеют приоритет.
+Если запрещены PowerShell-скрипты или задачи,
 используйте ручные команды ниже или обратитесь к администратору.
 
 ## Установка командами (Windows/macOS/Linux)
@@ -52,7 +54,7 @@ codex plugin add 1codex@1codex
 В Windows запустите в PowerShell:
 
 ```powershell
-& "$env:USERPROFILE\.codex\1codex-updater\Update-1Codex.ps1"
+powershell -NoProfile -ExecutionPolicy RemoteSigned -File "$env:USERPROFILE\.codex\1codex-updater\Update-1Codex.ps1"
 ```
 
 Или вручную в терминале с доступным `codex`:
