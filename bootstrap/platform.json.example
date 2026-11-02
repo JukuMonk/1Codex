@@ -3,6 +3,7 @@
   "agent": "codex",
   "configuration_kind": null,
   "metadata_version": null,
+  "platform_version": null,
   "compatibility_mode": null,
   "v8": null,
   "dump": null,
@@ -10,7 +11,14 @@
   "prefix": null,
   "test_ib": null,
   "ib": null,
+  "production_ib": null,
   "com": null,
   "test_usr": "",
-  "ui_port": 48123
+  "ui_port": 48123,
+  "com_test": null,
+  "ui_scenario": null,
+  "release_target": null,
+  "required_test_levels": ["com", "ui"],
+  "dataset": null,
+  "skill_revision": null
 }

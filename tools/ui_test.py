@@ -16,19 +16,25 @@
 Скорость (case 092): весь сценарий — один клиент, ожидание = 40 с × шагов (минимум 300); шаги ждут смены окна, а не
 фиксированных пауз; снимок — копией экрана (tools/ui_capture.py), окно вперёд не выводится; нет экрана или окно
 перекрыто — снимок пропускается и попадает в итоговую сводку. --printwindow — снимать любой ценой (тормозит клиент).
-Закрываются только клиенты ЭТОЙ базы (по пути в командной строке процесса).
+Закрываются только процессы, созданные текущим запуском. Артефакты — ui-runs/<run_id>; итог — ui-last.json.
 """
 import argparse
 import io
 import json
 import os
+import re
 import subprocess
 import sys
 import time
+import socket
+import tempfile
+from pathlib import Path
+from contextlib import ExitStack
+from workflow.ui_session import ProjectLock, RunArtifacts, stop_owned
+from workflow.resource_lock import base_lease
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import designer_lib as dl  # noqa: E402
-import ui_capture  # noqa: E402
 
 НАБОР = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 МЕНЕДЖЕР = os.path.join(НАБОР, 'reference', 'testing-ui', 'ТестUIМенеджер')
@@ -36,14 +42,21 @@ import ui_capture  # noqa: E402
 
 
 def close_clients(ib):
-    """Закрыть только 1cv8c/1cv8 этой базы (по пути в командной строке) — чужие окна не трогать."""
-    метка = ib.rstrip('\\/').replace("'", "''")
-    ps = ("Get-CimInstance Win32_Process | Where-Object { ($_.Name -eq '1cv8c.exe' -or $_.Name -eq '1cv8.exe') "
-          "-and $_.CommandLine -like '*%s*' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force; $_.ProcessId }"
-          % метка)
-    r = subprocess.run(['powershell', '-NoProfile', '-Command', ps], capture_output=True, text=True)
-    if r.stdout.strip():
-        print('закрыты процессы:', ' '.join(r.stdout.split()))
+    """Deprecated: path-based process termination is forbidden."""
+    raise RuntimeError('Use stop_owned(Popen handles); never terminate clients by database path')
+
+
+def port_available(port):
+    if not 1 <= port <= 65535: raise ValueError('Invalid UI port')
+    with socket.socket() as probe:
+        if hasattr(socket, 'SO_EXCLUSIVEADDRUSE'):
+            probe.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
+        probe.bind(('127.0.0.1', port))
+
+
+def capture(*args, **kwargs):
+    import ui_capture
+    return ui_capture.grab(*args, **kwargs)
 
 
 def manager_outdated(epf, src=МЕНЕДЖЕР):
@@ -59,69 +72,69 @@ def steps(scenario):
 
 
 def run(scenario, ib, v8, user='', pwd='', work=None, port=48133, printwindow=False, manager=МЕНЕДЖЕР):
-    scenario = os.path.abspath(scenario)
-    work = work or os.path.splitext(scenario)[0] + '_ui'
-    os.makedirs(work, exist_ok=True)
-    v8c, v8d = os.path.join(v8, '1cv8c.exe'), os.path.join(v8, '1cv8.exe')
-    т = time.time()
-    close_clients(ib)
-    epf = os.path.join(work, 'ТестUIМенеджер.epf')
-    if manager_outdated(epf, manager):
-        код, текст, _ = dl.build_epf(v8d, ib, os.path.join(manager, 'ТестUIМенеджер.xml'), epf,
-                                     os.path.join(work, 'сборка_менеджера.log'), user=user, pwd=pwd)
-        if код:
-            sys.exit('менеджер не собран:\n' + текст)
-    print('[замер] подготовка: %.1f с' % (time.time() - т))
-    журнал = os.path.join(work, 'ui_журнал.txt')
-    запрос = журнал + '.снимок'
-    for ф in (журнал, запрос):
-        if os.path.exists(ф):
-            os.remove(ф)
-    cred = ' /N"%s" /P"%s"' % (user, pwd) if user else ''
-    база = '"%s" ENTERPRISE /F"%s"%s /DisableStartupMessages' % (v8c, ib, cred)
-    ожидание = max(300, СЕКУНД_НА_ШАГ * steps(scenario))
-    клиент = subprocess.Popen(база + ' /TESTCLIENT -TPort %d' % port)
-    time.sleep(3)
-    subprocess.Popen(база + ' /TESTMANAGER /Execute "%s" /C "%s;%s;%d"' % (epf, scenario, журнал, port))
-    t0, не_снято, экран = time.time(), [], True
-
-    def снять(имя):
-        nonlocal экран
-        путь = os.path.join(work, 'ui_%s.png' % имя)
-        ок, причина = ui_capture.grab(клиент.pid, путь, retries=6 if экран else 1, printwindow=printwindow)
-        экран = ок                          # после неудачи — одна попытка на снимок, пока экран не вернётся
-        if not ок:
-            не_снято.append((имя, причина))
-        return путь if ок else '— НЕ СНЯТ (%s)' % причина
-
-    while not os.path.exists(журнал) and time.time() - t0 < ожидание:
-        if os.path.exists(запрос):
-            т_сн = time.time()
-            time.sleep(0.1)                 # дорисовка (шаг уже дождался смены окна)
-            with io.open(запрос, encoding='utf-8-sig') as f:
-                имя = f.read().strip() or 'снимок'
-            print('снимок', снять(имя), '[%.1f с]' % (time.time() - т_сн))
-            os.remove(запрос)               # менеджер ждёт удаления файла запроса
-        time.sleep(0.05)
-    time.sleep(1)
-    снять('итог')
-    if не_снято and не_снято[-1][0] == 'итог':
-        # после последнего шага клиенту тормозить уже нечего — итоговый кадр можно снять PrintWindow (case 095)
-        ок, _ = ui_capture.grab(клиент.pid, os.path.join(work, 'ui_итог.png'), printwindow=True)
-        if ок:
-            не_снято.pop()
-    close_clients(ib)
-    if не_снято:
-        print('\nНЕ СНЯТО снимков: %d (%s). Снимки — копией экрана: окно удалённого рабочего стола открыто, окно 1С '
-              'не перекрыто; либо --printwindow (медленно).' % (len(не_снято), не_снято[0][1]))
-    if not os.path.exists(журнал):
-        print('журнала нет: менеджер не отработал за %d с (диалог на старте? — ui_итог.png)' % ожидание)
-        return 2
-    with io.open(журнал, encoding='utf-8-sig') as f:
-        текст = f.read()
-    print(текст)
-    print('\n%.0f с' % (time.time() - t0))
-    return 1 if 'ОШИБКА' in текст else 0
+    scenario = str(Path(scenario).resolve())
+    if not Path(scenario).is_file() or steps(scenario) == 0:
+        raise ValueError('Scenario is absent or empty')
+    work = Path(work or os.path.splitext(scenario)[0] + '_ui').resolve()
+    owned, artifacts = [], None
+    began = time.monotonic()
+    result = 2
+    with ExitStack() as locks:
+        locks.enter_context(ProjectLock(work))
+        locks.enter_context(ProjectLock(Path(tempfile.gettempdir())/'1codex-ui-ports'/str(port)))
+        locks.enter_context(base_lease(work, ib))
+        port_available(port)
+        artifacts = RunArtifacts(work, str(Path(ib).resolve()), port, 'functional')
+        v8c, v8d = str(Path(v8)/'1cv8c.exe'), str(Path(v8)/'1cv8.exe')
+        try:
+            epf = work/'ТестUIМенеджер.epf'
+            if manager_outdated(str(epf), manager):
+                pending = artifacts.root/'ТестUIМенеджер.epf'
+                code, log, _ = dl.build_epf(v8d, ib, str(Path(manager)/'ТестUIМенеджер.xml'), str(pending),
+                    str(artifacts.root/'build.log'), user=user, pwd=pwd)
+                if code or not pending.is_file() or re.search(r'\b(?:Ошибка|Error|Exception|Исключение)(?=\s|:|\()', log, re.I):
+                    raise RuntimeError('Test manager build failed; see build.log')
+                os.replace(pending, epf)
+            cred = ' /N"%s" /P"%s"' % (user, pwd) if user else ''
+            command = '"%s" ENTERPRISE /F"%s"%s /DisableStartupMessages' % (v8c, ib, cred)
+            client = subprocess.Popen(command + ' /TESTCLIENT -TPort %d' % port)
+            owned.append(client)
+            time.sleep(3)
+            manager_process = subprocess.Popen(command + ' /TESTMANAGER /Execute "%s" /C "%s;%s;%d"' %
+                (epf, scenario, artifacts.journal, port))
+            owned.append(manager_process)
+            artifacts.manifest['owned_pids'] = [p.pid for p in owned]
+            artifacts.save()
+            until = time.monotonic() + max(300, СЕКУНД_НА_ШАГ * steps(scenario))
+            def shot(name):
+                target = artifacts.frame(name)  # validates traversal and reserved Windows names
+                ok, reason = capture(client.pid, str(target), printwindow=printwindow)
+                if ok: artifacts.manifest['frames'].append(name)
+                else: artifacts.manifest.setdefault('missed_frames', []).append({'name': name, 'reason': reason})
+                return ok
+            while not artifacts.journal.exists() and time.monotonic() < until:
+                if artifacts.request.exists():
+                    name = artifacts.request.read_text(encoding='utf-8-sig').strip() or 'снимок'
+                    time.sleep(0.1)
+                    shot(name)
+                    artifacts.request.unlink()
+                if client.poll() is not None or manager_process.poll() is not None:
+                    break
+                time.sleep(0.05)
+            time.sleep(0.3)
+            shot('итог')
+            if artifacts.journal.is_file():
+                log = artifacts.journal.read_text(encoding='utf-8-sig')
+                result = 1 if 'ОШИБКА' in log else (0 if log.strip() else 2)
+                print(log)
+            return result
+        finally:
+            stop_owned(owned)
+            artifacts.manifest.update(status='succeeded' if result == 0 else 'failed', exit_code=result,
+                elapsed_seconds=round(time.monotonic()-began, 6))
+            artifacts.save()
+            artifacts.publish()
+            print('UI artifacts:', artifacts.root)
 
 
 def main():
@@ -129,7 +142,7 @@ def main():
     a = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     a.add_argument('scenario')
     a.add_argument('--ib', required=True)
-    a.add_argument('--v8', default=r'C:\Program Files\1cv8\8.5.1.1529\bin')
+    a.add_argument('--v8', required=True, help='Каталог bin выбранной платформы')
     a.add_argument('--user', default='')
     a.add_argument('--cred')
     a.add_argument('--work')

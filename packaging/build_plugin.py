@@ -56,6 +56,7 @@ def main():
     sys.stdout.reconfigure(encoding='utf-8')
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', required=True, type=Path)
+    parser.add_argument('--include-worktree', action='store_true', help='Include uncommitted files in a local review build')
     parser.add_argument('--version', help='Override package version for a CI release')
     args = parser.parse_args()
     output = args.output.resolve()
@@ -70,12 +71,19 @@ def main():
     version = manifest['version']
     assert re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*', manifest['name'])
     assert re.fullmatch(r'\d+\.\d+\.\d+', version)
-    tracked = subprocess.check_output(['git', 'ls-files', '-z'], cwd=ROOT).decode('utf-8').split('\0')
+    dirty = bool(run(['git', 'status', '--porcelain'], ROOT))
+    if dirty and not args.include_worktree:
+        parser.error('Dirty checkout: use --include-worktree for a review build; stable builds require a clean commit')
+    options = ['--cached', '--others', '--exclude-standard'] if args.include_worktree else ['--cached']
+    tracked = subprocess.check_output(['git', 'ls-files', '-z', *options], cwd=ROOT).decode('utf-8').split('\0')
+    tracked = sorted(set(name for name in tracked if name and (ROOT/name).is_file()))
     resource_dirs = {'bootstrap', 'cases', 'examples', 'index', 'knowledge', 'reference', 'tests', 'tools'}
     tracked = [name for name in tracked if name and
                (PurePosixPath(name).parts[0] in resource_dirs or
-                name in {'SKILL.md', 'AGENTS.md', 'CLAUDE.md', 'README.md'})]
+                name in {'SKILL.md', 'AGENTS.md', 'CLAUDE.md', 'README.md', 'pyproject.toml', 'requirements-windows.txt'})]
     report = {'plugin': manifest['name'], 'version': version,
+              'worktree_dirty': dirty, 'review_build': args.include_worktree,
+              'source_manifest': {name: hashlib.sha256((ROOT/name).read_bytes()).hexdigest() for name in tracked},
               'source_commit': run(['git', 'rev-parse', 'HEAD'], ROOT),
               'checks': {}, 'host_installation_tested': False,
               'note': 'Archive and bundled-tool checks only; target ChatGPT installation still requires acceptance tests.'}
@@ -106,7 +114,7 @@ def main():
         (skill / 'knowledge' / 'chatgpt.md').write_bytes((TEMPLATES / 'chatgpt.md').read_bytes())
         setup = plugin / 'skills' / 'setup' / 'SKILL.md'
         setup.parent.mkdir(parents=True)
-        setup.write_bytes((TEMPLATES / 'setup' / 'SKILL.md').read_bytes())
+        setup.write_bytes((TEMPLATES / 'setup' / 'SKILL.md.template').read_bytes())
         json_write(plugin / 'plugin.json', manifest)
         extension = manifest['extensions']['com.openai']
         compat = {key: value for key, value in manifest.items() if key not in {'$schema', 'extensions'}}
@@ -159,15 +167,12 @@ def main():
         assert (path / 'plugin.json').read_bytes() == (restored / 'plugin.json').read_bytes()
         report['checks']['marketplace_resolution_and_enable_config'] = 'PASS'
         installed_skill = restored / 'skills' / '1c-edt-skill'
-        for label, cmd in (
-            ('links', ['tools/check_links.py']),
-            ('cases', ['tools/cases_sync.py', 'проверить']),
-            # Preload the standard library before adding tools/: its historical
-            # platform.py otherwise shadows stdlib platform when uuid loads on Linux.
-            ('sandbox', ['-c', "import platform,runpy,sys;sys.path.insert(0,'tools');"
-                         "sys.argv=['tools/check_project.py','tests/sandbox'];"
-                         "runpy.run_path(sys.argv[0],run_name='__main__')"])):
-            report['checks'][label] = run([sys.executable, *cmd], installed_skill)
+        check_report = stage / 'selftest.json'
+        report['checks']['selftest'] = run([sys.executable, 'tools/selftest.py', '--output', str(check_report)], installed_skill)
+        report['offline_acceptance'] = json.loads(check_report.read_text(encoding='utf-8'))
+        # Validate setup references in the actual package layout.
+        assert (restored/'skills/setup/../1c-edt-skill/knowledge/chatgpt.md').is_file()
+        report['checks']['setup_resources'] = 'PASS'
         report['archives'] = {}
         for archive in (portable_zip, local_zip):
             report['archives'][archive.name] = {'bytes': archive.stat().st_size,

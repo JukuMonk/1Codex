@@ -17,7 +17,7 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TOPS = ('knowledge/', 'examples/', 'cases/', 'reference/', 'tools/', 'tests/', 'index/',
-        'CLAUDE.md', 'README.md')
+        'CLAUDE.md', 'README.md', 'SKILL.md', 'AGENTS.md', 'docs/', 'packaging/', 'bootstrap/', 'distribution/', './', '../')
 LINK = re.compile(r'`([^`\n]+)`|\]\(([^)\n]+)\)')
 SENSITIVE = [
     (re.compile(r'https?://(?!localhost|g5\.1c\.ru|v8\.1c\.ru|www\.w3\.org|<)[^\s`"\'>)]+'), 'адрес'),
@@ -43,7 +43,8 @@ def files(exts):
 
 def resolve(link, base_dir):
     """Существует ли то, на что указывает ссылка. Возвращает None (ок) или причину."""
-    link = link.strip()
+    from urllib.parse import unquote
+    link = unquote(link.strip().strip('<>'))
     # Real resources (including BSL/XML under tools/) take precedence over
     # dotted Python helper notation such as tools/edt_lib.stable_uid.
     if any(os.path.exists(os.path.join(folder, link)) for folder in (ROOT, base_dir)):
@@ -68,7 +69,7 @@ def resolve(link, base_dir):
         if os.path.exists(c):
             return None
     # cases/024 — префикс папки кейса
-    if link.startswith('cases/'):
+    if re.fullmatch(r'cases/\d{3}/?', link):
         parts = link.split('/')
         if len(parts) >= 2 and os.path.isdir(os.path.join(ROOT, 'cases')):
             for n in os.listdir(os.path.join(ROOT, 'cases')):
@@ -85,7 +86,7 @@ def check_links():
         rel = os.path.relpath(path, ROOT).replace(os.sep, '/')
         for m in LINK.finditer(text):
             link = (m.group(1) or m.group(2) or '').strip()
-            if not link.startswith(TOPS):
+            if not link.startswith(TOPS) and not (m.group(2) and not re.match(r'^(?:[a-zA-Z]+:|#)', link)):
                 continue
             why = resolve(link, base_dir)
             if why:

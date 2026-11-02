@@ -1,0 +1,9 @@
+{
+  "platform": "8.3.27.2325",
+  "format": "2.20",
+  "compatibility": "Version8_3_27",
+  "origin": "Fresh isolated test base created by tests/designer/create_fixture.py",
+  "verification": "load, UpdateDBCfg, CheckModules, dump and compare; no users or business data bundled",
+  "comparison_errors": 0,
+  "compared_files": 7
+}

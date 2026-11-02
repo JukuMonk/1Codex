@@ -68,6 +68,16 @@ codex plugin add 1codex@1codex
 системах не применяется. Архив повторно скачивать не нужно. В Windows журнал:
 `%USERPROFILE%\.codex\1codex-updater\update.log`.
 
+В версии установщика 1.1.0 состояние последней попытки, успешного обновления
+и установленная версия доступны без обращения к сети:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy RemoteSigned -File "$env:USERPROFILE\.codex\1codex-updater\Update-1Codex.ps1" -StatusOnly
+```
+
+Коллеги получают версию из ветки `plugin`. Изменение исходников в `main`
+само по себе не выпускает новую версию: владелец запускает проверенный выпуск.
+
 ## Если не появился или нужно удалить
 
 - Проверьте версию приложения и `codex plugin marketplace list`.
