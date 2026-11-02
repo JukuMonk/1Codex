@@ -24,6 +24,12 @@ $updater = Join-Path $taskDir 'Update-1Codex.ps1'
 $sourceUpdater = Join-Path $PSScriptRoot 'Update-1Codex.ps1'
 if (-not (Test-Path -LiteralPath $sourceUpdater)) { throw 'Place Update-1Codex.ps1 beside the installer.' }
 Copy-Item -LiteralPath $sourceUpdater -Destination $updater -Force
+$hasher = [Security.Cryptography.SHA256]::Create()
+try { $updaterHash = [BitConverter]::ToString($hasher.ComputeHash([IO.File]::ReadAllBytes($updater))).Replace('-', '').ToLowerInvariant() }
+finally { $hasher.Dispose() }
+@{schema_version=2; installed_at=(Get-Date -Format o); scheduled=(-not $NoSchedule);
+    updater_sha256=$updaterHash} |
+    ConvertTo-Json | Set-Content -LiteralPath (Join-Path $taskDir 'installation.json') -Encoding UTF8
 if (-not $NoSchedule) {
     $shellExe = Join-Path $env:SystemRoot 'System32\WindowsPowerShell\v1.0\powershell.exe'
     $action = New-ScheduledTaskAction -Execute $shellExe -Argument ('-NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy RemoteSigned -File "' + $updater + '" -Quiet')

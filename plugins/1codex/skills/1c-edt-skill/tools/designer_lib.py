@@ -14,6 +14,8 @@ edt_lib пишет формат EDT (.mdo, Form.form); здесь — XML Кон
 Файлы выгрузки: UTF-8 С BOM, CRLF, отступы табуляцией.
 """
 import io
+from contextlib import contextmanager
+from contextvars import ContextVar
 import os
 import re
 import subprocess
@@ -50,6 +52,32 @@ FORM_EVENT_ORDER = ('AfterWrite', 'OnSaveDataInSettingsAtServer', 'ChoiceProcess
                     'OnClose', 'OnUpdateUserSettingSetAtServer', 'URLProcessing', 'FillCheckProcessingAtServer',
                     'BeforeLoadDataFromSettingsAtServer')
 VERSION = '2.20'      # атрибут version у MetaDataObject/Form (8.3.27, совместимость 8.3.21)
+
+_VERSION_CONTEXT = ContextVar('designer_metadata_version', default=None)
+
+
+def metadata_version():
+    return _VERSION_CONTEXT.get() or VERSION
+
+
+def metadata_namespaces(namespaces):
+    """Palette namespace present in canonical 8.5.1 metadata/form headers."""
+    if metadata_version() == '2.21' and 'xmlns:pal=' not in namespaces:
+        return namespaces.replace('xmlns:style=', 'xmlns:pal="http://v8.1c.ru/8.1/data/ui/colors/palette" xmlns:style=', 1)
+    return namespaces
+
+
+@contextmanager
+def generation_context(version):
+    """Explicit, nestable format context; legacy VERSION remains a fallback."""
+    if version not in ('2.20', '2.21'):
+        raise ValueError('Unsupported metadata format: ' + str(version))
+    token = _VERSION_CONTEXT.set(version)
+    try:
+        yield
+    finally:
+        _VERSION_CONTEXT.reset(token)
+
 
 NS_UID = uuid.UUID('6f1c1c1e-6c1d-4d7a-9a8e-1c0de51a7e01')
 
@@ -200,8 +228,9 @@ def md_tabular_section(kind, owner, name, columns, title=None, level=3):
 
 
 def md_object_file(body):
+    body = re.sub(r'<ChildObjects>\s*</ChildObjects>', '<ChildObjects/>', body)
     return '<?xml version="1.0" encoding="UTF-8"?>\n<MetaDataObject %s version="%s">\n%s\n</MetaDataObject>\n' % (
-        MD_NS, VERSION, body)
+        metadata_namespaces(MD_NS), metadata_version(), body)
 
 
 def data_processor_xml(name, title, attributes=(), tabular_sections=(), forms=(), default_form=None,
@@ -872,7 +901,7 @@ def rights_xml(objects=(), set_for_new_objects=False):
     (так устроена «ПолныеПрава» БСП: в ней перечислены только запреты). objects: [(объект, {право: bool})]."""
     p = ['<?xml version="1.0" encoding="UTF-8"?>',
          '<Rights xmlns="http://v8.1c.ru/8.2/roles" xmlns:xs="http://www.w3.org/2001/XMLSchema" '
-         'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="Rights" version="%s">' % VERSION,
+         'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="Rights" version="%s">' % metadata_version(),
          t(1) + '<setForNewObjects>%s</setForNewObjects>' % ('true' if set_for_new_objects else 'false'),
          t(1) + '<setForAttributesByDefault>true</setForAttributesByDefault>',
          t(1) + '<independentRightsOfChildObjects>false</independentRightsOfChildObjects>']
@@ -952,7 +981,7 @@ EXT_NS = ('xmlns="http://v8.1c.ru/8.3/xcf/extrnprops" xmlns:xr="http://v8.1c.ru/
 def picture_ext_xml(file_name='Picture.svg'):
     """Ext/Picture.xml общей картинки (и Ext/MainSectionPicture.xml конфигурации): сама картинка —
     файл рядом, в папке Ext/Picture/ (Ext/MainSectionPicture/). SVG — один файл на все масштабы."""
-    return '\n'.join(['<?xml version="1.0" encoding="UTF-8"?>', '<ExtPicture %s version="%s">' % (EXT_NS, VERSION),
+    return '\n'.join(['<?xml version="1.0" encoding="UTF-8"?>', '<ExtPicture %s version="%s">' % (EXT_NS, metadata_version()),
                       t(1) + '<Picture>', t(2) + '<xr:Abs>%s</xr:Abs>' % file_name,
                       t(2) + '<xr:LoadTransparent>false</xr:LoadTransparent>', t(1) + '</Picture>', '</ExtPicture>'])
 
@@ -1046,7 +1075,7 @@ def command_interface_xml(visibility=(), placement=(), order=(), subsystems=(), 
     visibility: [(команда, bool)]; placement: [(команда, группа)] — перенос в другую группу
     (NavigationPanelImportant/Ordinary/SeeAlso, ActionsPanelCreate/Reports/Tools);
     order: [(группа, [команды])]; subsystems: ['Subsystem.X', …]; groups: порядок групп."""
-    p = ['<?xml version="1.0" encoding="UTF-8"?>', '<CommandInterface %s version="%s">' % (EXT_NS, VERSION)]
+    p = ['<?xml version="1.0" encoding="UTF-8"?>', '<CommandInterface %s version="%s">' % (EXT_NS, metadata_version())]
     if visibility:
         p.append(t(1) + '<CommandsVisibility>')
         for c, vis in visibility:
@@ -1078,7 +1107,7 @@ def command_interface_xml(visibility=(), placement=(), order=(), subsystems=(), 
 def home_page_xml(forms, template='OneColumn'):
     """Ext/HomePageWorkArea.xml конфигурации: forms — [(форма, высота[, видимость])], форма —
     'DataProcessor.X.Form.Y' | 'CommonForm.X'. Видимость явно true: пустая = скрыта для всех (case 061)."""
-    p = ['<?xml version="1.0" encoding="UTF-8"?>', '<HomePageWorkArea %s version="%s">' % (EXT_NS, VERSION),
+    p = ['<?xml version="1.0" encoding="UTF-8"?>', '<HomePageWorkArea %s version="%s">' % (EXT_NS, metadata_version()),
          t(1) + '<WorkingAreaTemplate>%s</WorkingAreaTemplate>' % template, t(1) + '<Column>']
     for f in forms:
         p += [t(2) + '<Item>', t(3) + '<Form>%s</Form>' % f[0], t(3) + '<Height>%d</Height>' % f[1],
@@ -1546,7 +1575,7 @@ class Form:
                              t(5) + '<xr:Common>false</xr:Common>', t(4) + '</Visible>']
                 body.append(t(3) + '</Item>')
             body += [t(2) + '</NavigationPanel>', t(1) + '</CommandInterface>']
-        return ('<?xml version="1.0" encoding="UTF-8"?>\n<Form %s version="%s">\n' % (FORM_NS, VERSION) +
+        return ('<?xml version="1.0" encoding="UTF-8"?>\n<Form %s version="%s">\n' % (metadata_namespaces(FORM_NS), metadata_version()) +
                 '\n'.join(body) + '\n</Form>\n')
 
 
@@ -1746,7 +1775,7 @@ def check_form_params(module_text, form_xml):
 def check_query(text):
     """Проверка текста запроса до выполнения (COM, запросы форм в Python): псевдоним после КАК — ключевое слово
     («Ожидается имя», case 016: КАК В / По / Из …), непарные кавычки. Возвращает список замечаний."""
-    import edt_lib  # noqa: E402 — список ключевых слов один на набор
+    import bsl_checks as edt_lib  # noqa: E402 — список ключевых слов один на набор
     problems = []
     for m in re.finditer(r'\bКАК\s+([А-Яа-яЁёA-Za-z_][А-Яа-яЁёA-Za-z_0-9]*)', text, re.I):
         if m.group(1).upper() in edt_lib.QUERY_KEYWORDS - QUERY_ALIAS_OK:
@@ -1862,15 +1891,21 @@ def form_item_event(text, name, tag, event, handler):
 
 
 def form_hide(text, name, tag='InputField'):
-    """Visible=false у элемента (после DataPath или сразу после открывающего тега)."""
-    a, b = xml_block(text, '<%s name="%s"' % (tag, name), tag)
-    el = text[a:b]
-    o = line_indent(text, a) + '\t'
-    if '\n%s<Visible>false</Visible>' % o in el:
-        return text
-    m = re.search(r'\n%s<DataPath>[^<]*</DataPath>' % o, el)
-    k = m.end() if m else el.index('>') + 1
-    return text[:a] + el[:k] + '\n%s<Visible>false</Visible>' % o + el[k:] + text[b:]
+    """Set a direct Visible property without altering other element contents."""
+    from xml_spans import named
+    node = named(text, tag, name)
+    visible = [c for c in node.children if c.tag == 'Visible']
+    if len(visible) > 1:
+        raise ValueError('Duplicate Visible on ' + name)
+    if visible:
+        c = visible[0]
+        return text[:c.start] + '<Visible>false</Visible>' + text[c.end:]
+    if text[node.start:node.open_end].rstrip().endswith('/>'):
+        raise ValueError('Cannot insert property into self-closing field: ' + name)
+    data = [c for c in node.children if c.tag == 'DataPath']
+    at = data[0].end if data else node.open_end
+    indent = line_indent(text, node.start) + '\t'
+    return text[:at] + '\n' + indent + '<Visible>false</Visible>' + text[at:]
 
 
 ITEM_TAGS = ('InputField', 'UsualGroup', 'LabelField', 'CheckBoxField', 'Table', 'Pages', 'LabelDecoration', 'Button')
@@ -2059,27 +2094,24 @@ def form_related_list(text, pages_name, page, title, list_name, main_table, colu
 
 
 def form_reorder_columns(text, table, order):
-    """Колонки таблицы формы — в порядке order (имена элементов), остальные — после, как были."""
-    a, b = xml_block(text, '<Table name="%s"' % table, 'Table')
-    body = text[a:b]
-    ci, ce = body.rfind('<ChildItems>'), body.rfind('</ChildItems>')
-    kids = body[ci + len('<ChildItems>') + 1:body.rfind('\n', 0, ce) + 1]
-    blocks, names, pos = {}, [], 0
-    while True:
-        m = re.search(r'^\t*<(InputField|LabelField|CheckBoxField|ColumnGroup) name="(\w+)"', kids[pos:], re.M)
-        if not m:
-            break
-        s = pos + m.start()
-        e = xml_block(kids, '<%s name="%s"' % (m.group(1), m.group(2)), m.group(1), s)[1] + 1
-        names.append(m.group(2))
-        blocks[m.group(2)] = kids[s:e]
-        pos = e
-    new = [n for n in order if n in blocks] + [n for n in names if n not in order]
-    if new == names:
-        return text
-    head = ci + len('<ChildItems>') + 1
-    body = body[:head] + ''.join(blocks[n] for n in new) + body[body.rfind('\n', 0, ce) + 1:]
-    return text[:a] + body + text[b:]
+    """Reorder direct columns; retain all unknown types and nested contents byte-for-byte."""
+    from xml_spans import named
+    node = named(text, 'Table', table).child('ChildItems')
+    order = list(order)
+    if len(order) != len(set(order)):
+        raise ValueError('Repeated column in requested order')
+    blocks, names, cursor = {}, [], node.open_end
+    for index, child in enumerate(node.children):
+        name = child.attrs.get('name', ('unnamed', index))
+        if name in blocks: raise ValueError('Duplicate column name')
+        blocks[name] = text[cursor:child.end]
+        names.append(name)
+        cursor = child.end
+    unknown = set(order) - set(names)
+    if unknown: raise ValueError('Unknown columns: ' + ', '.join(sorted(unknown)))
+    new = order + [n for n in names if n not in order]
+    if new == names: return text
+    return text[:node.open_end] + ''.join(blocks[n] for n in new) + text[cursor:]
 
 
 def form_move_element(text, name, group, tag='InputField'):
@@ -2153,7 +2185,9 @@ def catalog_list_form(dump, obj, title, query, fields, columns, params=(), attrs
     write(os.path.join(dump, 'Catalogs', obj, 'Forms', form + '.xml'),
           form_meta_xml('Catalog.' + obj, form, 'Форма списка'))
     ids = FormIds('<x id="20"/>')
-    p = ['<?xml version="1.0" encoding="UTF-8"?>\n<Form %s version="%s">\n' % (FORM_NS, version or VERSION),
+    with generation_context(version or metadata_version()):
+        form_namespaces = metadata_namespaces(FORM_NS)
+    p = ['<?xml version="1.0" encoding="UTF-8"?>\n<Form %s version="%s">\n' % (form_namespaces, version or metadata_version()),
          ml_xml('Title', title, '\t'), '\t<AutoTitle>false</AutoTitle>\n',
          '\t<AutoCommandBar name="ФормаКоманднаяПанель" id="-1"/>\n',
          '\t<Events>\n\t\t<Event name="OnCreateAtServer">ПриСозданииНаСервере</Event>\n\t</Events>\n',
@@ -2195,10 +2229,10 @@ def changed_objects(dump, commit='HEAD'):
     Изменённый общий модуль добавляет объекты, в модулях которых он упоминается («Модуль.»)."""
     dump = os.path.abspath(dump)
     git = ['git', '-C', dump, '-c', 'core.quotepath=off']
-    files = subprocess.run(git + ['diff', '--name-only', '--relative', commit, '--', '.'], capture_output=True,
-                           text=True, encoding='utf-8').stdout.split()
-    files += subprocess.run(git + ['ls-files', '--others', '--exclude-standard', '--', '.'], capture_output=True,
-                            text=True, encoding='utf-8').stdout.split()
+    files = subprocess.run(git + ['diff', '--name-only', '-z', '--relative', commit, '--', '.'], capture_output=True,
+                           text=True, encoding='utf-8', check=True).stdout.split('\0')
+    files += subprocess.run(git + ['ls-files', '-z', '--others', '--exclude-standard', '--', '.'], capture_output=True,
+                            text=True, encoding='utf-8', check=True).stdout.split('\0')
     objects, modules = set(), set()
     for f in files:
         parts = f.replace('\\', '/').split('/')

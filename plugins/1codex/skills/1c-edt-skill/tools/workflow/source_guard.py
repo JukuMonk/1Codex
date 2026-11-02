@@ -71,9 +71,9 @@ def fingerprint(files):
 
 
 @contextlib.contextmanager
-def project_lock(project):
+def project_lock(project, platform=None):
     """Nonblocking OS byte/flock lock. A crashed process releases it automatically."""
-    path = Path(project) / '.platform' / 'platform-project.lock'
+    path = Path(platform or Path(project) / '.platform') / 'platform-project.lock'
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open('a+b') as stream:
         stream.seek(0, os.SEEK_END)
@@ -116,13 +116,23 @@ def cosmetic_equivalent(left, right):
         return True
     if Path(left).suffix.lower() == '.xml':
         import xml.etree.ElementTree as ET
-        def value(s):
-            return None if not s or not s.strip() else s
-        def tree(node):
-            return (node.tag, tuple(sorted(node.attrib.items())), value(node.text),
-                    tuple((tree(child), value(child.tail)) for child in node))
+        def signature(raw):
+            import io
+            # Keep prefix bindings too: QName values in 1C XML are text.
+            namespaces = []
+            for event, value in ET.iterparse(io.BytesIO(raw), events=('start-ns',)):
+                namespaces.append(value)
+            def tree(node, inherited=False):
+                space = node.get('{http://www.w3.org/XML/1998/namespace}space')
+                preserve = inherited if space is None else space == 'preserve'
+                def layout(value):
+                    return None if value is None or (not preserve and not value.strip()) else value
+                text = layout(node.text) if len(node) else node.text
+                return (node.tag, tuple(sorted(node.attrib.items())), text,
+                        tuple((tree(child, preserve), layout(child.tail)) for child in node))
+            return (tuple(namespaces), tree(ET.fromstring(raw)))
         try:
-            return tree(ET.fromstring(a)) == tree(ET.fromstring(b))
+            return signature(a) == signature(b)
         except ET.ParseError:
             return False
     try:
@@ -132,10 +142,10 @@ def cosmetic_equivalent(left, right):
 
 
 class FrozenRun:
-    def __init__(self, project, live, operation):
+    def __init__(self, project, live, operation, platform=None):
         self.live = Path(live).resolve()
         self.id = datetime.datetime.now().strftime('%Y%m%d_%H%M%S_') + uuid.uuid4().hex[:10]
-        self.folder = Path(project) / '.platform' / 'runs' / self.id
+        self.folder = Path(platform or Path(project) / '.platform') / 'runs' / self.id
         self.folder.mkdir(parents=True)
         self.snapshot = self.folder / 'source'
         self.started = time.monotonic()

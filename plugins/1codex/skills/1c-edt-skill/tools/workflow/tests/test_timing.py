@@ -67,3 +67,31 @@ class TimingTests(unittest.TestCase):
         phase = timing.begin(self.path, 'retry')
         timing.end(self.path, phase)
         timing.finish(self.path)
+
+    def test_parallel_cli_writers_do_not_drop_stages(self):
+        code='import sys;sys.path.insert(0,sys.argv[1]);import timing;s=timing.begin(sys.argv[2],"parallel");timing.end(sys.argv[2],s)'
+        processes=[subprocess.Popen([sys.executable,'-c',code,str(Path(timing.__file__).parent),str(self.path)],
+                                    stdout=subprocess.PIPE,stderr=subprocess.PIPE) for _ in range(8)]
+        results=[]
+        try:
+            for process in processes:
+                out,error=process.communicate(timeout=15)
+                results.append((process.returncode,error))
+        finally:
+            for process in processes:
+                if process.poll() is None:process.kill()
+                process.communicate(timeout=5)
+        for code,error in results:self.assertEqual(code,0,error.decode(errors='replace'))
+        timing.finish(self.path)
+        self.assertEqual(len(json.loads(self.path.read_text(encoding='utf-8'))['stages']),8)
+
+    def test_transient_windows_replace_denial_is_retried(self):
+        original_replace=Path.replace
+        attempts=[]
+        def intermittent(path,target):
+            attempts.append(target)
+            if len(attempts)<3:raise PermissionError('temporary sharing violation')
+            return original_replace(path,target)
+        with patch.object(Path,'replace',intermittent):phase=timing.begin(self.path,'retry')
+        self.assertEqual(len(attempts),3)
+        timing.end(self.path,phase);timing.finish(self.path)

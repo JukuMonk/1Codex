@@ -1,0 +1,3194 @@
+{
+  "schema_version": 2,
+  "evidence_hash_format": "utf8-no-bom-lf-v1",
+  "classification_note": "Format is a discovery route; platform mentions are not a compatibility guarantee. Null fields are unreviewed, not universal.",
+  "cases": [
+    {
+      "id": "001",
+      "slug": "form-number-qualifiers",
+      "topic": "форма",
+      "symptom": "пустой лист в EDT; числовой реквизит без `numberQualifiers`",
+      "format": "legacy-edt",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/001-form-number-qualifiers/task.md",
+          "sha256": "af68eb4798384c5255707d2be47c065ff23c5dd4164fb639d5fcf6165371e77b"
+        },
+        {
+          "path": "cases/001-form-number-qualifiers/lessons.md",
+          "sha256": "21fe097a89b084b37180dc8f37f4c7ebd506ebd834fa5a9d5dcbbbf846c62f9a"
+        }
+      ]
+    },
+    {
+      "id": "002",
+      "slug": "form-save-window-settings",
+      "topic": "форма",
+      "symptom": "пустой лист; нет `saveWindowSettings`; «Возникла внутренняя ошибка»",
+      "format": "legacy-edt",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/002-form-save-window-settings/task.md",
+          "sha256": "f267c750eedd44dfcb6722f7d4abe8cf20ec95a4eb576fe007657212355bfd55"
+        },
+        {
+          "path": "cases/002-form-save-window-settings/lessons.md",
+          "sha256": "01815e57a3bb6756afa5e77096d901d1236e91a7065365d79bff90ad3da2e4f5"
+        }
+      ]
+    },
+    {
+      "id": "003",
+      "slug": "form-attribute-column-id-space",
+      "topic": "форма",
+      "symptom": "пустой лист; колонка с номером реквизита «Объект»; три пространства номеров",
+      "format": "legacy-edt",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/003-form-attribute-column-id-space/task.md",
+          "sha256": "f581f3ec52105d6752fe65ad91005cd587b40dfdf257f5a723323eafd17313b7"
+        },
+        {
+          "path": "cases/003-form-attribute-column-id-space/lessons.md",
+          "sha256": "de32a9bbe5eb2a8fca29a2adb0b00df42dd27f52323a5bdbf9a2498b37f6399b"
+        }
+      ]
+    },
+    {
+      "id": "004",
+      "slug": "form-table-companions",
+      "topic": "форма",
+      "symptom": "таблица не рисуется; `searchStringAddition`/`viewStatusAddition`/`searchControlAddition`",
+      "format": "legacy-edt",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/004-form-table-companions/task.md",
+          "sha256": "7644b4cca0927963157c94f22f7ddd101ff0c8ca83239517a4b65cd95199a222"
+        },
+        {
+          "path": "cases/004-form-table-companions/lessons.md",
+          "sha256": "57505180cdd55f161005c7a0cbf3d33f41b687de3ed3b60e8b9398c4899351ce"
+        }
+      ]
+    },
+    {
+      "id": "005",
+      "slug": "mobile-use-purposes-root",
+      "topic": "мобильные",
+      "symptom": "форма есть, не открывается; `usePurposes MobileDevice` у корня",
+      "format": "legacy-edt",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/005-mobile-use-purposes-root/task.md",
+          "sha256": "b624f3b410a1f665053eb974b45b5abc88381f9da0c577d139cc6379fe2ad53c"
+        },
+        {
+          "path": "cases/005-mobile-use-purposes-root/lessons.md",
+          "sha256": "54f0849eb69c06d5695a0674bbc24205fa84628e8aeba36b6d5f35c73f26e91e"
+        }
+      ]
+    },
+    {
+      "id": "006",
+      "slug": "mobile-form-ladder-of-probes",
+      "topic": "диагностика",
+      "symptom": "«мобильную форму EDT не рисует» — не так; лесенка проб, три ложных диагноза",
+      "format": "legacy-edt",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/006-mobile-form-ladder-of-probes/task.md",
+          "sha256": "96b700240840f9d923c44b72af2ebc24ef7fd10c28b4675ad3d2ce991f0a7885"
+        },
+        {
+          "path": "cases/006-mobile-form-ladder-of-probes/lessons.md",
+          "sha256": "bcf1da8422d819e0847b46cc81dfda8727d05b02d0f2fe751387481d29f09557"
+        }
+      ]
+    },
+    {
+      "id": "007",
+      "slug": "group-through-align",
+      "topic": "форма",
+      "symptom": "элементы строки разъехались по колонкам; 4 свойства группы",
+      "format": "legacy-edt",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/007-group-through-align/task.md",
+          "sha256": "2db3600d3776aeca0d9bc437e1cf9ced8e63fc4b6c7936457140c4a2bebca9e0"
+        },
+        {
+          "path": "cases/007-group-through-align/lessons.md",
+          "sha256": "49697f72171e9eb1b464ee4d02214c6b47c782b335ad5c25baa2512c545aa14a"
+        }
+      ]
+    },
+    {
+      "id": "008",
+      "slug": "field-width-automaxwidth",
+      "topic": "форма",
+      "symptom": "поле до края формы; `width` + `autoMaxWidth`",
+      "format": "legacy-edt",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/008-field-width-automaxwidth/task.md",
+          "sha256": "e219fb1f64f570f3b6815ab36528f762dd84830cb7ecd0f78d3a729bd41fffb1"
+        },
+        {
+          "path": "cases/008-field-width-automaxwidth/lessons.md",
+          "sha256": "42a4b07909251c162de42ff6608e3f2852d33a51ddff220af123e0d66a852fcd"
+        }
+      ]
+    },
+    {
+      "id": "009",
+      "slug": "group-vertical-stretch",
+      "topic": "форма",
+      "symptom": "панель наверху, пустота, таблица внизу; `verticalStretch=false`, место тегов Group",
+      "format": "legacy-edt",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/009-group-vertical-stretch/task.md",
+          "sha256": "4bce40b49369b016b6e31b48cedfffe416a1f98ab0188519aaf2c1bd874f32f2"
+        },
+        {
+          "path": "cases/009-group-vertical-stretch/lessons.md",
+          "sha256": "060f84b88fb4fdf4c8b5be966bde227c9db05738e5b86edf13cea5a6a51ba652"
+        }
+      ]
+    },
+    {
+      "id": "010",
+      "slug": "form-module-reserved-names",
+      "topic": "BSL",
+      "symptom": "«Поле объекта недоступно для записи (Параметры)»; Объект/Элементы/ЭтаФорма",
+      "format": "shared",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/010-form-module-reserved-names/task.md",
+          "sha256": "63698df418f6f23ef600427e99424529150df99e4b503c35c99f0862d9adb21a"
+        },
+        {
+          "path": "cases/010-form-module-reserved-names/lessons.md",
+          "sha256": "3a81f4daca268b017a5073a1d2f5c3527344415af2e2f8448e6e9bb29dc0db20"
+        }
+      ]
+    },
+    {
+      "id": "011",
+      "slug": "procedure-without-directive-is-server",
+      "topic": "BSL",
+      "symptom": "«не определена (ОткрытьФорму)» при нажатии; процедура без директивы",
+      "format": "shared",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/011-procedure-without-directive-is-server/task.md",
+          "sha256": "6ef5ee19ea08ebd124ed6a88e73b8de694263a3d2df035c983577a280d786f40"
+        },
+        {
+          "path": "cases/011-procedure-without-directive-is-server/lessons.md",
+          "sha256": "98721db9aec0324ce9e15c1be89810c5a7457b386e9b344ee796c5fc7a31819f"
+        }
+      ]
+    },
+    {
+      "id": "012",
+      "slug": "insertion-breaks-directive",
+      "topic": "BSL/генератор",
+      "symptom": "вставка между директивой и объявлением; «не определена (ТочкаМаршрута)»",
+      "format": "shared",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/012-insertion-breaks-directive/task.md",
+          "sha256": "a2cf160a219dca061c0385775a6b334ce00e19d1fef3247bdef64434bac03c0c"
+        },
+        {
+          "path": "cases/012-insertion-breaks-directive/lessons.md",
+          "sha256": "95f2ada91a77a74bfb2c1ef79a0982198150ca62cc9734ccbde4630c95bf6fed"
+        }
+      ]
+    },
+    {
+      "id": "013",
+      "slug": "cross-module-call",
+      "topic": "BSL",
+      "symptom": "«{ОбщийМодуль…} не определена (ЧислоИлиНоль)»; чужой помощник",
+      "format": "shared",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/013-cross-module-call/task.md",
+          "sha256": "8991bad988a47b37a343766212450078576933bde50e21b8a770e02b5a443701"
+        },
+        {
+          "path": "cases/013-cross-module-call/lessons.md",
+          "sha256": "aafb860e19bffb70c8d313f10b3f8712c5ac42a0f04b791cd9386451658c59d3"
+        }
+      ]
+    },
+    {
+      "id": "014",
+      "slug": "exchange-data-load-property",
+      "topic": "BSL",
+      "symptom": "«Поле объекта не обнаружено (ОбменДаннымиЗагрузка)»",
+      "format": "shared",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/014-exchange-data-load-property/task.md",
+          "sha256": "b9b651e86addceab244d84d44995f442a05f7f7cc9c87ef9b930b6e457a60131"
+        },
+        {
+          "path": "cases/014-exchange-data-load-property/lessons.md",
+          "sha256": "664002946c536cbe1749484ac318868b88d5e018e5568036673cf24bc6c70033"
+        }
+      ]
+    },
+    {
+      "id": "015",
+      "slug": "query-quote-in-string-literal",
+      "topic": "запросы",
+      "symptom": "«Строка, не закрывающаяся кавычкой»; `<> \"\"`",
+      "format": "shared",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/015-query-quote-in-string-literal/task.md",
+          "sha256": "41d56d19c345846e9ccff52cc888d0895ce3688991f7c131d397c091c87cbd4c"
+        },
+        {
+          "path": "cases/015-query-quote-in-string-literal/lessons.md",
+          "sha256": "d022141b875b71af74c2ae3100174be32e7f3dd81877fdabf808d0842c8adf68"
+        }
+      ]
+    },
+    {
+      "id": "016",
+      "slug": "query-keyword-as-attribute-name",
+      "topic": "запросы/метаданные",
+      "symptom": "«Ожидается имя»; ресурсы `С`, `По`",
+      "format": "shared",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/016-query-keyword-as-attribute-name/task.md",
+          "sha256": "0f943924ad59cf92e46f413ef80760170db783a3766cf67f79549ea440d1d630"
+        },
+        {
+          "path": "cases/016-query-keyword-as-attribute-name/lessons.md",
+          "sha256": "44172b978989898c3c57a0b430fececb414c70c1769575bcd67f9a8327800f34"
+        }
+      ]
+    },
+    {
+      "id": "017",
+      "slug": "hierarchical-catalog-groups-in-queries",
+      "topic": "запросы",
+      "symptom": "«Преобразование значения к типу Число» на чистой базе; `ЭтоГруппа`; у плоского поля нет",
+      "format": "shared",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/017-hierarchical-catalog-groups-in-queries/task.md",
+          "sha256": "a1d3e9853e149717292b37a1be7f39595d81d27cbe613bd1e673dddd1b511eb0"
+        },
+        {
+          "path": "cases/017-hierarchical-catalog-groups-in-queries/lessons.md",
+          "sha256": "192cf59bd8094d99954276e0a62b948141727d9f1eed7d9dd9ad363acf725746"
+        }
+      ]
+    },
+    {
+      "id": "018",
+      "slug": "register-get-returns-structure",
+      "topic": "BSL",
+      "symptom": "кэш «находит» запись, которой нет; `Получить` никогда не Неопределено",
+      "format": "shared",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/018-register-get-returns-structure/task.md",
+          "sha256": "b89e57e37d5d06d38b7180d9d95841dfd93713ce79a74c29cf60cc49d4f21cf1"
+        },
+        {
+          "path": "cases/018-register-get-returns-structure/lessons.md",
+          "sha256": "c641eda8eed4fcf793f239f3e4c33f0258c1333f09fa73c68e8aec3cd36a35ae"
+        }
+      ]
+    },
+    {
+      "id": "019",
+      "slug": "parent-subsystem-tag",
+      "topic": "подсистемы",
+      "symptom": "«нельзя добавлять объекты без загрузки родительского»; «Файл объекта не существует»; три ложных диагноза",
+      "format": "legacy-edt",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/019-parent-subsystem-tag/task.md",
+          "sha256": "2e238d3e6524488b1139d9c9368d00e4d2b537606e484af6c24db04955ed1663"
+        },
+        {
+          "path": "cases/019-parent-subsystem-tag/lessons.md",
+          "sha256": "b0112ad87d0327caf6ac0bbaa7cafba874f94a77fa9be29ab372eee8c8d8d0be"
+        }
+      ]
+    },
+    {
+      "id": "020",
+      "slug": "new-objects-need-full-update-stable-uuids",
+      "topic": "развёртывание",
+      "symptom": "новый объект = полное обновление; uuid4 при пересборке",
+      "format": "legacy-edt",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/020-new-objects-need-full-update-stable-uuids/task.md",
+          "sha256": "cbb5deae11fcc05f5b2674c06ccc53739f61fbc8b4bd15213479e84b46a05b2f"
+        },
+        {
+          "path": "cases/020-new-objects-need-full-update-stable-uuids/lessons.md",
+          "sha256": "7ba4642db7efd77a8604d039f53f77f9bcfc1fe5be17ff9aa31647c0d3c1c29c"
+        }
+      ]
+    },
+    {
+      "id": "021",
+      "slug": "configuration-registration",
+      "topic": "структура",
+      "symptom": "объект на диске, конфигурация не видит",
+      "format": "legacy-edt",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/021-configuration-registration/task.md",
+          "sha256": "8d3b537b10a6beabdf202ff61b0bb7bca7a08ab325116220193c166e68dc0112"
+        },
+        {
+          "path": "cases/021-configuration-registration/lessons.md",
+          "sha256": "546822eff7c5dad54706d7f70d79271d4122618a8738d2f427274ab3ab1438de"
+        }
+      ]
+    },
+    {
+      "id": "022",
+      "slug": "html-field-width-height",
+      "topic": "поле HTML",
+      "symptom": "белый экран, «окно:2711x0»; `width 70`/`height 10`",
+      "format": "legacy-edt",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/022-html-field-width-height/task.md",
+          "sha256": "06b05b12281a4c3854c3aee97713f638eb5d65073919a291a446bbcef148afe1"
+        },
+        {
+          "path": "cases/022-html-field-width-height/lessons.md",
+          "sha256": "c3ecc05c1b9092688087b2346b73e2eebeadf0288b62f42bfb97f8720aa95f61"
+        }
+      ]
+    },
+    {
+      "id": "023",
+      "slug": "text-template-crlf-line-length",
+      "topic": "макеты",
+      "symptom": "пустая страница; LF = одна строка; 147 363 символа; `Символ(1)`",
+      "format": "legacy-edt",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/023-text-template-crlf-line-length/task.md",
+          "sha256": "9f5260cb89379a56118f7c45698df63ec252ecf4ecbab3724f9a6af880eac2ec"
+        },
+        {
+          "path": "cases/023-text-template-crlf-line-length/lessons.md",
+          "sha256": "7eccf4c49be7b0a6d70183495c627772b64647a5471818e17dd42104a4bf5bd4"
+        }
+      ]
+    },
+    {
+      "id": "024",
+      "slug": "string-attribute-length-1024",
+      "topic": "метаданные",
+      "symptom": "«Ошибка SDBL: слишком большое значение описателя длины»",
+      "format": "shared",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/024-string-attribute-length-1024/task.md",
+          "sha256": "d9f28e178d187b023f19f436caca35f9273b41d00f569bf43dd8723d82cdc550"
+        },
+        {
+          "path": "cases/024-string-attribute-length-1024/lessons.md",
+          "sha256": "6571446e0777b5a84808806037b0ddf5a09c02a4240bf0cd3a181e31097c521e"
+        }
+      ]
+    },
+    {
+      "id": "025",
+      "slug": "attribute-property-set-by-owner",
+      "topic": "метаданные",
+      "symptom": "«Свойство … не входит в состав объекта метаданных Attribute»; у ТЧ без fillValue",
+      "format": "legacy-edt",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/025-attribute-property-set-by-owner/task.md",
+          "sha256": "5a032868f1abd0d8f92f5fc3ac9c9d02b2ad6bc8307973f2bbc44d8e1940c258"
+        },
+        {
+          "path": "cases/025-attribute-property-set-by-owner/lessons.md",
+          "sha256": "f78ef9a44d3b108644a161933bb96f6ffa7f95a1e8c7a0c3a4b97710e1d18af8"
+        }
+      ]
+    },
+    {
+      "id": "026",
+      "slug": "insert-into-vendor-procedure-semicolon-crlf",
+      "topic": "генератор/BSL",
+      "symptom": "«Ожидается символ ';'»; одиночный LF",
+      "format": "shared",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/026-insert-into-vendor-procedure-semicolon-crlf/task.md",
+          "sha256": "d4c97cf8ac957a63ac7a3958080dda35cfc6c530539c1e13f0271fb4328a5e65"
+        },
+        {
+          "path": "cases/026-insert-into-vendor-procedure-semicolon-crlf/lessons.md",
+          "sha256": "42111a534f8563b063036f4758c5873891786373123b683e7d68ce05de6da26a"
+        }
+      ]
+    },
+    {
+      "id": "027",
+      "slug": "edt-canonical-order-user-edits",
+      "topic": "форма/генератор",
+      "symptom": "diff на каждом поле; порядок тегов EDT; правки пользователя",
+      "format": "legacy-edt",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/027-edt-canonical-order-user-edits/task.md",
+          "sha256": "fb4f5c84a0be0eae803eb851c5ddc2c43c0fd20fbaa3e615d4343fdb8ea0b7e0"
+        },
+        {
+          "path": "cases/027-edt-canonical-order-user-edits/lessons.md",
+          "sha256": "0885af73d89c9b8312cec91fceeeadcda616c2c61e99a21c3a2a93d417203530"
+        }
+      ]
+    },
+    {
+      "id": "028",
+      "slug": "edt-workspace-formitem-null",
+      "topic": "EDT",
+      "symptom": "«NullPointerException … formItem is null»; «Проект → Очистить»",
+      "format": "legacy-edt",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/028-edt-workspace-formitem-null/task.md",
+          "sha256": "2b263933f40d4fedc25e4d58bc0d22fbcfe2ef49c87324d88f6d44fa2dc252de"
+        },
+        {
+          "path": "cases/028-edt-workspace-formitem-null/lessons.md",
+          "sha256": "efc5ef9fb2839ed2592a07e5c543d4b3f7a53dc7360ab7817c9e520981a8bc9d"
+        }
+      ]
+    },
+    {
+      "id": "029",
+      "slug": "catalog-hierarchy-vs-attribute",
+      "topic": "метаданные",
+      "symptom": "«Группа» в ТЗ = реквизит, не иерархия",
+      "format": "shared",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/029-catalog-hierarchy-vs-attribute/task.md",
+          "sha256": "0663a7cbcb26afdb99800a62a021f68052566da3c387a482d20ba72373aa24aa"
+        },
+        {
+          "path": "cases/029-catalog-hierarchy-vs-attribute/lessons.md",
+          "sha256": "939251e54dc0a380ad70f0f179eb0e41d541100bdd2934886229cb6a1d6db589"
+        }
+      ]
+    },
+    {
+      "id": "030",
+      "slug": "mobile-pages-swipe-no-row-swipe",
+      "topic": "мобильные",
+      "symptom": "смахивания по строке нет; `Form.xcore`; TabsOnTop vs Swipe",
+      "format": "legacy-edt",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.5.1"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/030-mobile-pages-swipe-no-row-swipe/task.md",
+          "sha256": "a6c062f353cf72c1dd316a32cf1789c200b0878110fce416fd3782b741d70168"
+        },
+        {
+          "path": "cases/030-mobile-pages-swipe-no-row-swipe/lessons.md",
+          "sha256": "89bba3bb77cef8d078e63f80eedc3de17bc3dd2858d3adcc74439daabd0a5cdc"
+        }
+      ]
+    },
+    {
+      "id": "031",
+      "slug": "aggregate-over-unlimited-string",
+      "topic": "запросы",
+      "symptom": "«Неверные параметры МАКСИМУМ»; `ВЫРАЗИТЬ … КАК СТРОКА(150)`",
+      "format": "shared",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/031-aggregate-over-unlimited-string/task.md",
+          "sha256": "1fcd30005e67ebe52c3966c13181a160aeeb13ee55ec844e72da0ceec2975c34"
+        },
+        {
+          "path": "cases/031-aggregate-over-unlimited-string/lessons.md",
+          "sha256": "0f0c722aeb6f691e285c925ed1d9548c3ddb0cf233e8f4b767f9d9d384f5e18b"
+        }
+      ]
+    },
+    {
+      "id": "032",
+      "slug": "empty-ref-method-parens",
+      "topic": "BSL",
+      "symptom": "«Поле объекта не обнаружено (ПустаяСсылка)»",
+      "format": "shared",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/032-empty-ref-method-parens/task.md",
+          "sha256": "82510059c17eee91fc5c7f85cc6442709b0d8c9cc55a6c0ebbb58489015b9352"
+        },
+        {
+          "path": "cases/032-empty-ref-method-parens/lessons.md",
+          "sha256": "cbeb413e6eb4532514cb92b350983fc4554dacf36dbdaa31667ab5cdb2a5aa42"
+        }
+      ]
+    },
+    {
+      "id": "033",
+      "slug": "client-server-directive-not-found",
+      "topic": "BSL",
+      "symptom": "«не определена (мвмИерархияПоОтбору)» у `&НаКлиентеНаСервере`",
+      "format": "shared",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "MEDIUM",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/033-client-server-directive-not-found/task.md",
+          "sha256": "8d3fb984c5b8e4ea85e5d70df1213c4e5deffa6ef38a360bdb4339f287f86943"
+        },
+        {
+          "path": "cases/033-client-server-directive-not-found/lessons.md",
+          "sha256": "01dec940c4840cd04160b8754e3eb3daf6e4d8869c72dc1f55e4d5ce5d754978"
+        }
+      ]
+    },
+    {
+      "id": "034",
+      "slug": "dcs-filter-empty-value-string-vs-ref",
+      "topic": "СКД",
+      "symptom": "отбор по строке не работает; `xs:string` vs `DesignTimeValue`",
+      "format": "shared",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "MEDIUM",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/034-dcs-filter-empty-value-string-vs-ref/task.md",
+          "sha256": "c8a0341a1f867676a20d1dcb74e08a302b0925fdcff5e41438335abafd8c088f"
+        },
+        {
+          "path": "cases/034-dcs-filter-empty-value-string-vs-ref/lessons.md",
+          "sha256": "7158e211e0063c494befb20bc064769d0bd481c6dfec123a3517fac86202d041"
+        }
+      ]
+    },
+    {
+      "id": "035",
+      "slug": "dcs-detail-records-group",
+      "topic": "СКД",
+      "symptom": "только итоги без строк; вложенная группировка",
+      "format": "shared",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "MEDIUM",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/035-dcs-detail-records-group/task.md",
+          "sha256": "623f44c702b71a3cd45cf101a5a599374b95e4e23567381b0f0821461ac3da89"
+        },
+        {
+          "path": "cases/035-dcs-detail-records-group/lessons.md",
+          "sha256": "4fd93ef22ad2596559b1c433c5472bef7b049ec26304b42893d6d96e851c997b"
+        }
+      ]
+    },
+    {
+      "id": "036",
+      "slug": "choice-form-filter-parameters",
+      "topic": "формы",
+      "symptom": "ПараметрыВыбора не доезжают; открыть форму самим с оповещением",
+      "format": "shared",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/036-choice-form-filter-parameters/task.md",
+          "sha256": "6703ebcc16f7df4bb96fba752c62d88512df4cae47ff47536e15f1371762b9f2"
+        },
+        {
+          "path": "cases/036-choice-form-filter-parameters/lessons.md",
+          "sha256": "c94837b122fa9fde4e4db73dfd27a236f0573f4386842de8666a230b08aa121e"
+        }
+      ]
+    },
+    {
+      "id": "037",
+      "slug": "hide-by-constant-in-module-not-xml",
+      "topic": "типовая форма",
+      "symptom": "скрытие в XML необратимо; константа + модуль; «откуда поле Договор»",
+      "format": "shared",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/037-hide-by-constant-in-module-not-xml/task.md",
+          "sha256": "373c5a36721fba92e1f5ca1b3d8c7843bb7f08ee6a460bcdf4cb1b69ebe5cfe5"
+        },
+        {
+          "path": "cases/037-hide-by-constant-in-module-not-xml/lessons.md",
+          "sha256": "d686e9cd1f2237e25ed1d367e2f42524a8fa0c470825fff38a53ab7b1d4cf9c2"
+        }
+      ]
+    },
+    {
+      "id": "038",
+      "slug": "dynamic-list-settings-group",
+      "topic": "форма списка",
+      "symptom": "группа настроек до таблицы; `DynamicListTableExtInfo`",
+      "format": "legacy-edt",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "MEDIUM",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/038-dynamic-list-settings-group/task.md",
+          "sha256": "9ddf3ada1b73fc3b5bf95eb6ace1fae7e5e92cb26198540d34c565d74c0ed07b"
+        },
+        {
+          "path": "cases/038-dynamic-list-settings-group/lessons.md",
+          "sha256": "07a636c92e495cb030ae1eb984ca9634f31d5c2da6603c1c4a234172328999e1"
+        }
+      ]
+    },
+    {
+      "id": "039",
+      "slug": "mdo-form-reference-tag-order",
+      "topic": "метаданные",
+      "symptom": "`defaultRecordForm` до `dataLockControlMode`, у справочника после `choiceMode`",
+      "format": "shared",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "MEDIUM",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/039-mdo-form-reference-tag-order/task.md",
+          "sha256": "7763c46b40eb6b76980838913e19f2a9277c2d8121b6aabda94f3a7660b2479b"
+        },
+        {
+          "path": "cases/039-mdo-form-reference-tag-order/lessons.md",
+          "sha256": "09be1df4d1e66ba0e30c66e7db71b56c8a69e91cc66fb9292d42254b1c462a12"
+        }
+      ]
+    },
+    {
+      "id": "040",
+      "slug": "picture-zip-manifest",
+      "topic": "интерфейс",
+      "symptom": "мыльная иконка; 8 масштабов + manifest.xml",
+      "format": "legacy-edt",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "MEDIUM",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/040-picture-zip-manifest/task.md",
+          "sha256": "962e7771149fa9df5897b2f8c8c8462f47816158f7d088caf20bf6c5719c0ec1"
+        },
+        {
+          "path": "cases/040-picture-zip-manifest/lessons.md",
+          "sha256": "81c4fa8bf334bc5f41cdbf1f393f42393ca2c6d2423bb230eba26dd6b8a61a8c"
+        }
+      ]
+    },
+    {
+      "id": "041",
+      "slug": "mobile-table-and-buttons",
+      "topic": "мобильные",
+      "symptom": "«More actions», три полосы, «No» в колонке, кнопки в «ещё»",
+      "format": "legacy-edt",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/041-mobile-table-and-buttons/task.md",
+          "sha256": "e6b1bab81e2753ae44cdf5dc724f2df951c353b1ec9d41376d3e98565d35e8f1"
+        },
+        {
+          "path": "cases/041-mobile-table-and-buttons/lessons.md",
+          "sha256": "c045b580dc6e0f84f677a08ed7942067ae263487e78b6271ff281f9eb64e8a3b"
+        }
+      ]
+    },
+    {
+      "id": "042",
+      "slug": "query-packet-result-index",
+      "topic": "запросы",
+      "symptom": "«Поле объекта не обнаружено (ТС)»; индексы пакета поимённо",
+      "format": "shared",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/042-query-packet-result-index/task.md",
+          "sha256": "595c619abf36bfa10f3230b52efd4cc03708061c738747e59497c7ccf8e98c38"
+        },
+        {
+          "path": "cases/042-query-packet-result-index/lessons.md",
+          "sha256": "7189ac9eba2a32bd8d2daa75b06fdb6da3919875cdece11a6e50a5a489102115"
+        }
+      ]
+    },
+    {
+      "id": "043",
+      "slug": "optional-calculation-in-try",
+      "topic": "BSL",
+      "symptom": "АРМ пустой из-за украшения; `Попытка`; подача от гаража",
+      "format": "shared",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/043-optional-calculation-in-try/task.md",
+          "sha256": "4c64e126848bb8586bde2f9fb46c2b9049ef42f97b281b1cabc08742b2e23118"
+        },
+        {
+          "path": "cases/043-optional-calculation-in-try/lessons.md",
+          "sha256": "77b1b46d50ebb80bf1b7d8e8480699601719b8f365696445599973cde0e15fcf"
+        }
+      ]
+    },
+    {
+      "id": "044",
+      "slug": "skipped-object-kept-on-write",
+      "topic": "BSL",
+      "symptom": "зона исчезла молча; `Продолжить` без учёта; `НечегоПисать`",
+      "format": "shared",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/044-skipped-object-kept-on-write/task.md",
+          "sha256": "3b3dc22b870ef79ab34eb201fa326b00401c0c327b0927c1eed472adcc8fdf0c"
+        },
+        {
+          "path": "cases/044-skipped-object-kept-on-write/lessons.md",
+          "sha256": "e8a1ee4a3f85bef0a1f8f346259ffe7f437278fcbeca6e9c82f63104839f95ac"
+        }
+      ]
+    },
+    {
+      "id": "045",
+      "slug": "enum-value-names-from-mdo",
+      "topic": "BSL",
+      "symptom": "«Поле объекта не обнаружено (Запрет)»",
+      "format": "shared",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/045-enum-value-names-from-mdo/task.md",
+          "sha256": "10b2ab3193d4f8a29aba5c16c6c113afad261ba86a80de33e4e62a68d2d24f10"
+        },
+        {
+          "path": "cases/045-enum-value-names-from-mdo/lessons.md",
+          "sha256": "385806074b8140d14e33c6be4e91812f9bff4e26f5f22eda7972fc91073a4232"
+        }
+      ]
+    },
+    {
+      "id": "046",
+      "slug": "empty-query-in-packet",
+      "topic": "запросы",
+      "symptom": "«Ожидается выражение \"ВЫБРАТЬ\"»; два `;`",
+      "format": "shared",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/046-empty-query-in-packet/task.md",
+          "sha256": "c9574140f55402fe0a0cca201a9c9d793d17a15d21b7b8e60527df7a7eb9e47e"
+        },
+        {
+          "path": "cases/046-empty-query-in-packet/lessons.md",
+          "sha256": "9bbb451f9d347e01f0230729cb1c45b51fbefa01b7c5be8662391b626aa8c7cc"
+        }
+      ]
+    },
+    {
+      "id": "047",
+      "slug": "global-platform-name-in-thick-client",
+      "topic": "BSL",
+      "symptom": "«уже определена (Состояние)» в толстом клиенте; глобальные методы",
+      "format": "shared",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/047-global-platform-name-in-thick-client/task.md",
+          "sha256": "c736d8cb91ce6856934670ebb9bcba9984a050bc97c6ada08bbddc6c9fcb40b3"
+        },
+        {
+          "path": "cases/047-global-platform-name-in-thick-client/lessons.md",
+          "sha256": "0f66af544b82137eb3c6e11fb0b0d2905ca55627a7f3046624b62c4a07850b2b"
+        }
+      ]
+    },
+    {
+      "id": "048",
+      "slug": "mdo-values-from-edt-model",
+      "topic": "метаданные",
+      "symptom": "кэш «не работает»; `DuringCall` принят молча; `returnValuesReuse`",
+      "format": "shared",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/048-mdo-values-from-edt-model/task.md",
+          "sha256": "062a78f9b2c5f5f9037b4f3c6fb33ede0527ceafe86d69eb1bf924f842cf4ada"
+        },
+        {
+          "path": "cases/048-mdo-values-from-edt-model/lessons.md",
+          "sha256": "bce1767fe7e141ed176f9e1cdd4c9d5d518fe5e3850a8053f23b1d52dc9647d9"
+        }
+      ]
+    },
+    {
+      "id": "049",
+      "slug": "profile-before-optimizing",
+      "topic": "BSL",
+      "symptom": "автораздача 104 с; перебор минимума; граф на каждый маршрут; цель «Сервер»",
+      "format": "shared",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/049-profile-before-optimizing/task.md",
+          "sha256": "0106e5a4cedfe9f7ad463333a114012d8ba168cdb9efbf2f0e3b165933327f83"
+        },
+        {
+          "path": "cases/049-profile-before-optimizing/lessons.md",
+          "sha256": "7387df3e3eed3cb15c6588d5082b88e2ddefb83e3623eca2f8bcc1d6d7fa0138"
+        }
+      ]
+    },
+    {
+      "id": "050",
+      "slug": "attribute-read-in-loop-is-query",
+      "topic": "BSL",
+      "symptom": "тысячи `ЗначенияРеквизитовОбъекта`; реквизит через точку в цикле; два вызова сервера на экран",
+      "format": "shared",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/050-attribute-read-in-loop-is-query/task.md",
+          "sha256": "9f8a5d22d97cd01dc22ad2f59da203f76f164cc8b2c8119a9f399ddb10c2ff7b"
+        },
+        {
+          "path": "cases/050-attribute-read-in-loop-is-query/lessons.md",
+          "sha256": "99dd086f44a651f562bbcbc1ba2fd613fda9280b2d4795b44de3ee9c8c34a4e4"
+        }
+      ]
+    },
+    {
+      "id": "051",
+      "slug": "write-only-changed-objects",
+      "topic": "BSL",
+      "symptom": "запись 13,5 с; `Записать()` на каждый объект; сравнение с точностью реквизита",
+      "format": "shared",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/051-write-only-changed-objects/task.md",
+          "sha256": "f17c479b5170165c5eba9e1ed76b410a414dd693e503ed8443de849f6032b155"
+        },
+        {
+          "path": "cases/051-write-only-changed-objects/lessons.md",
+          "sha256": "850b0b0dd9c719fed5e6327f18e55edbebb13fa5bae4696b2123d3c8594706bc"
+        }
+      ]
+    },
+    {
+      "id": "052",
+      "slug": "bounding-box-before-geometry",
+      "topic": "BSL",
+      "symptom": "запись 30 с; 767 тыс. «точка в полигоне»; описывающий прямоугольник; «сотня вершин» сочинена",
+      "format": "shared",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/052-bounding-box-before-geometry/task.md",
+          "sha256": "baff9e3cf3d1a40f846f3fc39cb6957a4caa3c7e011a0b21cd360fff898f52a9"
+        },
+        {
+          "path": "cases/052-bounding-box-before-geometry/lessons.md",
+          "sha256": "7efbd8ea58e8ef7887d403cebc61b021afc9c4b494658ca6f1a58178f8004ed6"
+        }
+      ]
+    },
+    {
+      "id": "053",
+      "slug": "only-changed-everywhere-and-ref-keys",
+      "topic": "BSL",
+      "symptom": "69 зон пишутся всегда; полный пересчёт регистра; `Строка(Ключ)` для ссылки; набор с отбором",
+      "format": "shared",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/053-only-changed-everywhere-and-ref-keys/task.md",
+          "sha256": "aca427284d359243ee605d2cf70687db7128394bfc6c9e1c4faa6892b1c994b2"
+        },
+        {
+          "path": "cases/053-only-changed-everywhere-and-ref-keys/lessons.md",
+          "sha256": "825397d1faf5d139cf59578520b2d247ac5788ab87a2b063f51e49a952223082"
+        }
+      ]
+    },
+    {
+      "id": "054",
+      "slug": "html-field-no-confirm-alert",
+      "topic": "поле HTML",
+      "symptom": "кнопки попапа не нажимаются; `confirm` вешает; делегирование на `document`",
+      "format": "legacy-edt",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/054-html-field-no-confirm-alert/task.md",
+          "sha256": "abad30e5ecebb3d46213d3df829b7b950e86bb567899d291248c92c1fc063b10"
+        },
+        {
+          "path": "cases/054-html-field-no-confirm-alert/lessons.md",
+          "sha256": "65f9264676865c28b90a95fe07a103b3d5f87731201e97a97df548c911fb2c5f"
+        }
+      ]
+    },
+    {
+      "id": "055",
+      "slug": "index-by-query-measurement",
+      "topic": "метаданные",
+      "symptom": "отбор по неиндексированному полю; `<indexing>Index</indexing>`; второе измерение регистра",
+      "format": "shared",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/055-index-by-query-measurement/task.md",
+          "sha256": "b296e15af1a943825d56f72ffee0e49f55a779b709dc8f7dca7cab989607daf5"
+        },
+        {
+          "path": "cases/055-index-by-query-measurement/lessons.md",
+          "sha256": "3817f307e89edb0640cec10f19a57eda124e111a7ae3a0e78ac95e4726d7cb13"
+        }
+      ]
+    },
+    {
+      "id": "056",
+      "slug": "generator-idempotence-check",
+      "topic": "генераторы",
+      "symptom": "второй прогон вставил дважды; `стало in текст and было not in текст`",
+      "format": "legacy-edt",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/056-generator-idempotence-check/task.md",
+          "sha256": "1696c6bb946cc3448957446e06ff9f0355a53f4458787af841da1a82d0f6c6f3"
+        },
+        {
+          "path": "cases/056-generator-idempotence-check/lessons.md",
+          "sha256": "da952378d4899fccda1d86f8fbb782a8fac3d32e6e750d46600692433a965ea4"
+        }
+      ]
+    },
+    {
+      "id": "057",
+      "slug": "form-command-name-bsl-keyword",
+      "topic": "форма",
+      "symptom": "«Ожидается имя процедуры»; команда `Прервать`",
+      "format": "legacy-edt",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/057-form-command-name-bsl-keyword/task.md",
+          "sha256": "af6add714204676e687986308f4274e993b727a3b41b8045692ec37db1e2a72d"
+        },
+        {
+          "path": "cases/057-form-command-name-bsl-keyword/lessons.md",
+          "sha256": "edc199a4e682f49572f54cdd8bef7f673b7564ec4213f1a0878801b54186ca48"
+        }
+      ]
+    },
+    {
+      "id": "058",
+      "slug": "number-plus-string",
+      "topic": "BSL",
+      "symptom": "«Преобразование значения к типу Число»; `Номер + \". \"`",
+      "format": "shared",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/058-number-plus-string/task.md",
+          "sha256": "08a5a0541c15e32cf5e7ece9c5f7f0fad30186f7234fab36459a3623f3362f97"
+        },
+        {
+          "path": "cases/058-number-plus-string/lessons.md",
+          "sha256": "2a489f77783efc77f35247fb1ffbf2ca594dbb32695bfcdecba380fa6f123611"
+        }
+      ]
+    },
+    {
+      "id": "059",
+      "slug": "form-attribute-shadows-local-variable",
+      "topic": "BSL",
+      "symptom": "«Нельзя изменять поле, содержащее объект данных формы»; реквизит и локальная",
+      "format": "shared",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/059-form-attribute-shadows-local-variable/task.md",
+          "sha256": "6b739be074fe47556733c9ce7304b683af950ba3749812fd0ac3969e92a0000e"
+        },
+        {
+          "path": "cases/059-form-attribute-shadows-local-variable/lessons.md",
+          "sha256": "caac5d46c5291cf030aca8390cb0672966987338f135a1ddf2833b8b0b4112db"
+        }
+      ]
+    },
+    {
+      "id": "060",
+      "slug": "form-attribute-in-no-context-procedure",
+      "topic": "BSL",
+      "symptom": "«Переменная не определена»; реквизит формы в БезКонтекста",
+      "format": "shared",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/060-form-attribute-in-no-context-procedure/task.md",
+          "sha256": "931d6728bbd042492f04d24655e37d03dd5244c5d8c9b3778e3c0ca3022f6172"
+        },
+        {
+          "path": "cases/060-form-attribute-in-no-context-procedure/lessons.md",
+          "sha256": "203ebb99c242e1e282b0a6782fce52e957577099c838367b6550cb9d25911dfb"
+        }
+      ]
+    },
+    {
+      "id": "061",
+      "slug": "home-page-work-area-file",
+      "topic": "интерфейс",
+      "symptom": "начальная страница; `HomePageWorkArea.hpwa`; `transient`",
+      "format": "legacy-edt",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.5.1.1529"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/061-home-page-work-area-file/task.md",
+          "sha256": "f0050e5aa4524233aa608358f60f70f9e3a6b11ad4051a69968d06112df549ae"
+        },
+        {
+          "path": "cases/061-home-page-work-area-file/lessons.md",
+          "sha256": "06b855abc27890a3042b8d3815c5d350a6d19fb64ff4cb638f62c8c1a70d9b6d"
+        }
+      ]
+    },
+    {
+      "id": "062",
+      "slug": "alias-equals-tabular-section",
+      "topic": "запросы",
+      "symptom": "«Неоднозначное поле \"Тарировка.Ссылка\"»; псевдоним = имя ТЧ",
+      "format": "shared",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/062-alias-equals-tabular-section/task.md",
+          "sha256": "0a2f5dd806d81b78fcbe37c23076938fabba0442a8f0de66c8b6bfde7aeb786e"
+        },
+        {
+          "path": "cases/062-alias-equals-tabular-section/lessons.md",
+          "sha256": "ab3759c1c46d18a1f1749177d22e1fc79366d11ab53506a9b78cf465465d4037"
+        }
+      ]
+    },
+    {
+      "id": "063",
+      "slug": "dynamic-list-query-rejected-on-load",
+      "topic": "формы/запросы",
+      "symptom": "«Неверный путь к данным \"Список.*\"» по ВСЕМ полям списка при обновлении базы; EDT молчит",
+      "format": "legacy-edt",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.3.16",
+        "8.5.1.1529"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/063-dynamic-list-query-rejected-on-load/task.md",
+          "sha256": "af4b27d596b0c4996cb6e014bc8790e4056c241068e1ccaabda00bd902e49de9"
+        },
+        {
+          "path": "cases/063-dynamic-list-query-rejected-on-load/lessons.md",
+          "sha256": "0b7ed322bca3943b6ecb53049c1174851174a8df7feb62678179cb8fc9b307fa"
+        }
+      ]
+    },
+    {
+      "id": "064",
+      "slug": "recorder-register-override-by-document",
+      "topic": "метаданные/регистры",
+      "symptom": "«Запись с такими ключевыми полями существует!» при проведении корректировочного документа (график работ)",
+      "format": "shared",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.3.16",
+        "8.5.1.1529"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/064-recorder-register-override-by-document/task.md",
+          "sha256": "91dbe7d54eb5532acd9d1162aea175134be1bdba417486b1241a5e0b69135959"
+        },
+        {
+          "path": "cases/064-recorder-register-override-by-document/lessons.md",
+          "sha256": "8f3da06a5c1bdc57d8f1a72d0a33d13b26e303397c9e259f0f6f0c2dd6599481"
+        }
+      ]
+    },
+    {
+      "id": "065",
+      "slug": "query-fields-checked-against-metadata",
+      "topic": "запросы",
+      "symptom": "«Поле не найдено \"К.Код\"» (справочник без кода); «Поле не найдено ЭтоГруппа»; «Ожидается …» на псевдониме `В`",
+      "format": "shared",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.3.16",
+        "8.5.1.1529"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/065-query-fields-checked-against-metadata/task.md",
+          "sha256": "4dfb4048ab7fedb4bcf2da8ab7ef532770b24a80f92b3cf1528bdbb25205e645"
+        },
+        {
+          "path": "cases/065-query-fields-checked-against-metadata/lessons.md",
+          "sha256": "9c5e31fb16b220c61a83f09c0d50149267376def0e3dd9eeea11fd4ce1d8c1d9"
+        }
+      ]
+    },
+    {
+      "id": "066",
+      "slug": "html-field-background-load",
+      "topic": "поле HTML/производительность",
+      "symptom": "начальная страница открывается долго; форма дашборда считает все запросы до показа",
+      "format": "legacy-edt",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.3.16",
+        "8.5.1.1529"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/066-html-field-background-load/task.md",
+          "sha256": "5b4ec1253a7b832283835d1ba9fa689eb863d010a8187495a09a6098311d433a"
+        },
+        {
+          "path": "cases/066-html-field-background-load/lessons.md",
+          "sha256": "8ab81af075e6be5caf8ea028c4fbe06f2dd0c099c87a73f670d0631abcbf7e56"
+        }
+      ]
+    },
+    {
+      "id": "067",
+      "slug": "style-8-5-color-names",
+      "topic": "стиль/интерфейс",
+      "symptom": "стиль конфигурации задан, а интерфейс «Такси» остаётся жёлто-бежевым; цвет не меняется",
+      "format": "legacy-edt",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.3.16",
+        "8.5.1.1529"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/067-style-8-5-color-names/task.md",
+          "sha256": "6934c009f2ed24b08a853d3b9dc91528a7a2108aa7f1370c41fd0b9686f29115"
+        },
+        {
+          "path": "cases/067-style-8-5-color-names/lessons.md",
+          "sha256": "37dc1720fda13eff65b5069bfc052ab8828c7f0df363bb8af987c5ad42347b23"
+        }
+      ]
+    },
+    {
+      "id": "068",
+      "slug": "dcs-parameter-use-always",
+      "topic": "СКД",
+      "symptom": "«Не задано значение параметра …» при формировании отчёта, хотя в варианте параметр есть",
+      "format": "shared",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.3.16",
+        "8.5.1.1529"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/068-dcs-parameter-use-always/task.md",
+          "sha256": "1d32ed1326e75725a6d3493653a54fc21bdd71cecb5f917b87f2af676adb69ac"
+        },
+        {
+          "path": "cases/068-dcs-parameter-use-always/lessons.md",
+          "sha256": "55b2b5d9e147d4289eeb90f3474f0adab9ecad2f58ec8d634cb78c21ecc9be4f"
+        }
+      ]
+    },
+    {
+      "id": "069",
+      "slug": "html-field-link-params-hex",
+      "topic": "поле HTML",
+      "symptom": "«Переменная не определена (СпособКодированияСтроки)» на клиенте при щелчке по графику",
+      "format": "legacy-edt",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.3.16",
+        "8.5.1.1529"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/069-html-field-link-params-hex/task.md",
+          "sha256": "6b05b8159d60cfb8a749b8492a394b4dc935ae38f40b69cb6f129e3670ca161f"
+        },
+        {
+          "path": "cases/069-html-field-link-params-hex/lessons.md",
+          "sha256": "6824562fd1a8df850b5197a48a794b6635be7d4a94757682080ab3c5002af51a"
+        }
+      ]
+    },
+    {
+      "id": "070",
+      "slug": "generator-chain-run-whole",
+      "topic": "генераторы",
+      "symptom": "после запуска одного генератора в проекте «исчезли» обёртки модулей и раскладка форм",
+      "format": "legacy-edt",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.3.16",
+        "8.5.1.1529"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/070-generator-chain-run-whole/task.md",
+          "sha256": "0847aaaf0723e784ce01d3184bf69f8e93cc9457d441c544ccff8fc15e39d8f7"
+        },
+        {
+          "path": "cases/070-generator-chain-run-whole/lessons.md",
+          "sha256": "45060fba37d4c11af172b55d039ad4af4a2ba5bf930cbaee238408f465ae8235"
+        }
+      ]
+    },
+    {
+      "id": "071",
+      "slug": "ui-testmanager-real-clicks",
+      "topic": "тестирование",
+      "symptom": "«Тип не определен (ТестируемоеПриложение)»; «Метод объекта не обнаружен (ВыполнитьВыборИзСписка)»; «В элементе управления отсутствует указанное значение»",
+      "format": "shared",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.3.16",
+        "8.5.1",
+        "8.5.1.1529"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/071-ui-testmanager-real-clicks/task.md",
+          "sha256": "1d608cc708e70f3eed0f38c638fc94bb54f78581dc2ba7065e69aec99a88bd8b"
+        },
+        {
+          "path": "cases/071-ui-testmanager-real-clicks/lessons.md",
+          "sha256": "27f8178a69c81fb5afded21aec80eff2e28af6af31d71e2a1efb3d1503b945d4"
+        }
+      ]
+    },
+    {
+      "id": "072",
+      "slug": "vanessa-cli-run",
+      "topic": "тестирование",
+      "symptom": "«Клиент тестирования не подключен» на первом шаге; лог без шагов при статусе 0; шаги «по памяти»",
+      "format": "shared",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.3.16",
+        "8.5.1.1529"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/072-vanessa-cli-run/task.md",
+          "sha256": "94ad207f9cda8ed2d0c4bf0d0aabf2523004009e9559173b9cc245acc8e1a2f7"
+        },
+        {
+          "path": "cases/072-vanessa-cli-run/lessons.md",
+          "sha256": "2a3d6d5e9843aa9ad6691bcab230b9ace283f45e89e89a6757c100be133a7748"
+        }
+      ]
+    },
+    {
+      "id": "073",
+      "slug": "web-publication-debug-background-jobs",
+      "topic": "развёртывание/веб",
+      "symptom": "отчёты «пустой результат» только в веб-клиенте; «Ошибка регистрации предмета отладки в отладчике»; «не определена (ЗаписатьJSON)»",
+      "format": "shared",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.3.16",
+        "8.5.1.1529"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/073-web-publication-debug-background-jobs/task.md",
+          "sha256": "5f727468141348994d872400d1dd9d287f572c6e2654d190d23ecf8c2d909567"
+        },
+        {
+          "path": "cases/073-web-publication-debug-background-jobs/lessons.md",
+          "sha256": "e268862cc2c695d0c9a8cea702397634d5db33b107854c849364fabb312a71d3"
+        }
+      ]
+    },
+    {
+      "id": "074",
+      "slug": "no-edt-external-processing",
+      "topic": "без EDT / внешняя обработка",
+      "symptom": "«Неизвестное имя типа CatalogRef.<объект расширения>» при сборке .epf; «Исключение XDTO» при загрузке выгрузки расширения; методов нет у собранной .epf; «Неопознанный оператор» (переменная И, Новый Файл(…).Существует()); «Поле объекта недоступно для записи (Окно)»",
+      "format": "designer",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.3.21",
+        "8.3.27"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/074-no-edt-external-processing/task.md",
+          "sha256": "00602bfb9ab1c296c879de67656ebef97bf330b204e05fe1b63935e0b62a65f5"
+        },
+        {
+          "path": "cases/074-no-edt-external-processing/lessons.md",
+          "sha256": "a8519ace03887ab5fa1abc140d64b8fda59cb499d20f8c02b77543e2435decd0"
+        }
+      ]
+    },
+    {
+      "id": "075",
+      "slug": "html-graph-external-processing",
+      "topic": "поле HTML / тестирование",
+      "symptom": "страница «Загрузка…» при пустом js_errors; «Изменения (1)», а таблица пустая в тестовом клиенте (фантом отрисовки вкладки)",
+      "format": "designer",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.3.27"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/075-html-graph-external-processing/task.md",
+          "sha256": "c01bf76ccc32d8c9b0c7ad795259b9bd28978193fefa04f387af79d58ebe1d75"
+        },
+        {
+          "path": "cases/075-html-graph-external-processing/lessons.md",
+          "sha256": "da8d51a85f862d2a78e22fb5f57a3334e220578097d38ddca297928c7db6f315"
+        }
+      ]
+    },
+    {
+      "id": "076",
+      "slug": "echarts-views-html-field",
+      "topic": "поле HTML / тестирование",
+      "symptom": "null.innerHTML в ECharts после setOption в обработчике щелчка; headless Edge из Bash пустой; heredoc съел обратные косые черты; Cytoscape в 1С: нет getRootNode/structuredClone/matchAll",
+      "format": "designer",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.3.27"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/076-echarts-views-html-field/task.md",
+          "sha256": "aca2c9b8d53d85a8776d5c639dbde87863b2d129d476ad1fbe664b0e6a066819"
+        },
+        {
+          "path": "cases/076-echarts-views-html-field/lessons.md",
+          "sha256": "d6236a61817ad169886a5e8a39f61cae9862088812cd65adfafb1f6d4ff05b3a"
+        }
+      ]
+    },
+    {
+      "id": "077",
+      "slug": "web-publication-demo-base",
+      "topic": "веб-публикация / тестирование",
+      "symptom": "«Сеанс отсутствует или удален»: модуль 8.5.1 роняет httpd в СЛК (licenceaddin); обработка не видна — выключена опция доп. обработок; снимок чужого тестового клиента",
+      "format": "designer",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.3.27",
+        "8.5.1"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/077-web-publication-demo-base/task.md",
+          "sha256": "2f4870cc92f4b656ed738f35629bf961ee561954332e8b28cd24e9b0e3b79384"
+        },
+        {
+          "path": "cases/077-web-publication-demo-base/lessons.md",
+          "sha256": "23f8c7644ccf201745ca62d8326c5497889c96e9c30556aacbfc43837e36dda0"
+        }
+      ]
+    },
+    {
+      "id": "078",
+      "slug": "own-configuration-from-scratch",
+      "topic": "без EDT / метаданные / тестирование",
+      "symptom": "своя конфигурация с нуля: построители объектов в designer_lib, полная загрузка, сверка обратной выгрузкой; «Наименование не заполнено» при составлении в ПередЗаписью; datetime через COM сдвигается на пояс; «Предупреждение безопасности» менеджера UI в базе без пользователей",
+      "format": "designer",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.3.21",
+        "8.3.27",
+        "8.3.27.2342"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH/MEDIUM",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/078-own-configuration-from-scratch/task.md",
+          "sha256": "47ee4a40bbe839b2f486705818760b4df1238cf286a124160376cc47c734d82a"
+        },
+        {
+          "path": "cases/078-own-configuration-from-scratch/lessons.md",
+          "sha256": "7a2117b00759d00c56bc42db38e41a262f1160123a5e94119ca04941b358c0a2"
+        }
+      ]
+    },
+    {
+      "id": "079",
+      "slug": "dashboard-analytics-reports-designer",
+      "topic": "интерфейс / поле HTML / СКД / без EDT",
+      "symptom": "разделы с SVG-иконками, начальная страница-дашборд, мост ссылкой `#zp-`, ECharts в общем макете, отчёты СКД в выгрузке Конфигуратора, снимки всех окон клиента",
+      "format": "designer",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.3.21",
+        "8.3.27.2342"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/079-dashboard-analytics-reports-designer/task.md",
+          "sha256": "3987dfb84543098508513ef29d92441223fae929eee8837d7464c183d87b5e8a"
+        },
+        {
+          "path": "cases/079-dashboard-analytics-reports-designer/lessons.md",
+          "sha256": "7827126ecf2f48daafe543ca15b995d41387f7c12f1c004d83804b8d7d642c85"
+        }
+      ]
+    },
+    {
+      "id": "080",
+      "slug": "dt-851-data-export-for-migration",
+      "topic": "без EDT / развёртывание / перенос данных",
+      "symptom": "«необходима версия платформы не ниже 8.5.1» при /RestoreIB; формат выгрузки 2.21 у designer_lib; «Внешнее соединение не разрешено» и «Предупреждение безопасности» у /Execute — обработка в конфигурации копии и /URL; универсальная выгрузка данных в JSON",
+      "format": "designer",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.3.27",
+        "8.3.27.2342",
+        "8.5.1",
+        "8.5.1.1529"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/080-dt-851-data-export-for-migration/task.md",
+          "sha256": "db851c7be62ca3c33ab0cca512453f1bf02cd7cbcfc19681ba4ac9be35bce774"
+        },
+        {
+          "path": "cases/080-dt-851-data-export-for-migration/lessons.md",
+          "sha256": "ce4644c2372551a63f469371c22636f43afc69c8c5dc234fa6554d09c41fa423"
+        }
+      ]
+    },
+    {
+      "id": "081",
+      "slug": "config-modifications-to-extension",
+      "topic": "без EDT / расширение / правка типовой",
+      "symptom": "доработки типовой → расширение генератором по двум выгрузкам (поставка из ParentConfigurations); «Текущее ChildObjects, ожидаемое CommonForm», «свойство ThisNode», «Неизвестная команда …StandardCommand.Open»; «Добавление дочерних объектов … к заимствованным недопустимо в режиме совместимости 8.3.25 и ниже» — регистры-спутники; «Найдены подключенные расширения, изменяющие роли»",
+      "format": "designer",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.3.21",
+        "8.3.22",
+        "8.3.25",
+        "8.3.27",
+        "8.3.27.2342"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/081-config-modifications-to-extension/task.md",
+          "sha256": "9691e06bbc3fc8f70823cff1780db4ee69ff4a50fd810610101fd33821ee55a5"
+        },
+        {
+          "path": "cases/081-config-modifications-to-extension/lessons.md",
+          "sha256": "6766f6f2c8dc5ac0f367fb7e6956c75e0eab6610c3f671bb8748d40e854dd932"
+        }
+      ]
+    },
+    {
+      "id": "082",
+      "slug": "data-migration-config-to-extension",
+      "topic": "без EDT / расширение / перенос данных",
+      "symptom": "данные доработок теряются при замене конфигурации поставкой — выгрузка XDTO до, загрузка после; «Записи регистра сведений стали неуникальными» — подготовка; удвоение предопределённых; сверка по ссылкам; COM: XDTOSerializer, нет ТипЗнч, `Метаданные…[имя]` не работает",
+      "format": "designer",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.3.27.2342"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/082-data-migration-config-to-extension/task.md",
+          "sha256": "44032b94e62e209903a5d21734378403344bd04b4421184691b69f464248f513"
+        },
+        {
+          "path": "cases/082-data-migration-config-to-extension/lessons.md",
+          "sha256": "d9d324b9280e2b19264e49db1c3c6aa014690ccb32e63928ae453ffbbe7c5934"
+        }
+      ]
+    },
+    {
+      "id": "083",
+      "slug": "vendor-update-under-extension",
+      "topic": "без EDT / расширение / обновление типовой",
+      "symptom": "расширение под новую поставку: трёхстороннее слияние методов и схем (вставки обеих сторон — автоматически), ручные решения файлами; «Поле объекта не обнаружено (торо_НастройкиУведомлений)» в обработчике обновления при скачке версий — временное расширение-исправление; переименования поставщика в своих объектах; «КлючПредопределенногоВарианта» через COM; окно легальности обновления",
+      "format": "designer",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.3.21",
+        "8.3.25",
+        "8.3.27.2342"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/083-vendor-update-under-extension/task.md",
+          "sha256": "52fc452e5692be853b9b7b281b8a55904876fe5fe8a98086edcbfc6dfce278ae"
+        },
+        {
+          "path": "cases/083-vendor-update-under-extension/lessons.md",
+          "sha256": "3250cb8a8fdd33d9a05037605407aeda280fe8cc96f78afb095e1e93d07d7708"
+        }
+      ]
+    },
+    {
+      "id": "084",
+      "slug": "native-forms-documents-web-client-dt",
+      "topic": "без EDT / формы / веб-клиент / развёртывание",
+      "symptom": "документ и своя форма документа без EDT (HIGH); нативная форма «красиво»: разметка построителем, шрифты, цвета и условное оформление кодом, `StartChoice` → `ПоказатьВыборИзСписка`; «не определена (XMLСтрока)» только в веб-клиенте — журнал регистрации через COM; «<<?>>ИмяПользователя()», `Ln`; .dt для показа на другом сервере: досчитать «до сейчас» на весь период, `/RestoreIB` без `/N`",
+      "format": "designer",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.3.21",
+        "8.3.27.2342"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/084-native-forms-documents-web-client-dt/task.md",
+          "sha256": "23bc5edd09fe3f53d4aa1e9a0818df47423421ca39d7fb36940464e40c8a8df0"
+        },
+        {
+          "path": "cases/084-native-forms-documents-web-client-dt/lessons.md",
+          "sha256": "15a09ab27a42e21822cdab59be14f0e08a86ce7121e310e23a3e59b05180f804"
+        }
+      ]
+    },
+    {
+      "id": "085",
+      "slug": "v85-selection-panel-testclient",
+      "topic": "8.5 / формы / тест-клиент",
+      "symptom": "при выделении нескольких строк 8.5 заменяет панель таблицы панелью множественного выделения — команда формы попадает туда только с «Используемой таблицей» (`ИспользуемаяТаблица`, задаётся кодом) и `ИспользованиеВыделенныхСтрок`; подбор флажками — родное выделение, не колонка «Пометка»; тест-клиент 8.5.1: `Выбрать()` — кнопка выбора (не у строковой колонки), «Записать» висит, сценарии частями; документация ИТС — по входу пользователя",
+      "format": "designer",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.5.1",
+        "8.5.1.1529"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/085-v85-selection-panel-testclient/task.md",
+          "sha256": "26bb5552a6d31ad333189d88b568ed0690c311413cfec07c7336345679dd028f"
+        },
+        {
+          "path": "cases/085-v85-selection-panel-testclient/lessons.md",
+          "sha256": "1cf2bdf4516faab3467216224e46ad7c973762606b937c63af92151c93d11864"
+        }
+      ]
+    },
+    {
+      "id": "086",
+      "slug": "form-duplicate-item-name-crash",
+      "topic": "формы",
+      "symptom": "тонкий клиент 8.5.1 падает (mngui.dll, 0xc0000005) при закрытии формы; группа и поле с одним именем",
+      "format": "designer",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.5.1",
+        "8.5.1.1529"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/086-form-duplicate-item-name-crash/task.md",
+          "sha256": "00b092354198b30f82090fc5e0ba518346b04ecd90a0682369ed64dc9670663c"
+        },
+        {
+          "path": "cases/086-form-duplicate-item-name-crash/lessons.md",
+          "sha256": "8b464a75a654d39b0bb0dc2145a2ae0d7621a6bf33be915c21a3c87ec2e9dd92"
+        }
+      ]
+    },
+    {
+      "id": "087",
+      "slug": "form-field-width-stretch",
+      "topic": "формы",
+      "symptom": "наименование узкое, «узкое» поле растянуто; таблица видна наполовину; stretch / max_width",
+      "format": "designer",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.5.1.1529"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/087-form-field-width-stretch/task.md",
+          "sha256": "2ed88cdefb31f7262f3bdd26663d5140eef9bd7fcf39fb2f9b08b7318fd40b88"
+        },
+        {
+          "path": "cases/087-form-field-width-stretch/lessons.md",
+          "sha256": "59e2b29e153d28a5af4f0df1f8c21b8650cee3b389946308e93e9613495e2316"
+        }
+      ]
+    },
+    {
+      "id": "088",
+      "slug": "put-files-dialog-param-order",
+      "topic": "BSL / файлы",
+      "symptom": "«Несоответствие типов (параметр номер '4')» в НачатьПомещениеФайлов с диалогом — после диалога булево «Интерактивно»",
+      "format": "designer",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/088-put-files-dialog-param-order/README.md",
+          "sha256": "04bdde797157bc616731947a54977bc9a8bff475d5826963efc35d97dd193e5f"
+        }
+      ]
+    },
+    {
+      "id": "089",
+      "slug": "uat-route-sheet-status-conversion-question",
+      "topic": "правка типовой / тест-клиент",
+      "symptom": "маршрутный лист УАТ, записанный с `ОбменДанными.Загрузка`, — пустой `Статус`, форма открывается вопросом «Требуется конвертация… Релиз 1.1.21» (`РассчитатьСтатусДокумента`); пустая форма в кадре = модальное окно `ErrorWindow` — снимок каждого окна процесса; навигационная ссылка на пустую ссылку — «ЗначениеКопирования»",
+      "format": "designer",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.3.27.2342",
+        "8.5.1.1529"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/089-uat-route-sheet-status-conversion-question/task.md",
+          "sha256": "5cbf4ccdb8115d949d6ac43c3af365517333f241f2ea346a892ee848340157c0"
+        },
+        {
+          "path": "cases/089-uat-route-sheet-status-conversion-question/lessons.md",
+          "sha256": "7b265e120a25ff7c688e6a3bf3d8d9afd10ea161493dacbb6c9309239e5c702c"
+        }
+      ]
+    },
+    {
+      "id": "090",
+      "slug": "com-connection-globals-find-by-number",
+      "topic": "тестирование / COM",
+      "symptom": "у COM-соединения нет `Формат`, `Строка`, `ТекущаяДата` (есть `String`, `XMLString`, `XMLValue`); серверные процедуры формы через COM не вызвать — Vanessa; `НайтиПоНомеру` без даты при нумерации в пределах года пуст — запросом",
+      "format": "designer",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.3.27",
+        "8.3.27.2342"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH/MEDIUM",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/090-com-connection-globals-find-by-number/task.md",
+          "sha256": "a8a76a8711f54bc6d54b9ca306dd144f911165422e36b2f852097b74b420dd58"
+        },
+        {
+          "path": "cases/090-com-connection-globals-find-by-number/lessons.md",
+          "sha256": "8a7790a7c27e9e2ab036ffcf0f41b26b58dbb9cd602113a39b6393dbc53cdca5"
+        }
+      ]
+    },
+    {
+      "id": "091",
+      "slug": "partial-load-delta-package-root-ext",
+      "topic": "развёртывание / без EDT",
+      "symptom": "дельта-пакет вместо .cf: частичная загрузка изменённых объектов; корень = `Configuration.xml` + все корневые `Ext` с `ParentConfigurations` (без них стираются модули приложения и поддержка, новые объекты — «без загрузки родительского объекта»); проверка пакета на копии эталона; разовая «дефект в файлах проекта» при выгрузке EDT",
+      "format": "designer",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.3.27.2214",
+        "8.3.27.2342"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/091-partial-load-delta-package-root-ext/task.md",
+          "sha256": "84721322e514bef44786413e741ec0220fcec0cbfdbdfb8a7919fe4237047368"
+        },
+        {
+          "path": "cases/091-partial-load-delta-package-root-ext/lessons.md",
+          "sha256": "d847d41c11d7f2c89fcdb61bd70b05504e8cde14d0d77838b988b2cd21dce831"
+        }
+      ]
+    },
+    {
+      "id": "092",
+      "slug": "ui-test-speed-printwindow-one-client",
+      "topic": "проверка / без EDT",
+      "symptom": "UI-тесты в 15 раз быстрее: PrintWindow тормозит тестируемый клиент на десятки секунд (снимать копией экрана), один клиент на сценарий (ожидание по числу шагов, менеджер без пересборки), длительность шага в журнале; `designer_lib.check_query` и линт до платформы; помощники правки форм в `designer_lib`",
+      "format": "designer",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.5.1",
+        "8.5.1.1529"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/092-ui-test-speed-printwindow-one-client/task.md",
+          "sha256": "3170746cd42c8b6466b238e5c860f6e9b4814bb7aee2e575ae4d2c2b6877a7af"
+        },
+        {
+          "path": "cases/092-ui-test-speed-printwindow-one-client/lessons.md",
+          "sha256": "81be006b178c212e611423fcb933ba457e0177bba74c03a7293f82fc98793f6d"
+        }
+      ]
+    },
+    {
+      "id": "093",
+      "slug": "ut-release-chain-update-handlers",
+      "topic": "правка типовой / без EDT",
+      "symptom": "обновление УТ по цепочке релизов: отложенные — регламентным заданием (8 потоков; синхронный вызов однопоточный, расписание заказчика «с 19:00»), БСП 3.1 обновляет фоновыми заданиями (не снимать клиента, спящий сеанс), `sp_updatestats` после реструктуризации, ход по SQL; ставки НДС доработки из перечисления в справочник с постоянными GUID",
+      "format": "designer",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.3.27.2342"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/093-ut-release-chain-update-handlers/task.md",
+          "sha256": "8b2fe1a2b5f337d4df2115f562e75dd4f6745e3b4c3fd2d24301acb31b101d7c"
+        },
+        {
+          "path": "cases/093-ut-release-chain-update-handlers/lessons.md",
+          "sha256": "f079ec699aad00ef5ec0cec9f8d732c526a8e239ba9604bc40885433a389eeee"
+        }
+      ]
+    },
+    {
+      "id": "094",
+      "slug": "native-api-addin-zig-focas",
+      "topic": "без EDT / внешние компоненты / интеграция с оборудованием",
+      "symptom": "компонента Native API без Visual Studio — zig (clang, MinGW): деструктор в vtable — 1 ячейка у MSVC, 2 у Itanium → `addin_abi.h`; `u16string` вместо `basic_string<uint16_t>`; zip — из макета `AddIn` (`Ext/Template.bin`) или временного хранилища, по пути — только .dll; FOCAS: подставная библиотека по сценарию, дескриптор на опрос, параллельный опрос потоками; ctypes `restype=c_short`",
+      "format": "designer",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.3.21",
+        "8.3.27",
+        "8.3.27.2342"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/094-native-api-addin-zig-focas/task.md",
+          "sha256": "2d2ce97121e8f33a8210b1a5dcd17b763556d601382ea7cf4c05618632e6b38e"
+        },
+        {
+          "path": "cases/094-native-api-addin-zig-focas/lessons.md",
+          "sha256": "ae56a0b4d696a51263bd5292b57d733844d2a997aff8da6a93f9b1301f5ab189"
+        }
+      ]
+    },
+    {
+      "id": "095",
+      "slug": "home-page-sprint-svg-picture-external-sync",
+      "topic": "формы / без EDT / проверка",
+      "symptom": "начальная страница «Мой спринт»: SVG-картинка в поле картинки вместо поля HTML; запись в данные из обмена — сначала прочитать модуль обмена (направление, ключ, перезаписываемые поля); `OneColumn` → `<Column>`, команда `TextPicture`; флажок тест-клиента — `УстановитьОтметку()`; итоговый кадр PrintWindow; песочница возвращает защиту",
+      "format": "designer",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.5.1",
+        "8.5.1.1529"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/095-home-page-sprint-svg-picture-external-sync/task.md",
+          "sha256": "c54534aff801f600865027d5f00f71c46fbd85f1fae998d43131d6c704a2ee28"
+        },
+        {
+          "path": "cases/095-home-page-sprint-svg-picture-external-sync/lessons.md",
+          "sha256": "ab034363fe7e68cd527c778289f6d957fb8478a9405695e90610c896b3fffe97"
+        }
+      ]
+    },
+    {
+      "id": "096",
+      "slug": "fill-check-before-write-com-equality",
+      "topic": "BSL / проверка",
+      "symptom": "«Наименование не заполнено», хотя собирается в ПередЗаписью: проверка заполнения раньше — собирать в ОбработкаПроверкиЗаполнения и ПередЗаписью; COM-тест минует проверку заполнения (вызывать ПроверитьЗаполнение); ссылки через COM сравнивать XMLString; генератор не переписывает принятые файлы",
+      "format": "designer",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.5.1.1529"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/096-fill-check-before-write-com-equality/task.md",
+          "sha256": "cd0fdad0bd35fd7de113d4086f4eb21bf24b903e70c012519c4cd6b495192499"
+        },
+        {
+          "path": "cases/096-fill-check-before-write-com-equality/lessons.md",
+          "sha256": "5a7b8379695dc94c3524979455818d2fdc6cdaf337a4a91548349acee27b691c"
+        }
+      ]
+    },
+    {
+      "id": "097",
+      "slug": "task-delivery-speedup-pipeline-map",
+      "topic": "процесс / без EDT",
+      "symptom": "ускорение ДиЗ: разбор времени по транскрипту (70 % — модель), конвейер цикл/выпуск одной командой, карта конфигурации, линт дублей и синтаксиса скриптов, заготовка по docx, постоянные тестовые данные, параллельные сессии, быстрый режим",
+      "format": "designer",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.5.1"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/097-task-delivery-speedup-pipeline-map/task.md",
+          "sha256": "14378b02eab06004269feca03980bd7bf11ce40b63529d8276731b9389d785fe"
+        },
+        {
+          "path": "cases/097-task-delivery-speedup-pipeline-map/lessons.md",
+          "sha256": "c6e5fa23466719b3be0be29b4bf378b50e99ad207700c8c3db4d57bda7db67d1"
+        }
+      ]
+    },
+    {
+      "id": "098",
+      "slug": "fill-from-table-repeated-keys-count-dedupe",
+      "topic": "BSL",
+      "symptom": "«Все строки» подтягивает не все: ключ повторяется в источнике (реквизит в шапке и ТЧ), защита «уже есть» отбрасывает повтор того же заполнения — защита по количеству; ключ с табличной частью; тест на данных с повторами",
+      "format": "designer",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.5.1.1529"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/098-fill-from-table-repeated-keys-count-dedupe/task.md",
+          "sha256": "913b380676aa5caf20498bf06a7c7467e0d8d3118fd423cac0dd677adde73f48"
+        },
+        {
+          "path": "cases/098-fill-from-table-repeated-keys-count-dedupe/lessons.md",
+          "sha256": "b45525b79ce0d6952cc7facb9ea0ed99f2bc938c162630b075717b758ecd66c9"
+        }
+      ]
+    },
+    {
+      "id": "099",
+      "slug": "designer-accumulation-register-fields",
+      "topic": "Метаданные без EDT",
+      "symptom": "Ресурс/измерение регистра накопления не принимают FillValue; код загрузки 0 не заменяет чтение журнала",
+      "format": "designer",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.3.27",
+        "8.3.27.2325"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/099-designer-accumulation-register-fields/task.md",
+          "sha256": "f22ac668d745b874f98ecaa99cf9414b2ea80e53c5976eebec5c2488cebe9410"
+        },
+        {
+          "path": "cases/099-designer-accumulation-register-fields/lessons.md",
+          "sha256": "0a46ce6824bee881a39c508ed0c5f803320f32ecbdeec88ac52e648f4f5f5b9a"
+        }
+      ]
+    },
+    {
+      "id": "100",
+      "slug": "posting-recordset-clear",
+      "topic": "Проведение",
+      "symptom": "Повторное проведение того же COM-объекта удваивает движения — очищать набор перед заполнением",
+      "format": "designer",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.3.27",
+        "8.3.27.2325"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/100-posting-recordset-clear/task.md",
+          "sha256": "244ba9aafe8a8189ffdb0657b4c9653001a8d300dadb614148c004aa821332d5"
+        },
+        {
+          "path": "cases/100-posting-recordset-clear/lessons.md",
+          "sha256": "b9d1f83762381959733904f89dd224195aa36baf2c426210a17eb8a502f08b5a"
+        }
+      ]
+    },
+    {
+      "id": "101",
+      "slug": "historical-stock-guard",
+      "topic": "Проведение",
+      "symptom": "Локальные минусы внутри истории: проверка по регистраторам в транзакции под блокировкой",
+      "format": "designer",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.3.27",
+        "8.3.27.2325"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/101-historical-stock-guard/task.md",
+          "sha256": "2bc633096c21fa0841e02ee1d3ae206a9c46f1b712f2ddefcee20019b6b89e32"
+        },
+        {
+          "path": "cases/101-historical-stock-guard/lessons.md",
+          "sha256": "c15743bbc7e7582be10d400c8fd436fabca725956db049598929009e6d762123"
+        }
+      ]
+    },
+    {
+      "id": "102",
+      "slug": "test-base-lock-and-phone-shots",
+      "topic": "тестирование / мобильные формы / БСП",
+      "symptom": "блокировка БСП «заблокирована для обновления» снимается `UC=КодРазрешения`; догрузка проекта в тестовую базу без пересоздания; снимки формы «как на телефоне» в узком окне тестового клиента (1cv8.exe, пустой GetWindowText — по PID), `ui_printwindow`; `значение` не читает надпись; case 015 на многострочной НСтр",
+      "format": "designer",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.5.1"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/102-test-base-lock-and-phone-shots/task.md",
+          "sha256": "ab2af40084024786c64a7d15f0162a3ad21f1cc6fa7318ffdf6354b6d98c208e"
+        },
+        {
+          "path": "cases/102-test-base-lock-and-phone-shots/lessons.md",
+          "sha256": "c93d1e6e577c12445069c30cff4fe02fc119f314792afbc2d9e88f3a2f61517f"
+        }
+      ]
+    },
+    {
+      "id": "103",
+      "slug": "html-field-svg-gradient-black",
+      "topic": "поле HTML / тестирование",
+      "symptom": "ECharts SVG: `LinearGradient` и `'gradient'` в поле HTML 1С — чёрная/серая заливка (Edge рисует верно); сплошной цвет + `opacity`, проверка снимком окна клиента",
+      "format": "designer",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.3.16",
+        "8.5.1"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/103-html-field-svg-gradient-black/task.md",
+          "sha256": "5affdd7c86ea62279ea2b7d92d847bf25012c66796307f529faa55e0364920ab"
+        },
+        {
+          "path": "cases/103-html-field-svg-gradient-black/lessons.md",
+          "sha256": "752cd17d34dce19be3bb4ba114a7d3e656166f586d8e722c79292b2e6eebac84"
+        }
+      ]
+    },
+    {
+      "id": "104",
+      "slug": "enum-role-load-loop",
+      "topic": "роли / загрузка",
+      "symptom": "Enum с правами Read или View: LoadConfigFromFiles зациклен, журнал пуст; убрать самостоятельную запись перечисления (8.5.1.1529)",
+      "format": "designer",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.5.1",
+        "8.5.1.1529"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/104-enum-role-load-loop/task.md",
+          "sha256": "3586908f3de1365d6d17044907fd3f25721dd895b1c37f2a67c652178ae4229a"
+        },
+        {
+          "path": "cases/104-enum-role-load-loop/lessons.md",
+          "sha256": "71c158d759429ec905e31fa27b6164861695adbbb25b59e3dce0404d49ae1a70"
+        }
+      ]
+    },
+    {
+      "id": "105",
+      "slug": "editable-table-commandbar",
+      "topic": "формы / UI",
+      "symptom": "Нет «Добавить» в ТЧ: ChangeRowSet=false и Autofill=false; включить оба свойства и проверить запись кнопкой",
+      "format": "designer",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.5.1",
+        "8.5.1.1529"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/105-editable-table-commandbar/task.md",
+          "sha256": "7b1c4de2f4168aef4de4ec5326af7dbc43430bb2dd8f469484b91c8770b52121"
+        },
+        {
+          "path": "cases/105-editable-table-commandbar/lessons.md",
+          "sha256": "1674b81d6791272815a04027e6ec06ff39c6a7bba4efbb0bbc35f16f3b72c62b"
+        }
+      ]
+    },
+    {
+      "id": "106",
+      "slug": "choice-parameters-form-context",
+      "topic": "модуль формы / UI",
+      "symptom": "CheckModules чисто, присваивание ПараметрыВыбора даёт ошибку контекста и типа; отдельное имя структуры и диагностика по полному стеку",
+      "format": "designer",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.5.1",
+        "8.5.1.1529"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/106-choice-parameters-form-context/task.md",
+          "sha256": "3076456397eabca61b814a23d43c82fb204148b880cea324dd766ed20c9b33b4"
+        },
+        {
+          "path": "cases/106-choice-parameters-form-context/lessons.md",
+          "sha256": "5c225512322358d7e083b4fc1325b4f8f00f2bf1dfe01644a7c7846898cadf6c"
+        }
+      ]
+    },
+    {
+      "id": "107",
+      "slug": "ui-error-probe-implicit-wait",
+      "topic": "UI / производительность / диагностика",
+      "symptom": "НайтиОбъект отсутствующего ErrorInfo на каждом шаге добавляет ожидания: чтение дерева активного окна, полный стек менеджера; замер 11996 → 330 мс на 8.5.1.1529",
+      "format": "designer",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.5.1.1529"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/107-ui-error-probe-implicit-wait/task.md",
+          "sha256": "92ef4668caf5d4c69d0b606dccf3d8d0712e71f7404987f580591f72c12a82f9"
+        },
+        {
+          "path": "cases/107-ui-error-probe-implicit-wait/lessons.md",
+          "sha256": "3198ff9bdd5ea1338991980f240ee7c951051a0d019f63b667be3f0281ac7fb6"
+        }
+      ]
+    },
+    {
+      "id": "108",
+      "slug": "frozen-release-and-ui-resources",
+      "topic": "Выпуск, UI, замеры",
+      "symptom": "Гонка исходников, старый CF/кадр, конкуренция, вложенное время",
+      "format": "designer",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.5.1.1529"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/108-frozen-release-and-ui-resources/task.md",
+          "sha256": "4af877e4847178110e8bdab5005202e74b6411edb3375d784723cc1bf8c64f29"
+        },
+        {
+          "path": "cases/108-frozen-release-and-ui-resources/lessons.md",
+          "sha256": "0f11ff30806f13a710ee75dfdb97c2f3f1cea08bc9aeccd2d8f49d21315c28bd"
+        }
+      ]
+    },
+    {
+      "id": "109",
+      "slug": "dynamic-list-runtime-order",
+      "topic": "Формы, СКД",
+      "symptom": "После перемещения список возвращает порядок вставки",
+      "format": "designer",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.5.1.1529"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/109-dynamic-list-runtime-order/task.md",
+          "sha256": "ac8a119afceed1e86605b0b59315a0e0c7ee48f684ad1e69ac3aefe6e7bae315"
+        },
+        {
+          "path": "cases/109-dynamic-list-runtime-order/lessons.md",
+          "sha256": "dd75f421d01f70c995fb5cc6080c0e138e8754a2fedb71854f8c69feec686f05"
+        }
+      ]
+    }
+  ]
+}

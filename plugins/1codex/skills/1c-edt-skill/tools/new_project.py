@@ -44,7 +44,8 @@ TYPE_RU = {'String': 'Строка', 'Number': 'Число', 'Boolean': 'Бул�
 
 
 def read(path):
-    return io.open(path, encoding='utf-8', newline='').read()
+    with io.open(path, encoding='utf-8', newline='') as stream:
+        return stream.read()
 
 
 def synonym(block):
@@ -123,7 +124,8 @@ def write_once(path, text):
         print('  есть   %s' % path)
         return False
     os.makedirs(os.path.dirname(path) or '.', exist_ok=True)
-    io.open(path, 'w', encoding='utf-8', newline='').write(text)
+    with io.open(path, 'w', encoding='utf-8', newline='') as stream:
+        stream.write(text)
     print('  создан %s' % path)
     return True
 

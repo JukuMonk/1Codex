@@ -1,0 +1,10 @@
+{
+  "source_commit": "3ebd618802bf22d3c93f8c2e4b5d31c40d213331",
+  "method": "Exact UTF-8 bytes including CRLF, stable UUIDs and XML namespace bindings",
+  "sha256": {
+    "simple": "7fbe37fbcaaebcabe7d27bdfe149ece3d1c801d6c157ec31a93f5b05f16bc1d6",
+    "groups": "318bece08b5ca1787aaac4a7415b92c1e22ee428924563da97ef2b8b96063a0b",
+    "extended-period-False": "1841f30aa035b38451d622550896fbc5d151b92f2cbc530a0496efa65f46930b",
+    "extended-period-True": "635c9b7f7206f9e7e7d0716000bc7b8d1c3f3f7fdd0a6cb69ea46668d1be4f5f"
+  }
+}
