@@ -162,7 +162,11 @@ def main():
         for label, cmd in (
             ('links', ['tools/check_links.py']),
             ('cases', ['tools/cases_sync.py', 'проверить']),
-            ('sandbox', ['tools/check_project.py', 'tests/sandbox'])):
+            # Preload the standard library before adding tools/: its historical
+            # platform.py otherwise shadows stdlib platform when uuid loads on Linux.
+            ('sandbox', ['-c', "import platform,runpy,sys;sys.path.insert(0,'tools');"
+                         "sys.argv=['tools/check_project.py','tests/sandbox'];"
+                         "runpy.run_path(sys.argv[0],run_name='__main__')"])):
             report['checks'][label] = run([sys.executable, *cmd], installed_skill)
         report['archives'] = {}
         for archive in (portable_zip, local_zip):
