@@ -1,0 +1,18 @@
+{
+  "version": "1.1.0",
+  "source_commit": "8faed4be0a5609dbc970fdceed19980449602283",
+  "snapshot_date": "2026-11-02",
+  "cases": 109,
+  "knowledge": 23,
+  "tools": 55,
+  "nodes": 139,
+  "edges": 170,
+  "maps": 12,
+  "case_formats": {
+    "legacy-edt": 30,
+    "shared": 43,
+    "designer": 36
+  },
+  "dagre_version": "3.1.3",
+  "html_sha256": "23d7538710c248dc168c3454c3e6cf64ac4db4644c9955ea4aa9598e74d31401"
+}
