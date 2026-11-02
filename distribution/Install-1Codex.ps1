@@ -26,11 +26,12 @@ if (-not (Test-Path -LiteralPath $sourceUpdater)) { throw 'Place Update-1Codex.p
 Copy-Item -LiteralPath $sourceUpdater -Destination $updater -Force
 if (-not $NoSchedule) {
     $shellExe = Join-Path $env:SystemRoot 'System32\WindowsPowerShell\v1.0\powershell.exe'
-    $action = New-ScheduledTaskAction -Execute $shellExe -Argument ('-NoProfile -NonInteractive -WindowStyle Hidden -File "' + $updater + '" -Quiet')
+    $action = New-ScheduledTaskAction -Execute $shellExe -Argument ('-NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy RemoteSigned -File "' + $updater + '" -Quiet')
     $settings = New-ScheduledTaskSettingsSet -StartWhenAvailable -MultipleInstances IgnoreNew -ExecutionTimeLimit (New-TimeSpan -Minutes 10)
     $triggers = @((New-ScheduledTaskTrigger -Daily -At '12:00'), (New-ScheduledTaskTrigger -AtLogOn -User ([System.Security.Principal.WindowsIdentity]::GetCurrent().Name)))
     $principal = New-ScheduledTaskPrincipal -UserId ([System.Security.Principal.WindowsIdentity]::GetCurrent().Name) -LogonType Interactive -RunLevel Limited
     Register-ScheduledTask -TaskName '1Codex-Update' -Action $action -Trigger $triggers -Settings $settings -Principal $principal -Force | Out-Null
 }
 Write-Host '1Codex installed. Restart the desktop app and start a new chat.'
-Write-Host 'Daily updates: 12:00 and user sign-in. Log: ~/.codex/1codex-updater/update.log'
+if ($NoSchedule) { Write-Host 'Automatic schedule not created (-NoSchedule). Run the updater manually.' }
+else { Write-Host 'Daily updates: 12:00 and user sign-in. Log: ~/.codex/1codex-updater/update.log' }
