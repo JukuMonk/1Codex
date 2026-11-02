@@ -1,0 +1,13 @@
+<!-- WRONG: так НЕ делать -->
+
+  <dcsset:item xsi:type="dcsset:StructureItemGroup">
+    <dcsset:groupItems>
+      <dcsset:item xsi:type="dcsset:GroupItemField">
+        <dcsset:field>Состояние</dcsset:field>
+        <dcsset:groupType>Items</dcsset:groupType>
+        …
+      </dcsset:item>
+    </dcsset:groupItems>
+    <dcsset:order><dcsset:item xsi:type="dcsset:OrderItemAuto"/></dcsset:order>
+    <dcsset:selection><dcsset:item xsi:type="dcsset:SelectedItemAuto"/></dcsset:selection>
+  </dcsset:item>

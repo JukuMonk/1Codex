@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mdclass:Subsystem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:core="http://g5.1c.ru/v8/dt/mcore" xmlns:mdclass="http://g5.1c.ru/v8/dt/metadata/mdclass" uuid="f50e6f32-5d81-5351-98aa-e4779d42ce44">
+  <name>ПримерРаздел</name>
+  <synonym>
+    <key>ru</key>
+    <value>Пример раздела</value>
+  </synonym>
+  <includeInCommandInterface>true</includeInCommandInterface>
+  <explanation>
+    <key>ru</key>
+    <value>Раздел командного интерфейса: обработка сверху, справочники в группе</value>
+  </explanation>
+  <picture xsi:type="core:PictureRef">
+    <picture>CommonPicture.ПримерРаздел</picture>
+  </picture>
+  <content>DataProcessor.ПримерОбработка</content>
+  <subsystems>ПримерГруппа</subsystems>
+</mdclass:Subsystem>

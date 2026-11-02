@@ -1,0 +1,8 @@
+# CORRECT: uuid из файла, если он есть; иначе УСТОЙЧИВЫЙ от имени
+def uuid_из(путь):
+    if os.path.exists(путь):
+        т = прочитать(путь)
+        нач = т.find('uuid="')
+        if нач > 0:
+            return т[нач + 6:т.find('"', нач + 6)]
+    return str(uuid.uuid5(uuid.NAMESPACE_OID, путь))

@@ -1,0 +1,50 @@
+def снять_с_экрана(путь, pid):
+    """Копия области экрана под главным окном клиента (BitBlt, окну 1С ничего не посылается): PrintWindow шлёт окну
+    отрисовку и тормозит следующую загрузку динамических списков на десятки секунд (замер 17.10.2026). Нужен
+    видимый, не свёрнутый сеанс; окно не перекрыто."""
+    from PIL import ImageGrab
+    окна = window_shots.windows_of([pid])
+    if not окна:
+        return False
+    главное = max(окна, key=lambda x: (x[1][2] - x[1][0]) * (x[1][3] - x[1][1]))
+    import win32gui
+    try:
+        win32gui.SetForegroundWindow(главное[0])
+    except Exception:                    # noqa: BLE001 — фокус могут не отдать, снимаем как есть
+        pass
+    кадр = ImageGrab.grab(bbox=главное[1], all_screens=True)
+    if кадр.getbbox() is None:           # чёрный кадр — сеанс свёрнут
+        return False
+    кадр.save(путь)
+    return True
+
+
+def снять(путь, pid, порт='48133'):
+    """Окно тестируемого клиента: копией экрана (быстро, не мешает 1С); не вышло — PrintWindow по PID; затем — прежний
+    способ (PowerShell). UI_SHOT=printwindow — сразу PrintWindow."""
+    if os.environ.get('UI_SHOT', 'screen') == 'screen':
+        try:
+            if снять_с_экрана(путь, pid):
+                return True
+        except Exception as ошибка:      # noqa: BLE001
+            print('снимок с экрана не удался:', ошибка)
+    try:
+        кадр = window_shots.frame([pid])
+        if кадр is not None:
+            кадр.save(путь)
+            return True
+    except Exception as ошибка:          # noqa: BLE001
+        print('снимок по PID не удался:', ошибка)
+    return клиент.снимок(путь, 'TPort %s' % порт)
+
+
+    while not os.path.exists(журнал) and time.time() - t0 < ожидание:
+        if os.path.exists(запрос):
+            т_сн = time.time()
+            time.sleep(0.3)                  # дорисовка после шага
+            имя = open(запрос, encoding='utf-8-sig').read().strip() or 'снимок'
+            путь = os.path.join(клиент.СНИМКИ, 'ui_%s.png' % имя)
+            print('снимок', путь if снять(путь, клиент_тест.pid, порт) else '— НЕ СНЯТ', '[%.1f с]' % (time.time() - т_сн))
+            os.remove(запрос)
+        time.sleep(0.2)
+    time.sleep(1)

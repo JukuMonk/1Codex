@@ -1,0 +1,7 @@
+areaStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+  { offset: 0, color: 'rgba(31,78,121,.32)' }, { offset: 1, color: 'rgba(31,78,121,.02)' }]) },
+
+itemStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: '#2E75B6' }, { offset: 1, color: '#1F4E79' }]),
+             borderRadius: [4, 4, 0, 0] }
+
+lineStyle: { color: 'gradient', opacity: 0.32, curveness: 0.5 }   // санки

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mdclass:Subsystem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:core="http://g5.1c.ru/v8/dt/mcore" xmlns:mdclass="http://g5.1c.ru/v8/dt/metadata/mdclass" uuid="48418ab9-2253-4f46-8008-4246820c44de">
+  <name>мвмЗаявкиИРейсы</name>
+  <synonym>
+    <key>ru</key>
+    <value>Заявки и рейсы</value>
+  </synonym>
+  <includeInCommandInterface>true</includeInCommandInterface>
+  <explanation>
+    <key>ru</key>
+    <value>Заявка цеха — «Заказ на ТС», рейс машины — «Маршрутный лист». Оба документа типовые, своих мы не заводим.</value>
+  </explanation>
+  <content>Document.уатЗаказГрузоотправителя</content>
+  <content>Document.уатМаршрутныйЛист</content>
+  <content>Document.уатПеремещениеТоваров</content>
+  <parentSubsystem>Subsystem.мвмЗаводскаяЛогистика</parentSubsystem>
+</mdclass:Subsystem>

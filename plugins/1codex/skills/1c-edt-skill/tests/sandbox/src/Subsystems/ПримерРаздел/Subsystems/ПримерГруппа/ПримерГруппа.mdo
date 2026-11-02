@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mdclass:Subsystem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:core="http://g5.1c.ru/v8/dt/mcore" xmlns:mdclass="http://g5.1c.ru/v8/dt/metadata/mdclass" uuid="37e89b28-3f61-50ca-9bff-e6e4aed43289">
+  <name>ПримерГруппа</name>
+  <synonym>
+    <key>ru</key>
+    <value>Пример группы</value>
+  </synonym>
+  <includeInCommandInterface>true</includeInCommandInterface>
+  <explanation>
+    <key>ru</key>
+    <value>Дочерняя подсистема: связь с родителем держит parentSubsystem</value>
+  </explanation>
+  <content>Catalog.ПримерСправочник</content>
+  <content>InformationRegister.ПримерНедоступность</content>
+  <content>Report.ПримерОтчет</content>
+  <content>Enum.ПримерПеречисление</content>
+  <content>Constant.ПримерУпрощённыйРежим</content>
+  <parentSubsystem>Subsystem.ПримерРаздел</parentSubsystem>
+</mdclass:Subsystem>

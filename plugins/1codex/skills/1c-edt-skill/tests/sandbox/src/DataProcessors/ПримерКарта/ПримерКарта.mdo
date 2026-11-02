@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mdclass:DataProcessor xmlns:mdclass="http://g5.1c.ru/v8/dt/metadata/mdclass" uuid="669bc513-2767-5b2d-aa9a-5e1be757dec1">
+  <producedTypes>
+    <objectType typeId="d1ada537-2f72-5043-a8b4-55dae0ec3001" valueTypeId="6caa022d-c86e-50e8-b86e-8b8a7e81fc1c"/>
+    <managerType typeId="b065bc73-0453-54d9-a951-0215cdf4385c" valueTypeId="f8f74c62-b829-5e0e-82d7-eec42ee7e438"/>
+  </producedTypes>
+  <name>ПримерКарта</name>
+  <synonym>
+    <key>ru</key>
+    <value>Пример поля HTML</value>
+  </synonym>
+  <comment>Поле HTML с макетом и обменом через скрытые поля</comment>
+  <useStandardCommands>true</useStandardCommands>
+  <defaultForm>DataProcessor.ПримерКарта.Form.Форма</defaultForm>
+  <forms uuid="3b78582e-a479-5f17-af69-d22c9c74207a">
+    <name>Форма</name>
+    <synonym>
+      <key>ru</key>
+      <value>Пример поля HTML</value>
+    </synonym>
+    <usePurposes>PersonalComputer</usePurposes>
+  </forms>
+  <templates uuid="dadec8ef-87c0-540f-a97e-dde07d355ef6">
+    <name>СтраницаHTML</name>
+    <synonym>
+      <key>ru</key>
+      <value>Страница, HTML</value>
+    </synonym>
+    <templateType>TextDocument</templateType>
+  </templates>
+</mdclass:DataProcessor>

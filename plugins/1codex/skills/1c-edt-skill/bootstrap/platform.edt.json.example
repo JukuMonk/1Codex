@@ -1,0 +1,27 @@
+{
+  "v8": "C:\\Program Files\\1cv8\\8.3.27.2325\\bin\\1cv8.exe",
+  "edt_cli": "C:\\Users\\user\\AppData\\Local\\1C\\1cedtstart\\installations\\1C_EDT 2026.1\\1cedt\\1cedtcli.exe",
+  "project": "C:\\Users\\user\\AppData\\Local\\1C\\1cedtstart\\projects\\MVM\\УАТ_МВМ",
+  "work": "C:\\MVM\\.platform",
+  "prefix": "мвм",
+  "fill_prefixes": ["мвм"],
+  "test_usr": "Администратор",
+  "test_pwd": "",
+  "com": "V83.COMConnector",
+  "ui_port": 48123,
+  "ui_timeout": 900,
+  "va_epf": "C:/1c-tools/vanessa/vanessa-automation-single.epf",
+  "va_port": 48000,
+  "ffmpeg": "ffmpeg",
+  "va_video_dir": "C:/1c-tools/vanessa/video",
+  "ib": "File=\"C:\\Users\\user\\Documents\\InfoBase11\";",
+  "screens": {
+    "server_call_module": "ОбщегоНазначенияВызовСервера",
+    "global_client_module": "НапоминанияПользователяГлобальный",
+    "after_start_module": "ОбщегоНазначенияКлиентПереопределяемый",
+    "default_masks": [
+      "Обработка.мвм*.Форма.*",
+      "Справочник.мвм*.Форма.*"
+    ]
+  }
+}

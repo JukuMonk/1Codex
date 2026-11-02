@@ -1,0 +1,5 @@
+<!-- CORRECT -->
+
+  <subsystemsOrder>
+    <subsystems>Subsystem.мвмЗаводскаяЛогистика.Subsystem.мвмПланЗавода</subsystems>
+  </subsystemsOrder>

@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mdclass:Catalog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:core="http://g5.1c.ru/v8/dt/mcore" xmlns:mdclass="http://g5.1c.ru/v8/dt/metadata/mdclass" uuid="8c3d07ca-53c8-4620-b2bb-ba79fbf9c2bd">
+  <producedTypes>
+    <objectType typeId="5de10fd8-0685-4da2-9fc8-91114fc048f7" valueTypeId="f0a34142-20c3-4f7f-b96a-78e34dbebe30"/>
+    <refType typeId="86cade23-685f-4f1e-b391-1ad9f24b8c48" valueTypeId="9e081689-1cad-4155-a601-a10b2cd11fa5"/>
+    <selectionType typeId="ddf6fac4-b9b7-4eaa-833c-d837aee60882" valueTypeId="429c58fb-8126-4df4-9783-b0352f66ca8d"/>
+    <listType typeId="4f6d73f5-898c-4375-92f4-533eefa4ebff" valueTypeId="174c204c-1cb7-428a-b02e-7de436083b06"/>
+    <managerType typeId="b7c1160e-6534-4c6d-b088-c200a73f122c" valueTypeId="73f0a5f4-bbc4-4f47-9591-f63d14d54062"/>
+  </producedTypes>
+  <name>мвмТипыУзлов</name>
+  <synonym>
+    <key>ru</key>
+    <value>Типы узлов карты (оформление)</value>
+  </synonym>
+  <comment>Код — ключ карты: jn, load, entry, gate, rail, dock, store, pt.</comment>
+  <useStandardCommands>true</useStandardCommands>
+  <inputByString>Catalog.мвмТипыУзлов.StandardAttribute.Description</inputByString>
+  <inputByString>Catalog.мвмТипыУзлов.StandardAttribute.Code</inputByString>
+  <fullTextSearchOnInputByString>DontUse</fullTextSearchOnInputByString>
+  <standardAttributes>
+    <dataHistory>Use</dataHistory>
+    <name>PredefinedDataName</name>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+  </standardAttributes>
+  <standardAttributes>
+    <dataHistory>Use</dataHistory>
+    <name>Predefined</name>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+  </standardAttributes>
+  <standardAttributes>
+    <dataHistory>Use</dataHistory>
+    <name>Ref</name>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+  </standardAttributes>
+  <standardAttributes>
+    <dataHistory>Use</dataHistory>
+    <name>DeletionMark</name>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+  </standardAttributes>
+  <standardAttributes>
+    <dataHistory>Use</dataHistory>
+    <name>IsFolder</name>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+  </standardAttributes>
+  <standardAttributes>
+    <dataHistory>Use</dataHistory>
+    <name>Owner</name>
+    <fillFromFillingValue>true</fillFromFillingValue>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+  </standardAttributes>
+  <standardAttributes>
+    <dataHistory>Use</dataHistory>
+    <name>Parent</name>
+    <fillFromFillingValue>true</fillFromFillingValue>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+  </standardAttributes>
+  <standardAttributes>
+    <dataHistory>Use</dataHistory>
+    <name>Description</name>
+    <fillChecking>ShowError</fillChecking>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+  </standardAttributes>
+  <standardAttributes>
+    <dataHistory>Use</dataHistory>
+    <name>Code</name>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fillChecking>ShowError</fillChecking>
+    <fullTextSearch>Use</fullTextSearch>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+  </standardAttributes>
+  <createOnInput>Use</createOnInput>
+  <dataLockControlMode>Managed</dataLockControlMode>
+  <fullTextSearch>Use</fullTextSearch>
+  <codeLength>20</codeLength>
+  <descriptionLength>100</descriptionLength>
+  <codeType>String</codeType>
+  <codeAllowedLength>Variable</codeAllowedLength>
+  <checkUnique>true</checkUnique>
+  <autonumbering>false</autonumbering>
+  <defaultPresentation>AsDescription</defaultPresentation>
+  <editType>InDialog</editType>
+  <choiceMode>BothWays</choiceMode>
+  <defaultObjectForm>Catalog.мвмТипыУзлов.Form.ФормаЭлемента</defaultObjectForm>
+  <defaultListForm>Catalog.мвмТипыУзлов.Form.ФормаСписка</defaultListForm>
+  <attributes uuid="ffaf9362-02ef-47a4-8e5b-4379e401efcc">
+    <name>ЦветЗаливки</name>
+    <synonym>
+      <key>ru</key>
+      <value>Цвет заливки круга</value>
+    </synonym>
+    <type>
+      <types>EnumRef.мвмЦветНаКарте</types>
+    </type>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <dataHistory>Use</dataHistory>
+  </attributes>
+  <attributes uuid="0af2b368-dafa-4d7b-85b7-196015f273f4">
+    <name>ЦветОбводки</name>
+    <synonym>
+      <key>ru</key>
+      <value>Цвет обводки круга</value>
+    </synonym>
+    <type>
+      <types>EnumRef.мвмЦветНаКарте</types>
+    </type>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <dataHistory>Use</dataHistory>
+  </attributes>
+  <attributes uuid="5dcb97c2-9f9f-4d33-ac53-db5a9157961c">
+    <name>Радиус</name>
+    <synonym>
+      <key>ru</key>
+      <value>Радиус круга, пикселей</value>
+    </synonym>
+    <type>
+      <types>Number</types>
+      <numberQualifiers>
+        <precision>3</precision>
+      </numberQualifiers>
+    </type>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <dataHistory>Use</dataHistory>
+  </attributes>
+  <attributes uuid="3513a398-8dd2-4a01-9054-d2136c20dde7">
+    <name>ПоказыватьПодпись</name>
+    <synonym>
+      <key>ru</key>
+      <value>Показывать подпись</value>
+    </synonym>
+    <type>
+      <types>Boolean</types>
+    </type>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <dataHistory>Use</dataHistory>
+  </attributes>
+  <attributes uuid="6745dac0-c031-410e-89fe-50075c0150a0">
+    <name>ЦветПодписи</name>
+    <synonym>
+      <key>ru</key>
+      <value>Цвет подписи</value>
+    </synonym>
+    <type>
+      <types>EnumRef.мвмЦветНаКарте</types>
+    </type>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <dataHistory>Use</dataHistory>
+  </attributes>
+  <attributes uuid="521ccf65-cb13-45db-9654-afb29b2e6c2c">
+    <name>РазмерПодписи</name>
+    <synonym>
+      <key>ru</key>
+      <value>Размер подписи</value>
+    </synonym>
+    <type>
+      <types>EnumRef.мвмРазмерШрифтаНаКарте</types>
+    </type>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <dataHistory>Use</dataHistory>
+  </attributes>
+  <attributes uuid="1f419a40-acc8-457c-99a1-1e3b4552ad8e">
+    <name>ПозицияПодписи</name>
+    <synonym>
+      <key>ru</key>
+      <value>Позиция подписи</value>
+    </synonym>
+    <type>
+      <types>EnumRef.мвмПозицияПодписи</types>
+    </type>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <dataHistory>Use</dataHistory>
+  </attributes>
+  <attributes uuid="036836f1-ae81-4bde-9017-4dcc13ae0ac2">
+    <name>Порядок</name>
+    <synonym>
+      <key>ru</key>
+      <value>Порядок в списке</value>
+    </synonym>
+    <type>
+      <types>Number</types>
+      <numberQualifiers>
+        <precision>3</precision>
+      </numberQualifiers>
+    </type>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <dataHistory>Use</dataHistory>
+  </attributes>
+  <attributes uuid="8f160935-863c-4ca1-8af6-dea62fd29638">
+    <name>ПоказыватьУДиспетчера</name>
+    <synonym>
+      <key>ru</key>
+      <value>Показывать на карте диспетчера</value>
+    </synonym>
+    <type>
+      <types>Boolean</types>
+    </type>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <dataHistory>Use</dataHistory>
+  </attributes>
+  <attributes uuid="0f08bc5c-8d97-47d2-954b-054c37534ae3">
+    <name>ПодписьПунктами</name>
+    <synonym>
+      <key>ru</key>
+      <value>Подписывать пунктами назначения</value>
+    </synonym>
+    <type>
+      <types>Boolean</types>
+    </type>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <dataHistory>Use</dataHistory>
+  </attributes>
+  <forms uuid="28c48b9d-e611-4beb-a14e-aa93d10d1c12">
+    <name>ФормаЭлемента</name>
+    <synonym>
+      <key>ru</key>
+      <value>Форма элемента</value>
+    </synonym>
+    <usePurposes>PersonalComputer</usePurposes>
+    <usePurposes>MobileDevice</usePurposes>
+  </forms>
+  <forms uuid="a43ed23c-f808-4bf0-846f-f986b19bacb5">
+    <name>ФормаСписка</name>
+    <synonym>
+      <key>ru</key>
+      <value>Форма списка</value>
+    </synonym>
+    <usePurposes>PersonalComputer</usePurposes>
+    <usePurposes>MobileDevice</usePurposes>
+  </forms>
+</mdclass:Catalog>

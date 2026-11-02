@@ -1,0 +1,23 @@
+<!-- WRONG: так НЕ делать -->
+
+  <attributes>
+    <name>Объект</name>
+    <id>1</id>
+    …
+  </attributes>
+  <attributes>
+    <name>Строки</name>
+    <id>3</id>
+    <valueType><types>ValueTable</types></valueType>
+    …
+    <columns>
+      <name>Отметка</name>
+      <id>1</id>          ← совпадает с «Объект»
+      …
+    </columns>
+    <columns>
+      <name>Пункт</name>
+      <id>2</id>
+      …
+    </columns>
+  </attributes>

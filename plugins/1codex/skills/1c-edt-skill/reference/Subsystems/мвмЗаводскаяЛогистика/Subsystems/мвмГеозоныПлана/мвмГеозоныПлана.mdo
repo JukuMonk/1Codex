@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mdclass:Subsystem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:core="http://g5.1c.ru/v8/dt/mcore" xmlns:mdclass="http://g5.1c.ru/v8/dt/metadata/mdclass" uuid="bdbe4cc9-b094-4d09-ab5e-0994825a609c">
+  <name>мвмГеозоныПлана</name>
+  <synonym>
+    <key>ru</key>
+    <value>Геозоны</value>
+  </synonym>
+  <includeInCommandInterface>true</includeInCommandInterface>
+  <explanation>
+    <key>ru</key>
+    <value>Территории с правилами движения и то, какие узлы и проезды в них попали.</value>
+  </explanation>
+  <content>Catalog.уатГеозоны_уэ</content>
+  <content>InformationRegister.мвмПривязкаГрафаКГеозонам</content>
+  <content>Enum.мвмРежимДоступаГеозоны</content>
+  <content>Enum.мвмУровеньГеозоны</content>
+  <content>Enum.мвмТипыГеозон</content>
+  <parentSubsystem>Subsystem.мвмЗаводскаяЛогистика</parentSubsystem>
+</mdclass:Subsystem>

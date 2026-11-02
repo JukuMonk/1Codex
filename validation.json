@@ -1,0 +1,31 @@
+{
+  "plugin": "1codex",
+  "version": "1.0.3",
+  "source_commit": "79e750ecc609e73cdd7085cd443daa447ac28fa5",
+  "checks": {
+    "zip_integrity_and_safe_paths": "PASS",
+    "skill_frontmatter": "PASS",
+    "source_resources_preserved": 787,
+    "adapted_entrypoints": [
+      "SKILL.md",
+      "README.md"
+    ],
+    "python_syntax": "PASS",
+    "marketplace_resolution_and_enable_config": "PASS",
+    "links": "ссылки: ok",
+    "cases": "кейсов 109, строк указателя 109; расхождений нет",
+    "sandbox": "Проверено объектов: 15, ошибок 0, предупреждений 0"
+  },
+  "host_installation_tested": false,
+  "note": "Archive and bundled-tool checks only; target ChatGPT installation still requires acceptance tests.",
+  "archives": {
+    "1Codex-1.0.3.zip": {
+      "bytes": 1497934,
+      "sha256": "b7143e5c3154882b5b7bdb516f86619540645792da4b45b75ea4cbefe62048ec"
+    },
+    "1Codex-local-1.0.3.zip": {
+      "bytes": 1523451,
+      "sha256": "7a450459a0479ba59ea451b358482217c3fdb636666fdc8056b7a7f81b671703"
+    }
+  }
+}

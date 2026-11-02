@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cmi:CommandInterface xmlns:cmi="http://g5.1c.ru/v8/dt/cmi">
+  <commandsOrder>
+    <orderFragments>
+      <group>NavigationPanelImportant</group>
+      <commands>DataProcessor.мвмПривязкаПунктов.StandardCommand.Open</commands>
+    </orderFragments>
+    <orderFragments>
+      <group>NavigationPanelOrdinary</group>
+      <commands>Report.мвмСамопроверкаПлана.StandardCommand.Open</commands>
+      <commands>Report.мвмСоставПлана.StandardCommand.Open</commands>
+      <commands>Report.мвмПунктыИУзлы.StandardCommand.Open</commands>
+      <commands>Report.мвмУзлыИПункты.StandardCommand.Open</commands>
+      <commands>Report.мвмПаспортУчастков.StandardCommand.Open</commands>
+      <commands>Report.мвмГеозоныИПравила.StandardCommand.Open</commands>
+    </orderFragments>
+  </commandsOrder>
+</cmi:CommandInterface>

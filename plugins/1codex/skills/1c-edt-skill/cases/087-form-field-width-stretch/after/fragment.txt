@@ -1,0 +1,6 @@
+field(ids, 'Наименование', 'Объект.Description', 4, stretch=True)
+    → <autoMaxHeight>true</autoMaxHeight><horizontalStretch>true</horizontalStretch> (без autoMaxWidth)
+field(ids, 'Направление', 'Объект.Направление', 4, width=8, max_width=True, stretch=False)
+    → <width>8</width><autoMaxWidth>true</autoMaxWidth> … <horizontalStretch>false</horizontalStretch>
+object_tabular_table(ids, 'Шаги', 'Объект.Шаги', колонки, 4, max_width=False)
+    → без <autoMaxWidth>true</autoMaxWidth> у таблицы

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mdclass:Subsystem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:core="http://g5.1c.ru/v8/dt/mcore" xmlns:mdclass="http://g5.1c.ru/v8/dt/metadata/mdclass" uuid="5800f44d-6549-4a4d-92d2-38184c89d9d2">
+  <name>мвмСтруктураЗавода</name>
+  <synonym>
+    <key>ru</key>
+    <value>Структура предприятия</value>
+  </synonym>
+  <includeInCommandInterface>true</includeInCommandInterface>
+  <explanation>
+    <key>ru</key>
+    <value>Подразделения завода и пункты назначения — куда ездят машины.</value>
+  </explanation>
+  <content>Catalog.мвмСтруктураПредприятия</content>
+  <content>Catalog.уатПунктыНазначения</content>
+  <content>Enum.мвмСтатусПодразделения</content>
+  <parentSubsystem>Subsystem.мвмЗаводскаяЛогистика</parentSubsystem>
+</mdclass:Subsystem>

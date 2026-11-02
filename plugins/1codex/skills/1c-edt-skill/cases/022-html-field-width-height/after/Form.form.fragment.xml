@@ -1,0 +1,14 @@
+<!-- CORRECT -->
+
+    <extInfo xsi:type="form:HtmlFieldExtInfo">
+      <handlers>
+        <event>DocumentComplete</event>
+        <name>ПолеКартыДокументСформирован</name>
+      </handlers>
+      <width>70</width>
+      <autoMaxWidth>true</autoMaxWidth>
+      <height>10</height>
+      <autoMaxHeight>true</autoMaxHeight>
+      <horizontalStretch>true</horizontalStretch>
+      <verticalStretch>true</verticalStretch>
+    </extInfo>

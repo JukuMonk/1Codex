@@ -1,0 +1,7 @@
+  <formCommands>
+    <name>ПрерватьРейс</name>
+    <title><key>ru</key><value>Прервать рейс</value></title>
+    <id>17</id>
+    <use><common>true</common></use>
+    <action>ПрерватьРейс</action>
+  </formCommands>

@@ -1,0 +1,6 @@
+NavigationColor           (214,230,245)  // панель разделов (было 251,237,158)
+AuxiliaryNavigationColor  (236,244,252)  // панель функций раздела
+ActivityColor             ( 91,155,213)  // активный элемент / выделение (было 250,204,31)
+ImportantColor            (143,190,236)  // важные кнопки
+AccentColor               ( 31, 78,121)  // заголовки групп
+ToolTipBackColor, FieldAlternativeBackColor, Report*BackColor, ReportLineColor

@@ -1,0 +1,7 @@
+Configuration.xml
+Constants/мвмАвтотранспортноеПодразделение.xml
+ScheduledJobs/мвмОтветыЦеховГПМ.xml
+Subsystems/мвмЗаводскаяЛогистика.xml
+# корень без Ext/** — после LoadConfigFromFiles -listFile у базы нет модулей приложения и сеанса,
+# командного интерфейса, справки и ParentConfigurations (поддержки); без Configuration.xml — «нельзя добавлять
+# объекты метаданных без загрузки родительского объекта»

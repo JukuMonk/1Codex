@@ -1,0 +1,7 @@
+<!-- md_field(..., fill=False); ресурс: -->
+<FullTextSearch>Use</FullTextSearch>
+<!-- измерение: -->
+<DenyIncompleteValues>true</DenyIncompleteValues>
+<Indexing>DontIndex</Indexing>
+<FullTextSearch>Use</FullTextSearch>
+<UseInTotals>true</UseInTotals>

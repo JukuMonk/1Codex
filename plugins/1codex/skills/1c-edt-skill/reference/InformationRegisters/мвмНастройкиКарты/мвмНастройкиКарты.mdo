@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mdclass:InformationRegister xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:core="http://g5.1c.ru/v8/dt/mcore" xmlns:mdclass="http://g5.1c.ru/v8/dt/metadata/mdclass" uuid="f30b4eeb-126a-406d-8617-82288a4fa910">
+  <producedTypes>
+    <selectionType typeId="907c7acb-90c4-4277-b717-35dfb2247e90" valueTypeId="5678f932-b86a-4d9a-996b-016087767e81"/>
+    <listType typeId="19e9839a-7771-439f-8363-f3c4084354e9" valueTypeId="52cffbf9-f27e-4ae2-aaba-2fa80447d567"/>
+    <managerType typeId="61094929-a289-4d1d-9dac-f8c7c3842159" valueTypeId="5f3654a5-05e1-4ba2-a981-e44f43c05789"/>
+    <recordSetType typeId="ed98ed8e-c16a-49b3-8839-5e959a43cf40" valueTypeId="1316a7ab-4106-47ed-abd2-1e92cbff1ba7"/>
+    <recordKeyType typeId="0e086fb5-da19-4eba-8f3a-e4ad4db6f698" valueTypeId="9415b09d-f50f-4891-b862-81d2e96395bc"/>
+    <recordType typeId="c1c141d0-d78b-4bc5-bc40-c20f6f2dc3c3" valueTypeId="fda3dc31-cd53-4fc1-b16b-a726a278077b"/>
+    <recordManagerType typeId="6907667d-d1f3-4c98-b801-84bec117ebf9" valueTypeId="e164d26c-ac36-4c76-a9ca-a14c223b6784"/>
+  </producedTypes>
+  <name>мвмНастройкиКарты</name>
+  <synonym>
+    <key>ru</key>
+    <value>Настройки карты</value>
+  </synonym>
+  <comment>Оформление дорог, подписей и геозон, максимальный зум, геопривязка. Ключ — путь настройки, значение — текст.</comment>
+  <useStandardCommands>true</useStandardCommands>
+  <editType>InDialog</editType>
+  <defaultRecordForm>InformationRegister.мвмНастройкиКарты.Form.ФормаЗаписи</defaultRecordForm>
+  <defaultListForm>InformationRegister.мвмНастройкиКарты.Form.ФормаСписка</defaultListForm>
+  <dataLockControlMode>Managed</dataLockControlMode>
+  <dimensions uuid="067334f3-fdb8-46b8-97c0-44b340da2f4a">
+    <name>Ключ</name>
+    <synonym>
+      <key>ru</key>
+      <value>Ключ</value>
+    </synonym>
+    <type>
+      <types>String</types>
+      <stringQualifiers>
+        <length>100</length>
+      </stringQualifiers>
+    </type>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <dataHistory>Use</dataHistory>
+    <mainFilter>true</mainFilter>
+  </dimensions>
+  <resources uuid="85d0888d-1de5-4c91-8210-d55ebff2948c">
+    <name>Значение</name>
+    <synonym>
+      <key>ru</key>
+      <value>Значение</value>
+    </synonym>
+    <type>
+      <types>String</types>
+      <stringQualifiers/>
+    </type>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <dataHistory>Use</dataHistory>
+  </resources>
+  <forms uuid="41094d45-1eaf-4a25-ac67-dd3dde5421c1">
+    <name>ФормаЗаписи</name>
+    <synonym>
+      <key>ru</key>
+      <value>Форма записи</value>
+    </synonym>
+    <usePurposes>PersonalComputer</usePurposes>
+    <usePurposes>MobileDevice</usePurposes>
+  </forms>
+  <forms uuid="a9bfd0a2-0133-4f45-a19a-89c693c431be">
+    <name>ФормаСписка</name>
+    <synonym>
+      <key>ru</key>
+      <value>Форма списка</value>
+    </synonym>
+    <usePurposes>PersonalComputer</usePurposes>
+    <usePurposes>MobileDevice</usePurposes>
+  </forms>
+</mdclass:InformationRegister>

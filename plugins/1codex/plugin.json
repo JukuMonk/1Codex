@@ -1,0 +1,34 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "1codex",
+  "version": "1.0.3",
+  "description": "Разработка конфигураций, расширений и внешних обработок 1С без EDT: XML Конфигуратора, BSL, 109 кейс и инструменты проверки.",
+  "author": {
+    "name": "JukuMonk",
+    "url": "https://github.com/JukuMonk"
+  },
+  "repository": "https://github.com/JukuMonk/1Codex",
+  "keywords": [
+    "1c",
+    "bsl",
+    "configurator",
+    "warehouse"
+  ],
+  "extensions": {
+    "com.openai": {
+      "onboardingSkill": "./skills/setup/SKILL.md",
+      "interface": {
+        "displayName": "1Codex",
+        "shortDescription": "Разработка 1С без EDT",
+        "longDescription": "Знания, примеры и Python-инструменты для XML Конфигуратора и BSL. В ChatGPT можно готовить и анализировать исходники; сборка и тесты в 1С требуют доступа к компьютеру с платформой.",
+        "developerName": "JukuMonk",
+        "category": "Productivity",
+        "defaultPrompt": [
+          "Настрой 1Codex для моего проекта 1С без EDT.",
+          "Проанализируй приложенную XML-выгрузку 1С и предложи исправления.",
+          "Подготовь внешнюю обработку 1С и сценарии её проверки."
+        ]
+      }
+    }
+  }
+}

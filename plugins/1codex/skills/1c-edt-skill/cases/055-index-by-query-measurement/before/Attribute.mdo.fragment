@@ -1,0 +1,10 @@
+  <attributes uuid="…">
+    <name>мвмУзелКарты</name>
+    <synonym><key>ru</key><value>Узел плана</value></synonym>
+    <type><types>CatalogRef.мвмУзлыКарты</types></type>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>            <!-- отбор «ГДЕ Пункты.мвмУзелКарты В (…)» без индекса -->
+    <dataHistory>Use</dataHistory>
+  </attributes>

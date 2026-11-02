@@ -1,0 +1,8 @@
+<!-- CORRECT -->
+
+  <defaultPresentation>AsDescription</defaultPresentation>
+  <editType>InDialog</editType>
+  <choiceMode>BothWays</choiceMode>
+  <defaultObjectForm>Catalog.X.Form.ФормаЭлемента</defaultObjectForm>
+  <defaultListForm>Catalog.X.Form.ФормаСписка</defaultListForm>
+  <attributes uuid="…">

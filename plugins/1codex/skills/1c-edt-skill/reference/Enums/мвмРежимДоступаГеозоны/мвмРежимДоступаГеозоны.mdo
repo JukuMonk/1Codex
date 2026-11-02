@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mdclass:Enum xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:core="http://g5.1c.ru/v8/dt/mcore" xmlns:mdclass="http://g5.1c.ru/v8/dt/metadata/mdclass" uuid="f362db33-6aa9-42a3-b743-f1e03877468f">
+  <producedTypes>
+    <refType typeId="1b199aa1-6293-42a1-98a7-570f27c21858" valueTypeId="2c93a636-9635-4f64-a28b-8224db6dc72f"/>
+    <listType typeId="d7d27911-9c0c-4068-a7fd-1964bee24b95" valueTypeId="becefafe-3608-4492-a4fe-22fd001ee69c"/>
+    <managerType typeId="307c3d11-faf5-49c4-98ac-61e542ae780f" valueTypeId="51ed1001-cdd4-4eca-8054-2f622a6f0ec2"/>
+  </producedTypes>
+  <name>мвмРежимДоступаГеозоны</name>
+  <synonym>
+    <key>ru</key>
+    <value>Режим доступа геозоны</value>
+  </synonym>
+  <comment>Ключи карты: ban, allow. Определяет, как читать список типов ТС — как запрет или как единственное разрешение.</comment>
+  <standardAttributes>
+    <dataHistory>Use</dataHistory>
+    <name>Order</name>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+  </standardAttributes>
+  <standardAttributes>
+    <dataHistory>Use</dataHistory>
+    <name>Ref</name>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+  </standardAttributes>
+  <quickChoice>true</quickChoice>
+  <choiceMode>BothWays</choiceMode>
+  <enumValues uuid="45911d2b-acd7-44e5-b189-e21140a3c777">
+    <name>ЗапретитьВыбранным</name>
+    <synonym>
+      <key>ru</key>
+      <value>Запретить выбранным</value>
+    </synonym>
+  </enumValues>
+  <enumValues uuid="0612201e-cdaa-460c-aaf7-3cc3598a0db0">
+    <name>РазрешитьТолькоВыбранным</name>
+    <synonym>
+      <key>ru</key>
+      <value>Разрешить только выбранным</value>
+    </synonym>
+  </enumValues>
+</mdclass:Enum>

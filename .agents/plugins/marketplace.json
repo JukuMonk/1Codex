@@ -1,0 +1,20 @@
+{
+  "name": "1codex",
+  "interface": {
+    "displayName": "1Codex"
+  },
+  "plugins": [
+    {
+      "name": "1codex",
+      "source": {
+        "source": "local",
+        "path": "./plugins/1codex"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mdclass:Report xmlns:mdclass="http://g5.1c.ru/v8/dt/metadata/mdclass" uuid="3a431cd5-49be-48f8-8e1c-5742e3d2c788">
+  <producedTypes>
+    <objectType typeId="cadf6071-7ff0-46d3-b7c0-eb42f7b364f9" valueTypeId="c840e6e6-8b57-42a5-a4a7-de9c03a65b01"/>
+    <managerType typeId="a13898ab-12e7-4aa9-bc65-821c981e00b5" valueTypeId="dd78927f-4287-4efc-a07d-122e120badd4"/>
+  </producedTypes>
+  <name>мвмПунктыИУзлы</name>
+  <synonym>
+    <key>ru</key>
+    <value>Пункты назначения и узлы плана</value>
+  </synonym>
+  <useStandardCommands>true</useStandardCommands>
+  <defaultForm>CommonForm.ФормаОтчета</defaultForm>
+  <mainDataCompositionSchema>Report.мвмПунктыИУзлы.Template.ОсновнаяСхемаКомпоновкиДанных</mainDataCompositionSchema>
+  <defaultSettingsForm>CommonForm.ФормаНастроекОтчета</defaultSettingsForm>
+  <defaultVariantForm>CommonForm.ФормаВариантаОтчета</defaultVariantForm>
+  <variantsStorage>SettingsStorage.ХранилищеВариантовОтчетов</variantsStorage>
+  <templates uuid="66fb5441-7e3e-4a48-aabf-c3de323d2686">
+    <name>ОсновнаяСхемаКомпоновкиДанных</name>
+    <synonym>
+      <key>ru</key>
+      <value>Основная схема компоновки данных</value>
+    </synonym>
+    <templateType>DataCompositionSchema</templateType>
+  </templates>
+</mdclass:Report>

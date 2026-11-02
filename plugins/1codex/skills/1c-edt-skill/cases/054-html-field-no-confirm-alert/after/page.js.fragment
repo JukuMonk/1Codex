@@ -1,0 +1,21 @@
+function спросить(текст, приДа, кнопкаДа) {   // своя плашка, не блокирует движок
+  var короб = document.createElement('div');
+  короб.id = 'askBox';
+  короб.innerHTML = '<div class="ask-text"></div><div class="btnrow">'
+    + '<button class="btn amber" id="askYes"></button><button class="btn ghost" id="askNo">Отмена</button></div>';
+  короб.querySelector('.ask-text').textContent = String(текст);
+  короб.querySelector('#askYes').textContent = кнопкаДа || 'Да';
+  document.body.appendChild(короб);
+  var закрыть = function () { if (короб.parentNode) короб.parentNode.removeChild(короб); };
+  короб.querySelector('#askNo').onclick = закрыть;
+  короб.querySelector('#askYes').onclick = function () { закрыть(); if (typeof приДа === 'function') приДа(); };
+  короб.onmousedown = короб.onclick = function (e) { e.stopPropagation(); };   // не проваливаться в карту
+}
+function deleteGeo(зона) {
+  спросить('Удалить геозону «' + зона.name + '»?', function () { удалитьГеозону(зона); }, 'Удалить');
+}
+document.addEventListener('click', function (e) {                   // делегирование: попап может пересоздаваться
+  var цель = e.target && e.target.closest ? e.target.closest('#gcEdit, #gcDel') : null;
+  if (!цель || !карточкаГеозоны) return;
+  if (цель.id === 'gcEdit') editGeo(карточкаГеозоны); else deleteGeo(карточкаГеозоны);
+});

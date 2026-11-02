@@ -1,0 +1,12 @@
+// 1) перерисовка прямо в обработчике щелчка ECharts, notMerge — подсказка пересоздаётся
+chart.on('click', function (p) { sel = p.data.n; chart.setOption(построить(), true); });
+// → СБОЙ: Uncaught TypeError: Cannot set properties of null (setting 'innerHTML') @<строка библиотеки>
+
+# 2) проверка страницы из Bash-инструмента (Git Bash): пусто, код 0
+python инструменты/тест_графа.py --страница      # «страница не отдала результат самопроверки»
+
+# 3) heredoc с обратной косой чертой — в файле настоящие переводы строк
+python - <<'EOF'
+new = """    полный = страница_графа().replace('\\r\\n', '\\n')"""
+EOF
+# → SyntaxError: unterminated string literal

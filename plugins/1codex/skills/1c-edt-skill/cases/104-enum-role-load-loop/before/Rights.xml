@@ -1,0 +1,6 @@
+<!-- Неверно: права справочника перенесены на перечисление. -->
+<object>
+  <name>Enum.ТипыВкладок</name>
+  <right><name>Read</name><value>true</value></right>
+  <right><name>View</name><value>true</value></right>
+</object>

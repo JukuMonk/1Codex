@@ -1,0 +1,6 @@
+areaStyle: { color: '#1F4E79', opacity: 0.14 },
+
+itemStyle: { color: '#2A6AA6',
+             borderRadius: [4, 4, 0, 0] }
+
+lineStyle: { color: 'source', opacity: 0.32, curveness: 0.5 }   // санки

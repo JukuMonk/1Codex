@@ -1,0 +1,5 @@
+# Значения returnValuesReuse из модели EDT (в типовой: 8 DuringRequest, 4 DuringSession).
+ПОВТОРНОЕ_ИСПОЛЬЗОВАНИЕ = {'DuringRequest', 'DuringSession'}
+if о['повторное'] not in ПОВТОРНОЕ_ИСПОЛЬЗОВАНИЕ:
+    sys.exit(f'ОШИБКА: returnValuesReuse «{о["повторное"]}» — допустимы '
+             + ', '.join(sorted(ПОВТОРНОЕ_ИСПОЛЬЗОВАНИЕ)))

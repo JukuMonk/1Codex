@@ -1,0 +1,4 @@
+field(ids, 'Наименование', 'Объект.Description', 4)              → <autoMaxWidth>true</autoMaxWidth>: узкое
+field(ids, 'Направление', 'Объект.Направление', 4, width=8, max_width=True)
+                                                                 → <width>8</width><autoMaxWidth>true</autoMaxWidth>:
+                                                                   в горизонтальной группе растягивается

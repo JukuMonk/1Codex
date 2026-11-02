@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Пример</title>
+<style>html,body{height:100%;margin:0} #app{padding:12px;font-family:sans-serif}</style>
+</head>
+<body>
+<div id="app">Страница из макета. Команды уходят в 1С по кнопке.
+ <button onclick="Bridge.send('select',{ид:'demo'})">Выбрать</button></div>
+<!-- поля обмена: 1С читает и пишет их value; вызовов JS из 1С в этой связке нет -->
+<input type="hidden" id="in_package"><input type="hidden" id="in_package_sig">
+<input type="hidden" id="bridge_out"><input type="hidden" id="out_ack">
+<script>
+(function(){
+  var очередь = [], номер = 0, принято = {};
+  function читать(имя){ var п = document.getElementById("in_"+имя), с = document.getElementById("in_"+имя+"_sig");
+    if(!п||!с||!с.value) return; var м = с.value.split("\u0001"); var длина = +м[0], seq = +м[1];
+    if(принято[имя]===seq) return; if(п.value.length<длина) return; принято[имя]=seq; got(имя, п.value); }
+  function got(имя, текст){ document.getElementById("app").textContent = имя + ": " + текст.length + " символов"; }
+  function send(имя, данные){ очередь.push({n:++номер,k:имя,d:данные}); document.getElementById("bridge_out").value = JSON.stringify(очередь); }
+  setInterval(function(){ читать("package"); var ack = +document.getElementById("out_ack").value || 0;
+    if(ack){ очередь = очередь.filter(function(к){return к.n>ack;}); document.getElementById("bridge_out").value = очередь.length?JSON.stringify(очередь):""; } }, 40);
+  window.Bridge = {send:send};
+  send("appReady", {});
+})();
+</script>
+</body></html>

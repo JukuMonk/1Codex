@@ -1,0 +1,27 @@
+<!-- CORRECT -->
+
+    <items xsi:type="form:FormField">
+      <name>мвмПоискСклад</name>
+      <id>…</id>
+      <title>
+        <key>ru</key>
+        <value>Склад</value>
+      </title>
+      <visible>true</visible>
+      <enabled>true</enabled>
+      <userVisible>
+        <common>true</common>
+      </userVisible>
+      <dataPath xsi:type="form:DataPath">
+        <segments>мвмПоискСклад</segments>
+      </dataPath>
+      <handlers>
+        <event>OnChange</event>
+        <name>мвмПоискСкладПриИзменении</name>
+      </handlers>
+      <extendedTooltip>…</extendedTooltip>
+      <contextMenu>…</contextMenu>
+      <type>InputField</type>
+      …
+      <extInfo xsi:type="form:InputFieldExtInfo">
+        <width>22</width>

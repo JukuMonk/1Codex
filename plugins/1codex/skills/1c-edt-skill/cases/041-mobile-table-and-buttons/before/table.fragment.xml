@@ -1,0 +1,8 @@
+<!-- WRONG: так НЕ делать -->
+
+    <items xsi:type="form:Table">
+      <name>Рейсы</name>
+      … колонки, среди них CheckBoxField «Готово» …
+      <autoCommandBar>…</autoCommandBar>          ← «More actions»
+      … спутники …
+      <searchStringLocation>Auto … (умолчание)     ← три полосы над таблицей

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mdclass:AccumulationRegister xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:core="http://g5.1c.ru/v8/dt/mcore" xmlns:mdclass="http://g5.1c.ru/v8/dt/metadata/mdclass" uuid="68b19e1b-1b94-58d0-a454-b1d07a69e805">
+  <producedTypes>
+    <selectionType typeId="9050d092-7b14-5855-a915-96b860a20cce" valueTypeId="1824b2cc-e3b7-5a22-95ed-4e551980688e"/>
+    <listType typeId="df046688-9cb5-519a-867f-c9d3f177442e" valueTypeId="e8c89646-a9a3-5565-b5c3-86d6edea4c27"/>
+    <managerType typeId="ab8599a6-1e9d-54a6-8575-a15369e27a31" valueTypeId="584c88fc-c97c-56c0-937c-ff051bf8df07"/>
+    <recordSetType typeId="ce3a7a7d-e2d5-5468-99b5-cee134f76391" valueTypeId="4b509773-4934-5271-badf-75de11c90c94"/>
+    <recordKeyType typeId="961a0c70-14f7-50aa-a5de-f6d3c05d0cb2" valueTypeId="0f9b7f36-138d-5f20-9920-009e086c3e97"/>
+    <recordType typeId="6e0e2618-5ab7-5151-b8bc-ec047f5c525f" valueTypeId="fdb56422-18df-5aaf-964c-4e2e002406c9"/>
+  </producedTypes>
+  <name>ПримерОстатки</name>
+  <synonym>
+    <key>ru</key>
+    <value>Пример остатков</value>
+  </synonym>
+  <comment>Регистр остатков; структура снята с типового объекта (MEDIUM)</comment>
+  <useStandardCommands>true</useStandardCommands>
+  <standardAttributes>
+    <dataHistory>Use</dataHistory>
+    <name>RecordType</name>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+  </standardAttributes>
+  <standardAttributes>
+    <dataHistory>Use</dataHistory>
+    <name>Active</name>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+  </standardAttributes>
+  <standardAttributes>
+    <dataHistory>Use</dataHistory>
+    <name>LineNumber</name>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+  </standardAttributes>
+  <standardAttributes>
+    <dataHistory>Use</dataHistory>
+    <name>Recorder</name>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+  </standardAttributes>
+  <standardAttributes>
+    <dataHistory>Use</dataHistory>
+    <name>Period</name>
+    <fillChecking>ShowError</fillChecking>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+  </standardAttributes>
+  <dataLockControlMode>Managed</dataLockControlMode>
+  <enableTotalsSplitting>true</enableTotalsSplitting>
+  <resources uuid="33cf84b3-bedc-5f3d-8499-21284453185d">
+    <name>Количество</name>
+    <synonym>
+      <key>ru</key>
+      <value>Количество</value>
+    </synonym>
+    <type>
+      <types>Number</types>
+      <numberQualifiers>
+        <precision>10</precision>
+      </numberQualifiers>
+    </type>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+  </resources>
+  <dimensions uuid="46e00821-2cbb-5791-817d-c12ea148ff63">
+    <name>Объект</name>
+    <synonym>
+      <key>ru</key>
+      <value>Объект</value>
+    </synonym>
+    <type>
+      <types>CatalogRef.ПримерСправочник</types>
+    </type>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <useInTotals>true</useInTotals>
+  </dimensions>
+</mdclass:AccumulationRegister>

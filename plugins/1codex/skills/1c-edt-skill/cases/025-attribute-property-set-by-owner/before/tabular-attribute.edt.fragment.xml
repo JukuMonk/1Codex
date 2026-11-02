@@ -1,0 +1,11 @@
+<!-- WRONG: так НЕ делать -->
+
+    <attributes uuid="…">
+      <name>X</name>
+      …
+      <minValue xsi:type="core:UndefinedValue"/>
+      <maxValue xsi:type="core:UndefinedValue"/>
+      <fillValue xsi:type="core:UndefinedValue"/>       ← у реквизита ТЧ нет
+      <fullTextSearch>Use</fullTextSearch>
+      <dataHistory>Use</dataHistory>
+    </attributes>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mdclass:DataProcessor xmlns:mdclass="http://g5.1c.ru/v8/dt/metadata/mdclass" uuid="7549ccc3-e7a1-54e1-97fb-e20f0ac57e09">
+  <producedTypes>
+    <objectType typeId="2be403dc-f360-51f8-9937-8ce91939db47" valueTypeId="eb502076-e9a2-51e6-ab42-081c470ab638"/>
+    <managerType typeId="f5cd99f2-029e-5b5a-a6a1-0b00dd702b97" valueTypeId="8861d8f0-0d10-5af9-923b-780a8574042e"/>
+  </producedTypes>
+  <name>мвмМоиРейсы</name>
+  <synonym>
+    <key>ru</key>
+    <value>АРМ Водителя</value>
+  </synonym>
+  <useStandardCommands>true</useStandardCommands>
+  <defaultForm>DataProcessor.мвмМоиРейсы.Form.ФормаМобильная</defaultForm>
+  <forms uuid="6b0bbef2-e2a5-5f6e-970b-528480bac275">
+    <name>ФормаМобильная</name>
+    <synonym>
+      <key>ru</key>
+      <value>Мои рейсы</value>
+    </synonym>
+    <usePurposes>MobileDevice</usePurposes>
+    <usePurposes>PersonalComputer</usePurposes>
+  </forms>
+  <templates uuid="a37bc965-ba16-5e3f-9456-d1a85190cb46">
+    <name>ПодложкаТелефон</name>
+    <synonym>
+      <key>ru</key>
+      <value>Подложка для телефона</value>
+    </synonym>
+    <templateType>BinaryData</templateType>
+  </templates>
+</mdclass:DataProcessor>

@@ -1,0 +1,17 @@
+<!-- WRONG: так НЕ делать -->
+
+    <items xsi:type="form:Table">
+      <name>Строки</name>
+      <id>10</id>
+      …колонки…
+      <autoCommandBar>…</autoCommandBar>
+      <changeRowSet>true</changeRowSet>
+      <changeRowOrder>true</changeRowOrder>
+      <selectionMode>MultiRow</selectionMode>
+      <representation>List</representation>
+      <horizontalStretch>true</horizontalStretch>
+      <verticalStretch>true</verticalStretch>
+      <extInfo xsi:type="form:TableExtInfo">
+        <autoRefresh>false</autoRefresh>
+      </extInfo>
+    </items>

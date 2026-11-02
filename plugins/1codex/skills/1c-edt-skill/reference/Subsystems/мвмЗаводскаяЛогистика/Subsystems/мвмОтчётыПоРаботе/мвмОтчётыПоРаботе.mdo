@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mdclass:Subsystem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:core="http://g5.1c.ru/v8/dt/mcore" xmlns:mdclass="http://g5.1c.ru/v8/dt/metadata/mdclass" uuid="3301ff0c-8895-4bbb-81e4-f388d6fedc7c">
+  <name>мвмОтчётыПоРаботе</name>
+  <synonym>
+    <key>ru</key>
+    <value>Отчёты по работе</value>
+  </synonym>
+  <includeInCommandInterface>true</includeInCommandInterface>
+  <explanation>
+    <key>ru</key>
+    <value>Что происходило за смену: рейсы, очередь заявок, загрузка машин.</value>
+  </explanation>
+  <content>Report.мвмЖурналРейсов</content>
+  <content>Report.мвмОчередьЗаявок</content>
+  <content>Report.мвмЗагрузкаТехники</content>
+  <parentSubsystem>Subsystem.мвмЗаводскаяЛогистика</parentSubsystem>
+</mdclass:Subsystem>

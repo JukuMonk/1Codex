@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mdclass:Constant xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:core="http://g5.1c.ru/v8/dt/mcore" xmlns:mdclass="http://g5.1c.ru/v8/dt/metadata/mdclass" uuid="6c305799-1ed2-543b-a988-c2d9f97a450e">
+  <producedTypes>
+    <managerType typeId="e20bf784-c85b-5e38-b542-5f2f4ea30fd2" valueTypeId="95f939d3-f7d3-5b2d-920c-31fbaa36ec50"/>
+    <valueManagerType typeId="86c1f75b-55e2-562d-ab84-88492a6b3335" valueTypeId="66802550-597c-5e6f-b671-7a0c52459dd0"/>
+    <valueKeyType typeId="5e2894ac-fcd6-5458-a423-b6d8d22c407b" valueTypeId="5034cdee-f934-5341-8c91-fc96038ecc76"/>
+  </producedTypes>
+  <name>ПримерУпрощённыйРежим</name>
+  <synonym>
+    <key>ru</key>
+    <value>Упрощённый режим</value>
+  </synonym>
+  <comment>Переключатель поведения; читается Константы.X.Получить()</comment>
+  <type>
+    <types>Boolean</types>
+  </type>
+  <explanation>
+    <key>ru</key>
+    <value>Включает упрощённый вид форм: лишнее скрывается модулем формы, XML не меняется.</value>
+  </explanation>
+  <minValue xsi:type="core:UndefinedValue"/>
+  <maxValue xsi:type="core:UndefinedValue"/>
+  <dataLockControlMode>Managed</dataLockControlMode>
+</mdclass:Constant>

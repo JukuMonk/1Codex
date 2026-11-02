@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mdclass:Subsystem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:core="http://g5.1c.ru/v8/dt/mcore" xmlns:mdclass="http://g5.1c.ru/v8/dt/metadata/mdclass" uuid="402d8787-bd83-466a-9a23-9ec92e6b0ae6">
+  <name>мвмВедениеПлана</name>
+  <synonym>
+    <key>ru</key>
+    <value>Ведение плана</value>
+  </synonym>
+  <includeInCommandInterface>true</includeInCommandInterface>
+  <explanation>
+    <key>ru</key>
+    <value>Привязка пунктов к узлам и отчёты, которыми план проверяют перед тем, как по нему поедут.</value>
+  </explanation>
+  <content>DataProcessor.мвмПривязкаПунктов</content>
+  <content>Report.мвмСамопроверкаПлана</content>
+  <content>Report.мвмСоставПлана</content>
+  <content>Report.мвмПунктыИУзлы</content>
+  <content>Report.мвмУзлыИПункты</content>
+  <content>Report.мвмПаспортУчастков</content>
+  <content>Report.мвмГеозоныИПравила</content>
+  <parentSubsystem>Subsystem.мвмЗаводскаяЛогистика</parentSubsystem>
+</mdclass:Subsystem>

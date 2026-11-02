@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mdclass:InformationRegister xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:core="http://g5.1c.ru/v8/dt/mcore" xmlns:mdclass="http://g5.1c.ru/v8/dt/metadata/mdclass" uuid="1b602251-558e-5617-a0a3-ff708f8efae3">
+  <producedTypes>
+    <selectionType typeId="aaaa4620-638b-564d-b69f-898a0f181ef0" valueTypeId="d12e4e2a-f35c-55d6-9130-50a3ff08eb68"/>
+    <listType typeId="871eee5b-76a9-560e-94de-7b012eeb3e27" valueTypeId="99105c13-5f4a-5683-991d-71e2cce8ca02"/>
+    <managerType typeId="7c542e49-e1b3-5aeb-a455-62881a99c9ed" valueTypeId="e1d10368-c854-5741-89ff-36c94b11fb9e"/>
+    <recordSetType typeId="cc6d5b55-b3ce-5fa3-ab94-ab2fe0f101cd" valueTypeId="034ab018-63a2-5587-b7ec-1c23d479de81"/>
+    <recordKeyType typeId="41d570e8-356b-53a3-9f06-267ccb28ff68" valueTypeId="d6f3a9e2-5d6b-5ac8-a04e-a31280cc5957"/>
+    <recordType typeId="6ba39839-3d1a-5a1d-b1eb-2742f1a03738" valueTypeId="6684f997-d90f-5f04-ab4d-4c139751a907"/>
+    <recordManagerType typeId="c03fa6f9-1853-59e8-a8a5-bb8a47131e16" valueTypeId="5904f8a1-0c59-52a8-be1a-87d11ccb4a28"/>
+  </producedTypes>
+  <name>ПримерНедоступность</name>
+  <synonym>
+    <key>ru</key>
+    <value>Пример регистра сведений</value>
+  </synonym>
+  <comment>Независимый непериодический регистр: одна актуальная запись на объект</comment>
+  <useStandardCommands>true</useStandardCommands>
+  <editType>InDialog</editType>
+  <defaultRecordForm>InformationRegister.ПримерНедоступность.Form.ФормаЗаписи</defaultRecordForm>
+  <defaultListForm>InformationRegister.ПримерНедоступность.Form.ФормаСписка</defaultListForm>
+  <dataLockControlMode>Managed</dataLockControlMode>
+  <dimensions uuid="aeae1260-d759-56f8-abb1-ed3b43c876ed">
+    <name>Объект</name>
+    <synonym>
+      <key>ru</key>
+      <value>Объект</value>
+    </synonym>
+    <type>
+      <types>CatalogRef.ПримерСправочник</types>
+    </type>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <dataHistory>Use</dataHistory>
+    <mainFilter>true</mainFilter>
+  </dimensions>
+  <resources uuid="38969a63-abd9-509b-b51f-cffa5f10aa22">
+    <name>НедоступенС</name>
+    <synonym>
+      <key>ru</key>
+      <value>Недоступен с</value>
+    </synonym>
+    <type>
+      <types>Date</types>
+      <dateQualifiers>
+        <dateFractions>DateTime</dateFractions>
+      </dateQualifiers>
+    </type>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <dataHistory>Use</dataHistory>
+  </resources>
+  <resources uuid="fa8708f4-7343-5ab4-a56c-393557ca31d7">
+    <name>НедоступенПо</name>
+    <synonym>
+      <key>ru</key>
+      <value>Недоступен по</value>
+    </synonym>
+    <type>
+      <types>Date</types>
+      <dateQualifiers>
+        <dateFractions>DateTime</dateFractions>
+      </dateQualifiers>
+    </type>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <dataHistory>Use</dataHistory>
+  </resources>
+  <resources uuid="e2cbd031-edf9-5072-bdc2-291ecc7c7e4f">
+    <name>Причина</name>
+    <synonym>
+      <key>ru</key>
+      <value>Причина</value>
+    </synonym>
+    <type>
+      <types>String</types>
+      <stringQualifiers>
+        <length>100</length>
+      </stringQualifiers>
+    </type>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <dataHistory>Use</dataHistory>
+  </resources>
+  <forms uuid="72b8ef35-7666-5dfc-883d-7bc923486623">
+    <name>ФормаЗаписи</name>
+    <synonym>
+      <key>ru</key>
+      <value>Форма записи</value>
+    </synonym>
+    <usePurposes>PersonalComputer</usePurposes>
+    <usePurposes>MobileDevice</usePurposes>
+  </forms>
+  <forms uuid="f6258026-fa8f-54c1-b225-600627f3513b">
+    <name>ФормаСписка</name>
+    <synonym>
+      <key>ru</key>
+      <value>Форма списка</value>
+    </synonym>
+    <usePurposes>PersonalComputer</usePurposes>
+    <usePurposes>MobileDevice</usePurposes>
+  </forms>
+</mdclass:InformationRegister>

@@ -1,0 +1,11 @@
+def проиндексировать(текст, имя_поля):
+    """<indexing>Index</indexing> у реквизита или измерения: после fillValue, перед
+    fullTextSearch (так у типовых). Идемпотентно: Index не трогается, DontIndex заменяется."""
+    м = re.search(r'(<(attributes|dimensions|resources)[^>]*>\s*<name>%s</name>.*?)(</\2>)'
+                  % re.escape(имя_поля), текст, re.S)
+    блок = м.group(1)
+    if '<indexing>Index</indexing>' in блок:
+        return текст
+    блок = блок.replace('<indexing>DontIndex</indexing>\r\n', '')
+    новый = блок.replace('<fullTextSearch>', '<indexing>Index</indexing>\r\n    <fullTextSearch>', 1)
+    return текст.replace(блок, новый)

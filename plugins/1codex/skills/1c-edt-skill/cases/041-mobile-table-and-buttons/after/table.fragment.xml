@@ -1,0 +1,22 @@
+<!-- CORRECT -->
+
+    <items xsi:type="form:Table">
+      <name>Рейсы</name>
+      … только текстовые колонки, только чтение …
+      <commandBarLocation>None</commandBarLocation>
+      <autoCommandBar>…</autoCommandBar>
+      … спутники (обязательны для EDT) …
+      <searchStringLocation>None</searchStringLocation>
+      <viewStatusLocation>None</viewStatusLocation>
+      <searchControlLocation>None</searchControlLocation>
+      <rowFilter xsi:type="core:UndefinedValue"/>
+    </items>
+    <items xsi:type="form:Button">                 ← главное действие на странице
+      <name>Дальше</name>
+      … <type>UsualButton</type> <commandName>Form.Command.Дальше</commandName>
+      <defaultButton>true</defaultButton>
+      <horizontalStretch>true</horizontalStretch>
+      <textColor xsi:type="core:ColorDef">…255,255,255…</textColor>
+      <backColor xsi:type="core:ColorDef">…30,99,214…</backColor>
+      <borderColor xsi:type="core:ColorDef">…30,99,214…</borderColor>
+      <font xsi:type="core:FontRef"><font>Style.NormalTextFont</font><height>12.0</height><bold>true</bold>…</font>

@@ -1,0 +1,20 @@
+<!-- CORRECT -->
+
+  <items xsi:type="form:FormGroup">
+    <name>Страницы</name>
+    <id>…</id>
+    <items xsi:type="form:FormGroup"> … <type>Page</type> … </items>   × N
+    <visible>true</visible>
+    <enabled>true</enabled>
+    <userVisible><common>true</common></userVisible>
+    <extendedTooltip>…</extendedTooltip>
+    <type>Pages</type>
+    <extInfo xsi:type="form:PagesGroupExtInfo">
+      <handlers>
+        <event>OnCurrentPageChange</event>
+        <name>СтраницыПриСменеСтраницы</name>
+      </handlers>
+      <pagesRepresentation>TabsOnTop</pagesRepresentation>   ← или Swipe для телефона
+      <currentRowUse>Auto</currentRowUse>
+    </extInfo>
+  </items>

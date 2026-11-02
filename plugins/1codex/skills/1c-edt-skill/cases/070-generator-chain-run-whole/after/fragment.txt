@@ -1,0 +1,1 @@
+python build_all.py   # весь порядок: … G9 → apply_manifests → 90_coord → 95_roles → 96_layout → 97_brand

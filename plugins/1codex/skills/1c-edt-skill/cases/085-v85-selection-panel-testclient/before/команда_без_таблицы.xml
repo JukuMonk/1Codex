@@ -1,0 +1,16 @@
+		<Command name="ЗаполнитьВыделенные" id="2">
+			<Title>
+				<v8:item>
+					<v8:lang>ru</v8:lang>
+					<v8:content>Заполнить выделенные…</v8:content>
+				</v8:item>
+			</Title>
+			<ToolTip>
+				<v8:item>
+					<v8:lang>ru</v8:lang>
+					<v8:content>Заполнить в выделенных строках колонку «Обязательность», «Тип» или «Символов» одним значением</v8:content>
+				</v8:item>
+			</ToolTip>
+			<Action>ЗаполнитьВыделенные</Action>
+			<SelectedRowsUse>Use</SelectedRowsUse>
+		</Command>

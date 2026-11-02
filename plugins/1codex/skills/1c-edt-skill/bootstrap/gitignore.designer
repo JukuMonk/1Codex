@@ -1,0 +1,11 @@
+# Local runtime and test artifacts
+.work/
+.platform/
+__pycache__/
+*.pyc
+*.epf
+*.erf
+*.dt
+*.log
+credentials*.json
+*.local.json

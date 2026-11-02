@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mdclass:DataProcessor xmlns:mdclass="http://g5.1c.ru/v8/dt/metadata/mdclass" uuid="29e1caf0-a095-47fc-bb56-b10a3a95f5e3">
+  <producedTypes>
+    <objectType typeId="e9c7c76a-7df2-4e54-9ae5-5c483c986a65" valueTypeId="4262c694-7f68-4c69-81a3-d28d4a24ba39"/>
+    <managerType typeId="2cfa84d8-a4a7-4382-bd48-4c47b795562d" valueTypeId="a70a67df-b30e-495c-a050-2ea07f4f044c"/>
+  </producedTypes>
+  <name>мвмПривязкаПунктов</name>
+  <synonym>
+    <key>ru</key>
+    <value>Привязка пунктов к узлам плана</value>
+  </synonym>
+  <useStandardCommands>true</useStandardCommands>
+  <defaultForm>DataProcessor.мвмПривязкаПунктов.Form.Форма</defaultForm>
+  <forms uuid="d65eebf8-76c9-495c-8655-e3c1c18f5204">
+    <name>Форма</name>
+    <synonym>
+      <key>ru</key>
+      <value>Привязка пунктов к узлам плана</value>
+    </synonym>
+    <usePurposes>PersonalComputer</usePurposes>
+  </forms>
+</mdclass:DataProcessor>

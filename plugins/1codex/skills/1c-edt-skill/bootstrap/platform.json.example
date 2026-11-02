@@ -1,0 +1,16 @@
+{
+  "format": "designer",
+  "agent": "codex",
+  "configuration_kind": null,
+  "metadata_version": null,
+  "compatibility_mode": null,
+  "v8": null,
+  "dump": null,
+  "work": null,
+  "prefix": null,
+  "test_ib": null,
+  "ib": null,
+  "com": null,
+  "test_usr": "",
+  "ui_port": 48123
+}
