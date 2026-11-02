@@ -101,7 +101,7 @@ def main():
             'рабочий цикл и материалы ниже.', 1)
         entry.write_text(body, encoding='utf-8', newline='\n')
         readme = skill / 'README.md'
-        readme.write_text('# Навык 1Codex\n\nИнструкция установки — [README пакета](../../README.md).\n'
+        readme.write_text(f'# Навык 1Codex\n\nНабор содержит {case_count} кейсов.\n\nИнструкция установки — [README пакета](../../README.md).\n'
                           'Начало работы — [SKILL.md](SKILL.md).\n', encoding='utf-8', newline='\n')
         (skill / 'knowledge' / 'chatgpt.md').write_bytes((TEMPLATES / 'chatgpt.md').read_bytes())
         setup = plugin / 'skills' / 'setup' / 'SKILL.md'
