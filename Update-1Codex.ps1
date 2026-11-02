@@ -1,5 +1,10 @@
 param([switch]$Quiet)
 $ErrorActionPreference = 'Stop'
+$gitOptionIndex = 0
+if ($env:GIT_CONFIG_COUNT) { $gitOptionIndex = [int]$env:GIT_CONFIG_COUNT }
+[Environment]::SetEnvironmentVariable("GIT_CONFIG_KEY_$gitOptionIndex", 'core.longpaths', 'Process')
+[Environment]::SetEnvironmentVariable("GIT_CONFIG_VALUE_$gitOptionIndex", 'true', 'Process')
+$env:GIT_CONFIG_COUNT = [string]($gitOptionIndex + 1)
 $taskDir = Join-Path $env:USERPROFILE '.codex\1codex-updater'
 New-Item -ItemType Directory -Path $taskDir -Force | Out-Null
 $logPath = Join-Path $taskDir 'update.log'

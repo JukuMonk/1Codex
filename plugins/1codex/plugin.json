@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "1codex",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Разработка конфигураций, расширений и внешних обработок 1С без EDT: XML Конфигуратора, BSL, 109 кейс и инструменты проверки.",
   "author": {
     "name": "JukuMonk",

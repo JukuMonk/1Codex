@@ -35,6 +35,10 @@ ChatGPT/Codex с поддержкой плагинов, вход в свой а�
 CLI, поставляемый настольным Codex. Для других установок сначала добавьте
 актуальный Codex CLI в PATH.
 
+Для ручной установки в Windows сначала включите поддержку длинных путей Git:
+`git config --global core.longpaths true`. Установщик делает это только для
+своего процесса и не меняет глобальные настройки Git.
+
 ```text
 codex plugin marketplace add https://github.com/JukuMonk/1Codex.git --ref plugin
 codex plugin add 1codex@1codex
