@@ -1,0 +1,43 @@
+name: Publish 1Codex plugin
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: 1codex-publication
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      PYTHONUTF8: '1'
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build and validate
+        run: python packaging/publish_plugin.py --output "$RUNNER_TEMP/1codex-published" --version "1.0.${{ github.run_number }}"
+      - name: Publish marketplace branch
+        working-directory: ${{ runner.temp }}/1codex-published
+        run: |
+          gh auth setup-git
+          git init
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git remote add origin "https://github.com/${{ github.repository }}.git"
+          git checkout -b plugin
+          if git ls-remote --exit-code --heads origin plugin; then
+            git fetch --depth=1 origin plugin
+            git reset --soft FETCH_HEAD
+          fi
+          git add --all
+          git commit -m "Publish 1Codex 1.0.${{ github.run_number }} from ${{ github.sha }}"
+          git push origin HEAD:plugin
+      - uses: actions/upload-artifact@v4
+        with:
+          name: 1Codex-validation
+          path: ${{ runner.temp }}/1codex-published/validation.json
