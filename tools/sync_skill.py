@@ -8,7 +8,7 @@ import subprocess
 import tempfile
 from workflow.resource_lock import base_lease
 
-SHARED=('reference/probes/','cases/',
+SHARED=('reference/probes/',
         'tools/workflow/task_plan.py','tools/workflow/form_contract.py','tools/workflow/ui_contract.py',
         'tools/workflow/api_index.py','tools/workflow/hbk_source.py','tools/workflow/verification.py',
         'tools/workflow/watchdog.py','tools/workflow/source_guard.py','tools/workflow/ui_batch.py',
