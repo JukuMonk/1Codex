@@ -1,0 +1,3 @@
+CodeLength=4, CodeAllowedLength=Variable, Autonumbering=true, CheckUnique=true.
+Максимальный код 9999 → повторное 9999 при автоматической записи.
+Одно увеличение длины до 9 в проверенном сценарии ошибку не устранило.
