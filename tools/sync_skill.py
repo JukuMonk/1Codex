@@ -15,6 +15,9 @@ SHARED=('reference/probes/',
         'tools/workflow/reference/manager.bsl',
         'knowledge/task-plan.md','knowledge/contracts-and-api.md','knowledge/incremental-execution.md',
         'knowledge/optimization-workflow.md')
+SHARED+=tuple('tools/workflow/tests/test_'+name+'.py' for name in (
+    'task_plan','form_contract','ui_contract','api_index','hbk_source',
+    'verification','watchdog','source_guard_progress','ui_batch'))
 IGNORED={'.git','.platform','__pycache__'}
 
 def digest(path):
