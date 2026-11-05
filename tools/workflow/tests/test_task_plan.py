@@ -19,7 +19,9 @@ class PlanTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
-        self.root = Path(self.temp.name)
+        # Windows runners may expose TEMP as RUNNER~1 while timing resolves
+        # the full path. Compare the same canonical directory in either case.
+        self.root = Path(self.temp.name).resolve()
         self.path = self.root/'task.json'
         plan.create(self.path,'Task',[card(),card('OP02')],'rev1',self.root)
         self.journal = timing.create(self.root,'test')

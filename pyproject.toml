@@ -1,6 +1,6 @@
 [project]
 name = "onecodex-tools"
-version = "1.2.0"
+version = "1.2.1"
 description = "Designer XML and BSL tools shipped with the 1Codex skill"
 requires-python = ">=3.12"
 dependencies = []
