@@ -12,6 +12,7 @@ SHARED=('reference/probes/',
         'tools/workflow/task_plan.py','tools/workflow/form_contract.py','tools/workflow/ui_contract.py',
         'tools/workflow/api_index.py','tools/workflow/hbk_source.py','tools/workflow/verification.py',
         'tools/workflow/watchdog.py','tools/workflow/source_guard.py','tools/workflow/ui_batch.py',
+        'tools/workflow/reference/manager.bsl',
         'knowledge/task-plan.md','knowledge/contracts-and-api.md','knowledge/incremental-execution.md',
         'knowledge/optimization-workflow.md')
 IGNORED={'.git','.platform','__pycache__'}
