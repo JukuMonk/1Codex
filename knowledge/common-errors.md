@@ -506,3 +506,6 @@
 
 
 - Не определен каталог получения файла — [кейс 111](../cases/111-client-file-download-dialog/lessons.md).
+
+
+- WriteAndClose недопустима в форме документа; тост стандартной записи; пересечение фиксированного отбора при загрузке совмещённых настроек — [кейс 116](../cases/116-form-write-and-dynamic-list-settings/lessons.md).
