@@ -92,6 +92,18 @@ def file_hash(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
+def successful_result(value):
+    """Callbacks use None or integer 0; boolean False must never mean success."""
+    return value is None or (isinstance(value, int) and not isinstance(value, bool) and value == 0)
+
+
+def data_transition_allowed(before, after, validator):
+    """An opaque physical data hash may change; all other attestations stay fixed."""
+    return (before.keys() == after.keys() and
+            all(before[key] == after[key] for key in before if key != 'data') and
+            validator(dict(before), dict(after)) is True)
+
+
 def input_manifest(project, spec):
     if spec.dependencies is None: raise VerificationError('Unknown dependencies cannot be cached')
     root = Path(project).resolve()
@@ -225,19 +237,27 @@ class ReleaseSession:
         now = self.clock()
         return row.get('backup_at') is not None and 0 <= now-row['backup_at'] <= self.max_backup_age
 
-    def run(self, name, callback, *, evidence, backup=False, expected_after=None):
+    def run(self, name, callback, *, evidence, backup=False, expected_after=None, transition=None):
         if name == 'final_integrity': raise VerificationError('Use finish() for mandatory integrity')
+        if transition is not None and (not callable(transition) or expected_after is not None):
+            raise VerificationError('Transition must be a callable and cannot accompany expected_after')
         before = self._current()
         if before != self.observed_context:
             raise VerificationError('Context changed between release stages')
         after_expected = valid_context(expected_after) if expected_after is not None else before
         old = self.data.get('stages', [])
         row = old[self.position] if self.position < len(old) else None
+        transition_reusable = True
+        if transition is not None and row and row.get('status') == 'succeeded':
+            transition_reusable = data_transition_allowed(row['before'], row['after'], transition)
+            if self._current() != before:
+                raise VerificationError('Transition validator changed context during resume')
         try: existing_evidence = self._evidence(evidence)
         except VerificationError: existing_evidence = None
         can_reuse = bool(self.prefix_valid and row and row['name'] == name and
                          row['status'] == 'succeeded' and self.data.get('context') == before and
                          row.get('evidence') == existing_evidence and existing_evidence and
+                         transition_reusable and
                          (expected_after is None or row['after'] == after_expected) and
                          (not backup or self._backup_fresh(row)))
         if can_reuse:
@@ -258,7 +278,17 @@ class ReleaseSession:
             self.store.write({'context': self._current(), 'stages': self.completed})
             raise
         after = self._current()
-        row = {'name': name, 'status': 'succeeded' if result in (None, 0) and after == after_expected else 'failed',
+        try:
+            accepted = (after == after_expected if transition is None else
+                        data_transition_allowed(before, after, transition))
+            if self._current() != after:
+                accepted = False
+        except BaseException:
+            self.completed.append({'name': name, 'status': 'failed', 'before': before,
+                                   'after': self._current(), 'evidence': {}, 'backup_at': None})
+            self.store.write({'context': self._current(), 'stages': self.completed})
+            raise
+        row = {'name': name, 'status': 'succeeded' if successful_result(result) and accepted else 'failed',
                'before': before, 'after': after, 'evidence': self._evidence(evidence),
                'backup_at': self.clock() if backup else None}
         self.completed.append(row); self.position += 1
@@ -279,7 +309,7 @@ class ReleaseSession:
                 raise VerificationError('Release evidence changed after its checkpoint')
         verify_evidence()
         result = final_integrity()
-        if result not in (None, 0) or self._current() != before:
+        if not successful_result(result) or self._current() != before:
             raise VerificationError('Final integrity failed')
         verify_evidence()
         # Adapter may now call existing FrozenRun.publish(), which independently

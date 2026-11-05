@@ -173,5 +173,64 @@ class ResumeTests(Fixture):
         path.write_bytes(old)
         with self.assertRaises(VerificationError):a.finish(lambda:path.unlink())
 
+    def test_explicit_data_transition_and_resume_actual_physical_hash(self):
+        a=self.session()
+        a.run('backup',lambda:None,evidence=['evidence/backup.bin'],backup=True)
+        old=dict(self.context)
+        policy=Mock(return_value=True)
+        a.run('compile',lambda:self.context.update(data='physical-cache-written'),
+              evidence=['evidence/a.json'],transition=policy)
+        self.assertEqual(policy.call_args.args,(old,self.context))
+        self.assertEqual(a.store.read()['context']['data'],'physical-cache-written')
+        a.finish(lambda:None)
+        b=self.session()
+        b.run('backup',lambda:self.fail('backup reused'),evidence=['evidence/backup.bin'],backup=True)
+        self.assertEqual(b.run('compile',lambda:self.fail('compile reused'),
+            evidence=['evidence/a.json'],transition=policy),'reused')
+        b.finish(lambda:None)
+
+    def test_data_policy_cannot_authorize_source_environment_or_schema_changes(self):
+        for key in self.context:
+            if key=='data':continue
+            a=ReleaseSession(self.root,'reject-'+key,lambda:dict(self.context),clock=lambda:self.now)
+            a.run('backup',lambda:None,evidence=['evidence/backup.bin'],backup=True)
+            policy=Mock(return_value=True)
+            with self.assertRaises(VerificationError):
+                a.run('compile',lambda:self.context.update({key:key+'-changed'}),
+                      evidence=['evidence/a.json'],transition=policy)
+            policy.assert_not_called()
+            self.assertEqual(a.store.read()['stages'][-1]['status'],'failed')
+
+    def test_false_or_raising_policy_and_false_operation_are_failed(self):
+        policies=[lambda before,after:False,lambda before,after:None]
+        def crash(before,after):raise RuntimeError('private validator exception')
+        policies.append(crash)
+        for i,policy in enumerate(policies):
+            a=ReleaseSession(self.root,'policy-'+str(i),lambda:dict(self.context),clock=lambda:self.now)
+            with self.assertRaises((VerificationError,RuntimeError)):
+                a.run('compile',lambda:self.context.update(data='cache-'+str(i)),
+                      evidence=['evidence/a.json'],transition=policy)
+            self.assertEqual(a.store.read()['stages'][-1]['status'],'failed')
+            self.assertNotIn('private validator exception',a.store.path.read_text())
+        a=self.session()
+        with self.assertRaises(VerificationError):
+            a.run('compile',lambda:False,evidence=['evidence/a.json'],transition=lambda b,a:True)
+        with self.assertRaises(VerificationError):a.finish(lambda:None)
+
+    def test_policy_mutation_cannot_forge_success_and_bad_arguments_do_not_run(self):
+        a=self.session()
+        def mutate(before,after):
+            before['source']='forged';after['source']='forged'
+            self.context['source']='also changed'
+            return True
+        with self.assertRaises(VerificationError):
+            a.run('compile',lambda:self.context.update(data='cache'),
+                  evidence=['evidence/a.json'],transition=mutate)
+        self.assertNotEqual(a.store.read()['stages'][-1]['before']['source'],'forged')
+        callback=Mock()
+        for kwargs in ({'transition':True},{'transition':lambda b,a:True,'expected_after':self.context}):
+            with self.assertRaises(VerificationError):a.run('compile',callback,evidence=['evidence/a.json'],**kwargs)
+        callback.assert_not_called()
+
 
 if __name__=='__main__':unittest.main()
