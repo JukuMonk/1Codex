@@ -1,24 +1,28 @@
 """Persistent stage timing for 1C tasks; no command arguments or secrets logged."""
 import argparse
-from contextlib import contextmanager
+from contextlib import contextmanager, ExitStack
 from datetime import datetime, timezone
 import json
 from pathlib import Path
 import time
 import uuid
 
-from resource_lock import base_lease
+try:
+    from .resource_lock import base_lease, BaseBusy
+except ImportError:
+    from resource_lock import base_lease, BaseBusy
 
 
 def stamp():
     return datetime.now(timezone.utc).isoformat()
 
 
-def create(project, label):
+def create(project, label, scenario=None, environment=None, dataset=None, revision=None):
     run_id = uuid.uuid4().hex
     path = Path(project).resolve() / '.platform' / 'task-timings' / (run_id + '.json')
     path.parent.mkdir(parents=True, exist_ok=True)
-    data = dict(run_id=run_id, label=label, started_at=stamp(),
+    data = dict(schema_version=2, run_id=run_id, label=label, started_at=stamp(),
+                scenario=scenario, environment=environment, dataset=dataset, revision=revision,
                 status='running', stages=[])
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding='utf-8')
     return path
@@ -27,12 +31,29 @@ def create(project, label):
 @contextmanager
 def journal(path):
     path = Path(path).resolve()
-    with base_lease(path.parent, path):
+    with ExitStack() as locks:
+        deadline = time.monotonic() + 5
+        while True:
+            try:
+                locks.enter_context(base_lease(path.parent, path))
+                break
+            except BaseBusy:
+                if time.monotonic() >= deadline: raise
+                time.sleep(0.02)
         data = json.loads(path.read_text(encoding='utf-8'))
         yield data
         pending = path.with_suffix('.pending')
         pending.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding='utf-8')
-        pending.replace(path)
+        # Windows scanners/readers may briefly hold a handle without FILE_SHARE_DELETE.
+        # Keep the journal lock while retrying; never re-read or drop this update.
+        replace_deadline = time.monotonic() + 2
+        while True:
+            try:
+                pending.replace(path)
+                break
+            except PermissionError:
+                if time.monotonic() >= replace_deadline: raise
+                time.sleep(0.025)
 
 
 def begin(path, name, parent=None):
@@ -59,6 +80,7 @@ def end(path, stage_id, status='ok'):
         stage.update(ended_at=stamp(), status=status)
         stage['seconds'] = max(0, (datetime.fromisoformat(stage['ended_at']) -
                                    datetime.fromisoformat(stage['started_at'])).total_seconds())
+        stage['clock_valid'] = stage['ended_at'] >= stage['started_at']
 
 
 def finish(path, status='ok'):
@@ -70,6 +92,7 @@ def finish(path, status='ok'):
         data.update(status=status, ended_at=stamp())
         data['elapsed_seconds'] = max(0, (datetime.fromisoformat(data['ended_at']) -
                                           datetime.fromisoformat(data['started_at'])).total_seconds())
+        data['clock_valid'] = datetime.fromisoformat(data['ended_at']) >= datetime.fromisoformat(data['started_at'])
 
 
 @contextmanager
@@ -88,6 +111,7 @@ def stage(path, name, parent=None):
         with journal(path) as data:
             item = next(s for s in data['stages'] if s['stage_id'] == stage_id)
             item['monotonic_seconds'] = time.perf_counter() - started
+            item['clock_valid'] = item.get('clock_valid', True) and abs(item['seconds']-item['monotonic_seconds']) < 2
 
 
 def summary(path):
@@ -105,11 +129,15 @@ def summary(path):
 
 
 def main():
+    import sys
+    sys.stdout.reconfigure(encoding='utf-8')
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest='action', required=True)
     start = commands.add_parser('start')
     start.add_argument('--project', type=Path, default=Path.cwd())
     start.add_argument('--label', required=True)
+    for name in ('scenario', 'environment', 'dataset', 'revision'):
+        start.add_argument('--' + name)
     for action in ('begin', 'end', 'finish', 'show'):
         command = commands.add_parser(action)
         command.add_argument('journal', type=Path)
@@ -121,7 +149,7 @@ def main():
         if action in ('end', 'finish'):
             command.add_argument('--status', choices=['ok', 'failed', 'interrupted'], default='ok')
     args = parser.parse_args()
-    if args.action == 'start': print(create(args.project, args.label))
+    if args.action == 'start': print(create(args.project, args.label, args.scenario, args.environment, args.dataset, args.revision))
     elif args.action == 'begin': print(begin(args.journal, args.name, args.parent))
     elif args.action == 'end': end(args.journal, args.stage_id, args.status)
     elif args.action == 'finish': finish(args.journal, args.status)

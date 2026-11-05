@@ -14,17 +14,25 @@
 Встраивать первым шагом команды загрузки проекта: ошибка запроса видна за секунду, а не после загрузки в базу.
 """
 import argparse
+from collections import Counter
+import hashlib
 import io
+import json
 import os
+from pathlib import Path
 import re
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import designer_lib as dl  # noqa: E402
-import edt_lib  # noqa: E402
+import bsl_checks as edt_lib  # noqa: E402
 
 
 def problems(dump):
+    from check_designer import check
+    structural = check(dump, require_root=False)
+    if structural:
+        raise ValueError('\n'.join(structural))
     out = []
     for корень, _, имена in os.walk(dump):
         for и in имена:
@@ -50,17 +58,51 @@ def key(problem):
 
 def lint(dump, baseline=None, remember=False):
     baseline = baseline or os.path.join(os.path.dirname(os.path.abspath(dump)), 'lint_baseline.txt')
-    все = problems(dump)
+    try:
+        все = problems(dump)
+    except (OSError, ValueError) as exc:
+        print('линт: некорректный вход: ' + str(exc))
+        return 2
+    def identity(problem):
+        stable = key(problem).replace('\\', '/')
+        match = re.search(r'строка (\d+): ', problem)
+        context = ''
+        if match:
+            relative = problem.split(' — ', 1)[0]
+            lines = (Path(dump)/relative).read_text(encoding='utf-8-sig').splitlines()
+            n = int(match[1]) - 1
+            if n < len(lines): context = hashlib.sha256(lines[n].strip().encode('utf-8')).hexdigest()
+        return stable, context
     if remember:
         with io.open(baseline, 'w', encoding='utf-8') as f:
-            f.write('\n'.join(sorted(set(map(key, все)))) + '\n')
+            entries = [{'key': k, 'context': c, 'count': count} for (k, c), count in sorted(Counter(map(identity, все)).items())]
+            json.dump({'schema_version': 2, 'entries': entries}, f, ensure_ascii=False, indent=2)
+            f.write('\n')
         print('линт: в базовый список записано %d замечаний → %s' % (len(все), baseline))
         return 0
-    известные = set()
+    известные = Counter()
+    legacy = False
     if os.path.exists(baseline):
         with io.open(baseline, encoding='utf-8') as f:
-            известные = set(f.read().splitlines())
-    новые = [п for п in все if key(п) not in известные]
+            raw = f.read()
+        if raw.lstrip().startswith('{'):
+            try:
+                data = json.loads(raw)
+                if data['schema_version'] != 2: raise ValueError('Unsupported baseline schema')
+                for row in data['entries']:
+                    if type(row['count']) is not int or row['count'] < 1: raise ValueError('Invalid baseline count')
+                    известные[(row['key'], row['context'])] += row['count']
+            except (ValueError, KeyError, TypeError) as exc:
+                print('линт: некорректный baseline: ' + str(exc))
+                return 2
+        else:
+            legacy = True
+            известные.update((s.replace('\\', '/'), '') for s in raw.splitlines() if s)
+    новые = []
+    for problem in все:
+        k = (key(problem).replace('\\', '/'), '') if legacy else identity(problem)
+        if известные[k] > 0: известные[k] -= 1
+        else: новые.append(problem)
     for п in новые:
         print(п)
     print('линт: новых замечаний %d (известных: %d)' % (len(новые), len(все) - len(новые)))

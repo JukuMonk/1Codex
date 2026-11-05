@@ -501,11 +501,16 @@
 - [Кейс 108: frozen-release-and-ui-resources](../cases/108-frozen-release-and-ui-resources/lessons.md).
 - [Кейс 109: dynamic-list-runtime-order](../cases/109-dynamic-list-runtime-order/lessons.md).
 
+- 110-string-code-range-exhaustion — [проверенный кейс](../cases/110-string-code-range-exhaustion/lessons.md).
 
-- Код 9999 не уникален после увеличения длины — [кейс 110](../cases/110-string-code-range-exhaustion/lessons.md).
+- 111-client-file-download-dialog — [проверенный кейс](../cases/111-client-file-download-dialog/lessons.md).
 
+- 116-form-write-and-dynamic-list-settings — [проверенный кейс](../cases/116-form-write-and-dynamic-list-settings/lessons.md).
 
-- Не определен каталог получения файла — [кейс 111](../cases/111-client-file-download-dialog/lessons.md).
+- 112-designer-accumulation-register-fields — [проверенный кейс](../cases/112-designer-accumulation-register-fields/lessons.md).
 
+- 113-posting-recordset-clear — [проверенный кейс](../cases/113-posting-recordset-clear/lessons.md).
 
-- WriteAndClose недопустима в форме документа; тост стандартной записи; пересечение фиксированного отбора при загрузке совмещённых настроек — [кейс 116](../cases/116-form-write-and-dynamic-list-settings/lessons.md).
+- 114-historical-stock-guard — [проверенный кейс](../cases/114-historical-stock-guard/lessons.md).
+
+- 115-profile-reports-need-bsp-roles — [проверенный кейс](../cases/115-profile-reports-need-bsp-roles/lessons.md).

@@ -1,0 +1,14 @@
+[project]
+name = "onecodex-tools"
+version = "1.2.0"
+description = "Designer XML and BSL tools shipped with the 1Codex skill"
+requires-python = ">=3.12"
+dependencies = []
+
+[project.optional-dependencies]
+windows = ["pywin32>=306; sys_platform == 'win32'", "Pillow>=10"]
+
+[tool.onecodex]
+tested-python = ["3.12"]
+metadata-formats = ["2.20", "2.21"]
+runtime-note = "1C platform, COM registration and GUI are installed separately; optional dependencies do not install them."

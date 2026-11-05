@@ -25,7 +25,7 @@ class ReadLease:
     On non-Windows hosts only manifest verification is available. This project
     deploys from Windows; callers can inspect ``os_protected`` in the journal.
     """
-    def __init__(self, root, files):
+    def __init__(self, root, files, progress=None):
         self.handles = []
         if os.name != 'nt': return
         import ctypes
@@ -39,12 +39,13 @@ class ReadLease:
         self.close_handle.argtypes = [wintypes.HANDLE]
         self.close_handle.restype = wintypes.BOOL
         try:
-            for relative in files:
+            for count, relative in enumerate(files, 1):
                 # GENERIC_READ, FILE_SHARE_READ only, OPEN_EXISTING.
                 handle = create(str(Path(root) / relative), 0x80000000, 1, None, 3, 0x80, None)
                 if handle == ctypes.c_void_p(-1).value:
                     raise GuardError('Не удалось защитить frozen-файл от записи: ' + relative)
                 self.handles.append(handle)
+                if progress and count % 64 == 0: progress(count)
         except BaseException:
             self.close(); raise
 
@@ -53,7 +54,7 @@ class ReadLease:
         self.handles.clear()
 
 
-def manifest(directory):
+def manifest(directory, progress=None):
     root = Path(directory)
     result = {}
     if not root.is_dir():
@@ -63,6 +64,8 @@ def manifest(directory):
             raise GuardError('Ссылки и junction в исходнике запрещены: ' + str(path.relative_to(root)))
         if path.is_file():
             result[path.relative_to(root).as_posix()] = hashlib.sha256(path.read_bytes()).hexdigest()
+            if progress and len(result) % 64 == 0: progress(len(result))
+    if progress: progress(len(result))
     return result
 
 
@@ -71,9 +74,9 @@ def fingerprint(files):
 
 
 @contextlib.contextmanager
-def project_lock(project):
+def project_lock(project, platform=None):
     """Nonblocking OS byte/flock lock. A crashed process releases it automatically."""
-    path = Path(project) / '.platform' / 'platform-project.lock'
+    path = Path(platform or Path(project) / '.platform') / 'platform-project.lock'
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open('a+b') as stream:
         stream.seek(0, os.SEEK_END)
@@ -116,13 +119,23 @@ def cosmetic_equivalent(left, right):
         return True
     if Path(left).suffix.lower() == '.xml':
         import xml.etree.ElementTree as ET
-        def value(s):
-            return None if not s or not s.strip() else s
-        def tree(node):
-            return (node.tag, tuple(sorted(node.attrib.items())), value(node.text),
-                    tuple((tree(child), value(child.tail)) for child in node))
+        def signature(raw):
+            import io
+            # Keep prefix bindings too: QName values in 1C XML are text.
+            namespaces = []
+            for event, value in ET.iterparse(io.BytesIO(raw), events=('start-ns',)):
+                namespaces.append(value)
+            def tree(node, inherited=False):
+                space = node.get('{http://www.w3.org/XML/1998/namespace}space')
+                preserve = inherited if space is None else space == 'preserve'
+                def layout(value):
+                    return None if value is None or (not preserve and not value.strip()) else value
+                text = layout(node.text) if len(node) else node.text
+                return (node.tag, tuple(sorted(node.attrib.items())), text,
+                        tuple((tree(child, preserve), layout(child.tail)) for child in node))
+            return (tuple(namespaces), tree(ET.fromstring(raw)))
         try:
-            return tree(ET.fromstring(a)) == tree(ET.fromstring(b))
+            return signature(a) == signature(b)
         except ET.ParseError:
             return False
     try:
@@ -132,10 +145,10 @@ def cosmetic_equivalent(left, right):
 
 
 class FrozenRun:
-    def __init__(self, project, live, operation):
+    def __init__(self, project, live, operation, platform=None, progress=None):
         self.live = Path(live).resolve()
         self.id = datetime.datetime.now().strftime('%Y%m%d_%H%M%S_') + uuid.uuid4().hex[:10]
-        self.folder = Path(project) / '.platform' / 'runs' / self.id
+        self.folder = Path(platform or Path(project) / '.platform') / 'runs' / self.id
         self.folder.mkdir(parents=True)
         self.snapshot = self.folder / 'source'
         self.started = time.monotonic()
@@ -144,19 +157,34 @@ class FrozenRun:
         self.pending = []
         self.leases = []
         self.stage_stack = []
-        self.baseline = manifest(self.live)
-        self.record['source_fingerprint'] = fingerprint(self.baseline)
-        self.save()
+        self.progress_callback = progress
+        self.record['preparation_stages'] = []
         try:
-            shutil.copytree(self.live, self.snapshot)
-            self.assert_live()
-            if manifest(self.snapshot) != self.baseline:
+            self.baseline = self._prepare('hash_live', lambda: manifest(self.live, self._progress))
+            self.record['source_fingerprint'] = fingerprint(self.baseline)
+            def copy_source():
+                processed = 0
+                def copy_file(source, target):
+                    nonlocal processed
+                    result = shutil.copy2(source, target)
+                    processed += 1
+                    if processed % 64 == 0: self._progress(processed)
+                    return result
+                shutil.copytree(self.live, self.snapshot, copy_function=copy_file)
+                self._progress(processed)
+            self._prepare('copy', copy_source)
+            self._prepare('verify_live', lambda: self.assert_live(self._progress))
+            copied = self._prepare('verify_copy', lambda: manifest(self.snapshot, self._progress))
+            if copied != self.baseline:
                 raise GuardError('Исходник изменился во время создания snapshot')
             # Normalize only the private copy, never files being edited by other agents.
-            for p in self.snapshot.rglob('*.bsl'):
-                data = p.read_bytes().decode('utf-8-sig').replace('\r\n', '\n')
-                p.write_bytes(b'\xef\xbb\xbf' + data.replace('\n', '\r\n').encode('utf-8'))
-            self.seal(self.snapshot)
+            def normalize():
+                for count, p in enumerate(self.snapshot.rglob('*.bsl'), 1):
+                    data = p.read_bytes().decode('utf-8-sig').replace('\r\n', '\n')
+                    p.write_bytes(b'\xef\xbb\xbf' + data.replace('\n', '\r\n').encode('utf-8'))
+                    if count % 64 == 0: self._progress(count)
+            self._prepare('normalize_bsl', normalize)
+            self.seal(self.snapshot, measure=True)
             self.record['snapshot_fingerprint'] = fingerprint(self.frozen[str(self.snapshot)])
             self.record['os_protected'] = os.name == 'nt'
             (self.folder / 'source-manifest.json').write_text(json.dumps(self.baseline, ensure_ascii=False, indent=2), encoding='utf-8')
@@ -168,25 +196,51 @@ class FrozenRun:
             self.finish('failed_preparing')
             raise
 
+    def _progress(self, processed):
+        self.record['preparation_progress'] = dict(phase=self._preparation_name,
+                processed_files=processed, updated_at=utc_now())
+        self.save()
+        if self.progress_callback:
+            self.progress_callback(dict(self.record['preparation_progress']))
+
+    def _prepare(self, name, function):
+        self._preparation_name = name
+        entry = dict(name=name, started_at=utc_now(), status='running')
+        self.record['preparation_stages'].append(entry)
+        began = time.monotonic()
+        try:
+            self._progress(0)
+            value = function()
+            entry['status'] = 'succeeded'
+            return value
+        except BaseException:
+            entry['status'] = 'failed'
+            raise
+        finally:
+            entry.update(finished_at=utc_now(), duration_seconds=round(time.monotonic()-began, 3))
+            self.save()
+
     def save(self):
         target = self.folder / 'run.json'
         temp = self.folder / 'run.json.tmp'
         temp.write_text(json.dumps(self.record, ensure_ascii=False, indent=2), encoding='utf-8')
         os.replace(temp, target)
 
-    def seal(self, path):
-        files = manifest(path)
-        lease = ReadLease(path, files)
+    def seal(self, path, measure=False):
+        run = self._prepare if measure else lambda name, function: function()
+        files = run('hash_normalized', lambda: manifest(path, self._progress if measure else None))
+        lease = run('read_leases', lambda: ReadLease(path, files, self._progress) if measure else ReadLease(path, files))
         try:
-            if manifest(path) != files:
+            verified = run('verify_leases', lambda: manifest(path, self._progress if measure else None))
+            if verified != files:
                 raise GuardError('Snapshot изменился во время установки запрета записи')
             self.leases.append(lease)
             self.frozen[str(path)] = files
         except BaseException:
             lease.close(); raise
 
-    def assert_live(self):
-        if manifest(self.live) != self.baseline:
+    def assert_live(self, progress=None):
+        if manifest(self.live, progress) != self.baseline:
             raise GuardError('Исходник изменился после начала операции; принятие выгрузки и выпуск CF запрещены')
 
     def check(self):

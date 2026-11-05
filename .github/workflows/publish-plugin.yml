@@ -1,0 +1,98 @@
+name: Publish stable 1Codex plugin
+on:
+  workflow_dispatch:
+    inputs:
+      source_ref:
+        description: Reviewed source commit or tag
+        required: true
+        type: string
+      version:
+        description: New stable version (for example 1.1.0)
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: 1codex-publication
+  cancel-in-progress: false
+jobs:
+  resolve:
+    runs-on: ubuntu-latest
+    outputs:
+      sha: ${{ steps.source.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.source_ref }}
+      - id: source
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+  validate:
+    needs: resolve
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    env:
+      PYTHONUTF8: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.resolve.outputs.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python tools/selftest.py --output "${{ runner.temp }}/selftest.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: stable-checks-${{ matrix.os }}
+          path: ${{ runner.temp }}/selftest.json
+  publish:
+    needs: [resolve, validate]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      PYTHONUTF8: '1'
+      GH_TOKEN: ${{ github.token }}
+      PLUGIN_VERSION: ${{ inputs.version }}
+      SOURCE_SHA: ${{ needs.resolve.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.resolve.outputs.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build and validate
+        run: |
+          python tools/release_policy.py --version "$PLUGIN_VERSION"
+          if git ls-remote --exit-code --heads origin plugin; then
+            git fetch --depth=1 origin plugin:refs/remotes/origin/plugin
+            python tools/release_policy.py --version "$PLUGIN_VERSION" --previous-ref refs/remotes/origin/plugin
+          else
+            code=$?
+            if [ "$code" -ne 2 ]; then exit "$code"; fi
+          fi
+          python packaging/publish_plugin.py --output "$RUNNER_TEMP/1codex-published" --version "$PLUGIN_VERSION"
+      - name: Publish marketplace branch
+        working-directory: ${{ runner.temp }}/1codex-published
+        run: |
+          gh auth setup-git
+          git init
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git remote add origin "https://github.com/${{ github.repository }}.git"
+          git checkout -b plugin
+          if git ls-remote --exit-code --heads origin plugin; then
+            git fetch --depth=1 origin plugin
+            git reset --soft FETCH_HEAD
+          fi
+          git add --all
+          git commit -m "Publish stable 1Codex $PLUGIN_VERSION from $SOURCE_SHA"
+          git push origin HEAD:plugin
+      - uses: actions/upload-artifact@v4
+        with:
+          name: 1Codex-validation
+          path: ${{ runner.temp }}/1codex-published/validation.json

@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ConfigDumpInfo xmlns="http://v8.1c.ru/8.3/xcf/dumpinfo" xmlns:xen="http://v8.1c.ru/8.3/xcf/enums" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" format="Hierarchical" version="2.20">
+	<ConfigVersions>
+		<Metadata name="Catalog.тстТовары" id="e556e01e-e4a7-54c6-8534-567eb360cf57" configVersion="f3a73013e562d2498e7f00c475d6becf00000000">
+			<Metadata name="Catalog.тстТовары.Attribute.Артикул" id="b0210005-b9a1-58dc-ab0f-ebae829216fb"/>
+		</Metadata>
+		<Metadata name="CommonModule.тстСервис" id="54ad4009-2789-5b45-8fb3-cd5e5f308c80" configVersion="cb97fe0ccd1224428529cf65f23296e800000000"/>
+		<Metadata name="CommonModule.тстСервис.Module" id="54ad4009-2789-5b45-8fb3-cd5e5f308c80.0" configVersion="5426afa81464e349832d7454bdfb66f400000000"/>
+		<Metadata name="Configuration.Конфигурация" id="e232f614-358a-497f-8fc5-e0cd43711d62" configVersion="00ce679d10d5f74da4d773f777dfb94b00000000"/>
+		<Metadata name="Language.Русский" id="35daf6d2-a7c1-4c6f-80db-16ded982c2bc" configVersion="a6edf5ac24b2cb41b0b7ab54ccb514ff00000000"/>
+		<Metadata name="Role.тстПолныеПрава" id="a194c71e-6c59-5c7e-b7d0-e4738516f685" configVersion="f5c2dc89e9ed4d4d976aecf3c8a2ecc400000000"/>
+		<Metadata name="Role.тстПолныеПрава.Rights" id="a194c71e-6c59-5c7e-b7d0-e4738516f685.0" configVersion="562236dfb70631418a66fe4db36db5ab00000000"/>
+	</ConfigVersions>
+</ConfigDumpInfo>
