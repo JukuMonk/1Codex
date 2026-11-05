@@ -3189,6 +3189,221 @@
           "sha256": "dd75f421d01f70c995fb5cc6080c0e138e8754a2fedb71854f8c69feec686f05"
         }
       ]
+    },
+    {
+      "id": "110",
+      "slug": "string-code-range-exhaustion",
+      "topic": "Коды, автонумерация",
+      "symptom": "9999 не уникально после увеличения длины; ведущие нули и аудит дублей",
+      "format": "legacy-edt",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.5.1.1529"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/110-string-code-range-exhaustion/task.md",
+          "sha256": "6f5016c315cf2b0657078c5d0a4c642b82371f0a7b0975167b8b52455fdb38f1"
+        },
+        {
+          "path": "cases/110-string-code-range-exhaustion/lessons.md",
+          "sha256": "10cedc48a3deec95a0903e6a8d841823e2fa2b432318dc2acf4ad7364e0d4daf"
+        }
+      ]
+    },
+    {
+      "id": "111",
+      "slug": "client-file-download-dialog",
+      "topic": "Файлы, клиент-сервер",
+      "symptom": "Не определен каталог получения; параметры диалога, одиночный результат, проверка нового JSON",
+      "format": "legacy-edt",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.5.1.1529"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/111-client-file-download-dialog/task.md",
+          "sha256": "1661af9b5677064974c7e9075ebb88e4d9c00de838c39ea770461fe4fffa01d0"
+        },
+        {
+          "path": "cases/111-client-file-download-dialog/lessons.md",
+          "sha256": "d5b105a3f2d86e0f1758810e74fced040016b4c505aa1b3e564f96e4d83f2583"
+        }
+      ]
+    },
+    {
+      "id": "112",
+      "slug": "designer-accumulation-register-fields",
+      "topic": "Метаданные без EDT",
+      "symptom": "Ресурс/измерение регистра накопления не принимают FillValue; код загрузки 0 не заменяет чтение журнала",
+      "format": "legacy-edt",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.3.27",
+        "8.3.27.2325"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/112-designer-accumulation-register-fields/task.md",
+          "sha256": "2949bded4c4b2ae55227e571d466ad7a63998f9629f7b37f884d1c1a7730ec3c"
+        },
+        {
+          "path": "cases/112-designer-accumulation-register-fields/lessons.md",
+          "sha256": "0a46ce6824bee881a39c508ed0c5f803320f32ecbdeec88ac52e648f4f5f5b9a"
+        }
+      ]
+    },
+    {
+      "id": "113",
+      "slug": "posting-recordset-clear",
+      "topic": "Проведение",
+      "symptom": "Повторное проведение того же COM-объекта удваивает движения — очищать набор перед заполнением",
+      "format": "legacy-edt",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.3.27",
+        "8.3.27.2325"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/113-posting-recordset-clear/task.md",
+          "sha256": "645db122bbc85b3994fdf9d2e534dcf9808dcf1345502ef19333d0e245064fd1"
+        },
+        {
+          "path": "cases/113-posting-recordset-clear/lessons.md",
+          "sha256": "b9d1f83762381959733904f89dd224195aa36baf2c426210a17eb8a502f08b5a"
+        }
+      ]
+    },
+    {
+      "id": "114",
+      "slug": "historical-stock-guard",
+      "topic": "Проведение",
+      "symptom": "Локальные минусы внутри истории: проверка по регистраторам в транзакции под блокировкой",
+      "format": "legacy-edt",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.3.27",
+        "8.3.27.2325"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/114-historical-stock-guard/task.md",
+          "sha256": "d8b6263533f2713fdc9f8d750ee9ed0dbf6e0cbbd016ab24152883f491516d9c"
+        },
+        {
+          "path": "cases/114-historical-stock-guard/lessons.md",
+          "sha256": "c15743bbc7e7582be10d400c8fd436fabca725956db049598929009e6d762123"
+        }
+      ]
+    },
+    {
+      "id": "115",
+      "slug": "profile-reports-need-bsp-roles",
+      "topic": "Роли",
+      "symptom": "Отчёты не формируются у пользователя с профилем, под администратором работают",
+      "format": "legacy-edt",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.3.16",
+        "8.5.1",
+        "8.5.1.1529"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/115-profile-reports-need-bsp-roles/task.md",
+          "sha256": "899c00ee7d7fbe67a7999f2d1f4efc1be689bb7ae56b16ffa6f82fdf163c32db"
+        },
+        {
+          "path": "cases/115-profile-reports-need-bsp-roles/lessons.md",
+          "sha256": "3bcb70c79bfb914c96ed5fc9fd3e80addce2111dfbc31c82338a8532759aa2d3"
+        }
+      ]
+    },
+    {
+      "id": "116",
+      "slug": "form-write-and-dynamic-list-settings",
+      "topic": "Формы и СКД",
+      "symptom": "Запись без служебного тоста; команды документов; сортировка без дублирования отбора",
+      "format": "legacy-edt",
+      "platform_build": null,
+      "compatibility_mode": null,
+      "platform_mentions": [
+        "8.5.1.1529"
+      ],
+      "configuration_kind": null,
+      "client": null,
+      "applies_to": "See task.md and lessons.md for verified boundaries",
+      "confidence": "HIGH",
+      "verification_status": "historical-evidence",
+      "verified_at": null,
+      "regression_tests": [],
+      "supersedes": [],
+      "evidence": [
+        {
+          "path": "cases/116-form-write-and-dynamic-list-settings/task.md",
+          "sha256": "3cb354952855ec4add8f23ac61e5a9e2efda1b917b017e7e9cd89013a8cb83ad"
+        },
+        {
+          "path": "cases/116-form-write-and-dynamic-list-settings/lessons.md",
+          "sha256": "705c5e6ef09fa5ee914c4d3f121fbbb7e5913c33a2ad9984196da36144188233"
+        }
+      ]
     }
   ]
 }
