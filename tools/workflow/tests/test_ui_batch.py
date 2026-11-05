@@ -28,6 +28,11 @@ class BatchTests(unittest.TestCase):
     def test_reserved_markers(self):
         cases=self.cases();cases[0]['steps']=['этап | OP13.end']
         with self.assertRaises(ValueError):ui_batch.prepare(cases,self.factory)
+    def test_reference_manager_supports_the_published_protocol(self):
+        module=Path(__file__).resolve().parents[1]/'reference/manager.bsl'
+        text=module.read_text(encoding='utf-8-sig')
+        for action in ('этап','сортировать','фокус-поле','открыть-поле'):
+            self.assertIn('Шаг = "'+action+'"',text)
     def test_runner_and_artifact(self):
         def runner(path):
             self.assertTrue(path.is_file())
