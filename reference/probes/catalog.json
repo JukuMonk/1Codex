@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "probes": [
+    {"id":"form-write","generator":"save_probe.py","kind":"catalog","platform":"8.5.1.1529","origin":"UP FM02 point 6, case 116","verification":"Observed standard Write toast versus form method Write without toast; generated portable variant still requires target sandbox validation.","acceptance":["Written data matches input","Business validation failure remains visible","Compare toast immediately after both actions"]},
+    {"id":"document-posting","generator":"save_probe.py","kind":"document","platform":"8.5.1.1529","origin":"UP FM02 point 6, case 116","verification":"Observed document Posted=true and no method-write toast; automatic posting mode retained. Portable variant requires compatible target document.","acceptance":["Posted flag becomes true","Automatic posting mode preserved","Failure does not close the form"]},
+    {"id":"dirty-close","generator":"save_probe.py","kind":"close","platform":"8.5.1.1529","origin":"UP FM02 point 6, case 116","verification":"Observed Yes write, No discard, Cancel retained input; application exit intentionally stays standard.","acceptance":["Yes writes","No preserves previous stored value","Cancel retains form input","Failed write keeps form open"]},
+    {"id":"dynamic-list-order","fragment":"dynamic_order.bsl","platform":"8.5.1.1529","origin":"UP FM02 points 9 and 10, case 116","verification":"Fragment adapted from real name-sort then move test. Not a standalone EPF.","acceptance":["Fixed owner filter is preserved","User sort precedes move","Visible row order matches saved order","Repeat movement and boundaries"]},
+    {"id":"independent-editor","fragment":"independent_editor.bsl","platform":"8.5.1.1529","origin":"UP FM02 point 8","verification":"Two editors keyed by stable row IDs and editable parent were observed in UP. Fragment requires real form, close callback and metadata adaptation.","acceptance":["Parent remains editable","Two editors return to their own rows","Deleted row is handled","Applying editor does not save parent"]}
+  ]
+}
