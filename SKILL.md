@@ -16,6 +16,11 @@ BSL-проверки — `tools/bsl_checks.py`, СКД — `tools/skd_builder.py
 [маршрутах без EDT](index/designer.md) и прочитать только нужный раздел.
 Новый проект — [порядок старта](knowledge/new-project.md).
 
+Доработка по ДиЗ или нескольким требованиям — [цикл по пунктам](knowledge/optimization-workflow.md):
+карточки и время, ограниченное исследование, контракты форм/UI, независимые
+фикстуры, ранняя сверка, проверяемое переиспользование результатов и отчёт.
+Инструкции, профиль платформы и уровни приёмки не заменять общим быстрым режимом.
+
 ## Рабочий цикл
 
 1. Зафиксировать версию платформы, совместимость, формат выгрузки, префикс,
@@ -60,3 +65,6 @@ BSL-проверки — `tools/bsl_checks.py`, СКД — `tools/skd_builder.py
 Проверенные средства защиты выпуска и UI: [надежный цикл](knowledge/reliable-workflow.md).
 Готовые команды doctor/lint/check/test/release — [исполнитель проекта](knowledge/project-runner.md).
 Анализ затрат и проверка гипотез ускорения — [самосовершенствование](knowledge/self-improvement.md).
+API карточек и отчёта — [task-plan](knowledge/task-plan.md);
+контракты, пробники и локальная справка — [contracts-and-api](knowledge/contracts-and-api.md);
+кэш, продолжение выпуска и watchdog — [incremental-execution](knowledge/incremental-execution.md).

@@ -12,7 +12,7 @@ import xml.etree.ElementTree as ET
 
 FIELD_TYPES = {'InputField', 'CheckBoxField', 'LabelField', 'TextDocumentField', 'HTMLDocumentField'}
 TABLE_ACTIONS = {'строка', 'текущая', 'текущаястрока', 'выделить', 'открыть', 'завершить'}
-PASS_ACTIONS = {'ждать', 'снимок', 'сообщения', 'контекст', 'дамп', 'закрыть', 'закрыть-форму', 'вопрос', 'раздел'}
+PASS_ACTIONS = {'ждать', 'снимок', 'сообщения', 'контекст', 'дамп', 'закрыть', 'закрыть-форму', 'вопрос', 'раздел', 'этап'}
 RUNTIME_TYPES = {'кнопка': 'Button', 'поле': 'InputField', 'таблица': 'Table', 'группа': 'UsualGroup', 'декорация': 'LabelDecoration'}
 
 

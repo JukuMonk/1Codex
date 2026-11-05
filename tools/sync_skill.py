@@ -8,7 +8,12 @@ import subprocess
 import tempfile
 from workflow.resource_lock import base_lease
 
-SHARED=('tools/workflow/','reference/probes/','cases/')
+SHARED=('reference/probes/','cases/',
+        'tools/workflow/task_plan.py','tools/workflow/form_contract.py','tools/workflow/ui_contract.py',
+        'tools/workflow/api_index.py','tools/workflow/hbk_source.py','tools/workflow/verification.py',
+        'tools/workflow/watchdog.py','tools/workflow/source_guard.py','tools/workflow/ui_batch.py',
+        'knowledge/task-plan.md','knowledge/contracts-and-api.md','knowledge/incremental-execution.md',
+        'knowledge/optimization-workflow.md')
 IGNORED={'.git','.platform','__pycache__'}
 
 def digest(path):
@@ -36,7 +41,10 @@ def tracked_files(source,profile):
     if profile not in ('codex','shared'): raise ValueError('Unknown skill profile')
     result=subprocess.run(['git','-C',str(source),'ls-files','-z'],capture_output=True,check=True)
     names=result.stdout.decode('utf-8').split('\0')
-    return sorted(n for n in names if n and (profile=='codex' or n.startswith(SHARED)))
+    return sorted(n for n in names if n and (profile=='codex' or shared(n)))
+
+def shared(name):
+    return any(name.startswith(p) if p.endswith('/') else name==p for p in SHARED)
 
 def inventory(root,names):
     return {n:digest(inside(root,n)) for n in names}
@@ -48,7 +56,7 @@ def make_plan(source,target,names,profile='codex'):
         raise ValueError('Source and destination must be separate trees')
     names=sorted(set(names))
     for name in names:
-        if profile=='shared' and not name.startswith(SHARED): raise ValueError('Profile-specific file in shared update')
+        if profile=='shared' and not shared(name): raise ValueError('Profile-specific file in shared update')
         if not inside(source,name).is_file(): raise ValueError('Missing source file: '+name)
     return {'schema_version':1,'profile':profile,'source':str(source),'target':str(target),
             'files':{n:{'source':digest(inside(source,n)),'before':digest(inside(target,n))} for n in names}}

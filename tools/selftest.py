@@ -13,6 +13,7 @@ ROOT=Path(__file__).resolve().parents[1]
 def run():
     checks=[]
     commands=[('regression',['-m','unittest','discover','-s','tools/workflow/tests','-v']),
+        ('skill-sync',['-m','unittest','discover','-s','tests','-p','test_skill_sync.py','-v']),
         ('links',['tools/check_links.py']),('cases',['tools/cases_sync.py','проверить']),
         ('catalog',['tools/case_catalog.py','check']),('legacy-sandbox',['tools/check_project.py','tests/sandbox']),
         ('designer-fixture',['tools/check_designer.py','tests/designer/fixtures/configuration']),
