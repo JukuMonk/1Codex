@@ -19,6 +19,18 @@ MAX_FILE_BYTES = 2_000_000
 MAX_TEXT = 200_000
 
 
+def decode_html(raw):
+    if raw.startswith((b'\xff\xfe', b'\xfe\xff')): return raw.decode('utf-16')
+    if raw.startswith(b'\xef\xbb\xbf'): return raw.decode('utf-8-sig')
+    declared = re.search(rb'charset\s*=\s*["\x27]?([a-zA-Z0-9_-]+)', raw[:4096], re.I)
+    encoding = declared.group(1).decode('ascii').casefold() if declared else 'utf-8'
+    allowed = {'utf-8', 'utf8', 'windows-1251', 'cp1251', 'windows-1252', 'cp1252',
+               'utf-16', 'utf-16le', 'utf-16be', 'koi8-r', 'iso-8859-1'}
+    if encoding not in allowed: raise ValueError('Unsupported help HTML charset: ' + encoding)
+    try: return raw.decode(encoding)
+    except UnicodeDecodeError as error: raise ValueError('Help HTML cannot be decoded with ' + encoding) from error
+
+
 class Text(HTMLParser):
     def __init__(self):
         super().__init__(convert_charrefs=True)
@@ -102,7 +114,7 @@ def build_index(source_root, cache_path, platform_version, archive=None, progres
                     connection.execute('DELETE FROM tokens WHERE path=?', (relative,))
                     continue
                 raw = path.read_bytes()
-                html = raw.decode('utf-8-sig', errors='replace')
+                html = decode_html(raw)
                 parser = Text(); parser.feed(html)
                 body = re.sub(r'\s+', ' ', ' '.join(parser.parts)).strip()[:MAX_TEXT]
                 heading = re.search(r'<title[^>]*>(.*?)</title\s*>', html, re.I | re.S)

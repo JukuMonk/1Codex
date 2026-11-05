@@ -48,6 +48,19 @@ class ApiIndex(unittest.TestCase):
         self.assertEqual(result['parsed'],2)
         self.assertEqual(search_index(self.cache,'Открыть','8.3')['platform_version'],'8.3')
 
+    def test_declared_windows_charset_and_utf16_bom(self):
+        self.page.write_bytes('<meta charset="windows-1251"><title>Открыть</title><p>ТестируемоеПолеФормы</p>'.encode('cp1251'))
+        (self.root/'Save.html').write_bytes('<title>Записать</title><p>Сервер</p>'.encode('utf-16'))
+        self.build()
+        self.assertTrue(self.search('Открыть ТестируемоеПолеФормы')['matches'])
+        self.assertTrue(self.search('Записать Сервер')['matches'])
+
+    def test_undecodable_help_keeps_previous_index(self):
+        self.build();before=self.cache.read_bytes()
+        self.page.write_bytes(b'<meta charset="not-a-codec">bad')
+        with self.assertRaisesRegex(ValueError,'charset'):self.build()
+        self.assertEqual(self.cache.read_bytes(),before)
+
     def test_escaping_source_symlink_rejected(self):
         outside=Path(self.temp.name)/'outside.html';outside.write_text('outside')
         target=self.root/'link.html'
