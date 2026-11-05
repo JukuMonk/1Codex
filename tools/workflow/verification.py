@@ -100,7 +100,13 @@ def input_manifest(project, spec):
     if not script.is_file(): raise VerificationError('Missing test script')
     result[spec.script] = file_hash(script)
     for pattern in spec.dependencies:
-        found = [p for p in root.glob(pattern) if p.is_file()]
+        found = set()
+        # Path.glob('directory/**') yields directories, not files. Expand them
+        # explicitly so the documented subtree dependency is actually cacheable.
+        for item in root.glob(pattern):
+            contained(root, item.relative_to(root).as_posix())
+            if item.is_file(): found.add(item)
+            elif item.is_dir(): found.update(p for p in item.rglob('*') if p.is_file())
         if not found: raise VerificationError('Dependency pattern matched no files: ' + pattern)
         for p in found:
             name = p.relative_to(root).as_posix()

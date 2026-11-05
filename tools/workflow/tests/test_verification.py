@@ -52,6 +52,13 @@ class CacheTests(Fixture):
         (self.root/'reports/report.md').write_text('changed')
         self.assertTrue(self.cache.can_reuse(self.spec,self.context))
 
+    def test_directory_glob_tracks_all_files_and_new_files_invalidate(self):
+        spec=TestSpec('subtree','tests/a.py',('source/**',))
+        self.cache.record(spec,self.context,['evidence/a.json'])
+        self.assertTrue(self.cache.can_reuse(spec,self.context))
+        (self.root/'source/new.bsl').write_text('new')
+        self.assertFalse(self.cache.can_reuse(spec,self.context))
+
     def test_each_context_field_invalidates(self):
         for key in self.context:
             changed=dict(self.context);changed[key]='changed'
