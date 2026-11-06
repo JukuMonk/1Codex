@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark"><title>1Codex | Дерево выполнения</title>
+<style>/* STYLES */</style>
+</head>
+<body>
+<header class="mast"><div class="brand"><b aria-hidden="true">&gt;_</b> 1Codex</div><span class="mast-label">Монитор выполнения</span><span id="connection" role="status"></span></header>
+<main>
+<section class="intro"><div><p class="run-id" id="run-id"></p><h1 id="title"></h1></div>
+<div class="run-meta"><span id="job-status"></span><strong id="duration"></strong></div></section>
+<section class="run-map" aria-labelledby="rail-title">
+<div class="map-head"><h2 id="rail-title">Маршрут попыток</h2><div class="map-controls"><button id="rail-fail" hidden>К сбою</button><button id="rail-retry" hidden>К повтору</button><span id="rail-count"></span></div></div>
+<div id="route-window" tabindex="0" aria-label="Схема записанных переходов, прокрутка по горизонтали"><div id="route-board"></div></div>
+<div class="map-key"><span><i></i>Предшественник</span><span><i class="chron"></i>По времени</span><span><i class="nested"></i>Внутри этапа</span><span><i class="from-failure"></i>После сбоя</span><span><i class="again"></i>К повтору</span></div>
+</section>
+<details class="atlas-nav"><summary>Перейти к разделу атласа</summary><nav id="navigator" aria-label="Навигация по ветвям"></nav></details>
+<div class="layout">
+<section class="workspace" aria-labelledby="map-title">
+<div class="tree-heading"><h2 id="map-title">Дерево выполнения</h2><div class="actions"><button id="expand">Раскрыть все ветви</button><button id="collapse">Свернуть</button></div></div>
+<div class="filters"><label class="check"><input type="checkbox" id="used"> Только задействованные</label><label id="points-wrap" hidden>Пункт <select id="point"></select></label></div>
+<div class="time-tools" id="time-tools"><label>Шкала времени <select id="time-window"></select></label><span class="time-key"><i class="wait-swatch"></i> Записанное ожидание</span></div>
+<div class="column-titles"><span>Этап и попытка</span><span class="scale-title" id="scale"></span></div>
+<div id="tree"><svg id="wires" aria-hidden="true"></svg><div id="branches"></div></div>
+<div class="legend"><span><i class="line explicit"></i>Предшественник</span><span data-legend="sequence"><i class="line sequence"></i>По времени</span><span data-legend="retry"><i class="line repeat"></i>Возврат</span><span data-legend="fault"><i class="line fault-line"></i>После сбоя</span><span data-legend="parent"><i class="line indirect"></i>Вложенный этап</span><span data-legend="plan"><i class="line indirect"></i>Вариант по атласу</span></div>
+</section>
+<aside aria-label="Состояние и события">
+<section class="summary"><h2>Состояние прогона</h2><div id="metrics"></div><div id="incidents"></div></section>
+<details class="log-panel" open><summary><h2>Журнал</h2><span id="total"></span></summary>
+<label class="log-filter">Показать <select id="filter"><option value="all">Все события</option><option value="failed">Ошибки</option><option value="repeat">Повторы</option><option value="waiting">Ожидание</option></select></label>
+<ol id="events"></ol></details>
+</aside></div></main>
+<footer><span id="source"></span><a href="https://jukumonk.github.io/1Codex/" target="_blank" rel="noreferrer">Инженерный атлас ↗</a></footer>
+<script type="application/json" id="bundle"><!-- DATA --></script>
+<script>/* SCRIPT */</script>
+</body></html>

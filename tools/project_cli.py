@@ -104,7 +104,7 @@ def compare(source,exported):
     return {'errors':errors,'cosmetic':cosmetic,'compared_files':len(a.keys()&b.keys())}
 
 
-def execute(cfg,action):
+def execute(cfg,action, *, journal=None, parent=None):
     validate_settings(cfg)
     project=Path(cfg['_project']);source=Path(cfg['dump']);kind=cfg['configuration_kind']
     if action=='release':
@@ -117,14 +117,18 @@ def execute(cfg,action):
             if level=='ui' and not cfg.get('ui_scenario'):raise ValueError('Release requires UI scenario')
     run=None;status='failed'
     with project_lock(project,cfg['work']):
-        journal=timing.create(project,action,scenario='project-'+action,environment=cfg.get('platform_version'),
-                             dataset=cfg.get('dataset'),revision=cfg.get('skill_revision'))
+        owns_journal = journal is None
+        if owns_journal:
+            journal=timing.create(project,action,scenario='project-'+action,environment=cfg.get('platform_version'),
+                                 dataset=cfg.get('dataset'),revision=cfg.get('skill_revision'))
         try:
             run=FrozenRun(project,source,action,platform=cfg['work'])
             def stage(name,callback):
-                with timing.stage(journal,name):
+                with timing.stage(journal,name,parent) as sid:
                     code=run.stage(name,callback)
-                    if code:raise RuntimeError('Stage failed: '+name)
+                    if code:
+                        timing.signal(journal, sid, 'warning', 'Проверка вернула код '+str(code))
+                        raise RuntimeError('Stage failed: '+name)
             stage('structure',lambda:bool(check_designer.check(run.snapshot)))
             baseline=cfg.get('lint_baseline') or str(source.parent/'lint_baseline.txt')
             stage('lint',lambda:lint_dump.lint(str(run.snapshot),baseline))
@@ -188,7 +192,8 @@ def execute(cfg,action):
         finally:
             try:
                 if run:run.finish('succeeded' if status=='ok' else 'failed')
-            finally:timing.finish(journal,status)
+            finally:
+                if owns_journal:timing.finish(journal,status)
 
 
 def main():
@@ -196,13 +201,35 @@ def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('action',choices=['doctor','lint','check','test','release'])
     p.add_argument('--config',required=True,type=Path)
+    p.add_argument('--journal', type=Path, help='Existing task journal to join')
+    p.add_argument('--parent', help='Active parent stage in that journal')
+    p.add_argument('--after', help='Finished predecessor in that journal')
     args=p.parse_args()
+    if not args.journal and (args.parent or args.after):
+        p.error('--parent and --after require --journal')
+    scope = None
+    outcome = 'failed'
     try:
         cfg=read_config(args.config)
+        if args.journal:
+            folder = Path(cfg['_project']) / '.platform' / 'task-timings'
+            if args.journal.resolve().parent != folder.resolve():
+                raise ValueError('Use the task timing journal of this project')
+            node = {'lint':'platform.lint', 'doctor':'analysis.doctor',
+                    'release':'release', 'test':'evidence', 'check':'platform'}[args.action]
+            scope = timing.begin(args.journal, args.action, args.parent, node=node, after=args.after)
         if args.action=='doctor':result=doctor(cfg)
-        elif args.action=='lint':return lint_dump.lint(cfg['dump'],cfg.get('lint_baseline'))
-        else:result=execute(cfg,args.action)
+        elif args.action=='lint':
+            code = lint_dump.lint(cfg['dump'],cfg.get('lint_baseline'))
+            outcome = 'failed' if code else 'ok'
+            if code and scope:
+                timing.signal(args.journal, scope, 'warning', 'Линт вернул код '+str(code))
+            return code
+        else:result=execute(cfg,args.action,journal=args.journal,parent=scope)
+        outcome = 'ok'
         print(json.dumps(result,ensure_ascii=False,indent=2));return 0
     except (OSError,ValueError,RuntimeError,ET.ParseError) as exc:
         print('ERROR: '+str(exc),file=sys.stderr);return 1
+    finally:
+        if scope: timing.end(args.journal, scope, outcome)
 if __name__=='__main__':sys.exit(main())

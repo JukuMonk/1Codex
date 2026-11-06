@@ -113,7 +113,7 @@ def set_revision(path, revision):
         data['revision'] = _text(revision, 'revision')
 
 
-def begin_stage(path, journal, point_id, phase, parent=None, budget_seconds=None):
+def begin_stage(path, journal, point_id, phase, parent=None, budget_seconds=None, *, node=None, after=None):
     """Create a stage in timing.py's journal, adding task/point/phase metadata."""
     _read(path)
     if phase not in PHASES:
@@ -145,7 +145,7 @@ def begin_stage(path, journal, point_id, phase, parent=None, budget_seconds=None
             record['stages'].append(dict(stage_id=stage_id, parent_id=parent,
                 name=point_id + ':' + phase, started_at=timing.stamp(), status='running',
                 task_id=data['task_id'], point_id=point_id, phase=phase,
-                budget_seconds=budget_seconds))
+                budget_seconds=budget_seconds, **(timing.bindings(record, node, after) if node or after else {})))
         if relative not in data['journals']:
             data['journals'].append(relative)
     return stage_id
@@ -367,6 +367,7 @@ def main():
     begin.add_argument('manifest', type=Path); begin.add_argument('journal', type=Path)
     begin.add_argument('--point', required=True); begin.add_argument('--phase', required=True, choices=sorted(PHASES))
     begin.add_argument('--parent'); begin.add_argument('--budget-seconds', type=float)
+    begin.add_argument('--node'); begin.add_argument('--after')
     end = sub.add_parser('end')
     end.add_argument('manifest', type=Path); end.add_argument('journal', type=Path); end.add_argument('stage_id')
     end.add_argument('--status', choices=['ok','failed','interrupted'], default='ok'); end.add_argument('--failure-kind', choices=sorted(FAILURES))
@@ -384,7 +385,8 @@ def main():
     if args.command == 'create':
         print(create(args.manifest, args.title, json.loads(args.points.read_text(encoding='utf-8')), args.revision, args.project))
     elif args.command == 'begin':
-        print(begin_stage(args.manifest,args.journal,args.point,args.phase,args.parent,args.budget_seconds))
+        print(begin_stage(args.manifest,args.journal,args.point,args.phase,args.parent,args.budget_seconds,
+                          node=args.node,after=args.after))
     elif args.command == 'end':
         end_stage(args.manifest,args.journal,args.stage_id,args.status,args.failure_kind)
     elif args.command == 'checkpoint':

@@ -80,7 +80,8 @@ def main():
     resource_dirs = {'bootstrap', 'cases', 'examples', 'index', 'knowledge', 'reference', 'tests', 'tools'}
     tracked = [name for name in tracked if name and
                (PurePosixPath(name).parts[0] in resource_dirs or
-                name in {'SKILL.md', 'AGENTS.md', 'CLAUDE.md', 'README.md', 'pyproject.toml', 'requirements-windows.txt'})]
+                name in {'SKILL.md', 'AGENTS.md', 'CLAUDE.md', 'README.md', 'pyproject.toml', 'requirements-windows.txt',
+                         'docs/atlas/graph-layout.json'})]
     report = {'plugin': manifest['name'], 'version': version,
               'worktree_dirty': dirty, 'review_build': args.include_worktree,
               'source_manifest': {name: hashlib.sha256((ROOT/name).read_bytes()).hexdigest() for name in tracked},
