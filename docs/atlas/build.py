@@ -57,9 +57,11 @@ def main():
     if p.returncode:
         sys.stderr.write(p.stderr[-4000:]);raise SystemExit(p.returncode)
     graphs=json.loads(p.stdout)
-    catalog=json.loads((REPO/'index/catalog.json').read_text(encoding='utf-8-sig'));counts=collections.Counter(c['format'] for c in catalog['cases'])
-    stats=dict(cases=len(catalog['cases']),knowledge=len(list((REPO/'knowledge').glob('*.md'))),tools=len(list((REPO/'tools').rglob('*.py'))),nodes=sum(len(g['nodes']) for g in graphs),edges=sum(len(g['edges']) for g in graphs),maps=len(graphs))
     source_sha=subprocess.check_output(['git','rev-parse','v1.1.0^{commit}'],cwd=REPO,text=True).strip()
+    catalog=json.loads(subprocess.check_output(['git','show',source_sha+':index/catalog.json'],cwd=REPO))
+    counts=collections.Counter(c['format'] for c in catalog['cases'])
+    files=subprocess.check_output(['git','ls-tree','-r','--name-only',source_sha,'--','knowledge','tools'],cwd=REPO,text=True).splitlines()
+    stats=dict(cases=len(catalog['cases']),knowledge=sum(bool(re.fullmatch(r'knowledge/[^/]+\.md',p)) for p in files),tools=sum(p.startswith('tools/') and p.endswith('.py') for p in files),nodes=sum(len(g['nodes']) for g in graphs),edges=sum(len(g['edges']) for g in graphs),maps=len(graphs))
     labels=['Разбор задачи','Поиск метаданных','Выбор знаний','Изменение исходников','Проверка платформой','Демо-данные','COM-соединение','Интерфейс и Vanessa','Приёмка','Выпуск и отчёт','Замеры и улучшения','Обновления']
     nav=''.join(f'<a href="#{g["id"]}"><span>{i:02}</span>{H(labels[i-1])}</a>' for i,g in enumerate(graphs,1))
     sections=[];node_data={}
@@ -77,7 +79,7 @@ def main():
     metrics=''.join(f'<div><strong>{stats[k]}</strong><span>{label}</span></div>' for k,label in [('cases','разобранных кейсов'),('knowledge','раздела знаний'),('tools','Python-файлов в tools'),('maps','подробных схем')])
     bars=''.join(f'<div class="catalog-row"><span>{name}</span><div><i style="width:{counts[key]/stats["cases"]*100:.3f}%"></i></div><b>{counts[key]}</b></div>' for key,name in [('designer','Конфигуратор'),('shared','Общие приёмы'),('legacy-edt','Архив EDT')])
     data=json.dumps(node_data,ensure_ascii=False).replace('<','\\u003c')
-    values={'CSS':(HERE/'style.css').read_text(encoding='utf-8')+'\n'+(HERE/'terminal.css').read_text(encoding='utf-8'),'JS':(HERE/'app.js').read_text(encoding='utf-8'),'NAV':nav,'SECTIONS':'\n'.join(sections),'OVERVIEW':overview(),'METRICS':metrics,'BARS':bars,'NODE_DATA':data,'NODE_COUNT':str(stats['nodes']),'EDGE_COUNT':str(stats['edges']),'SOURCE_SHA':source_sha,'LICENSE':H((HERE/'vendor/DAGRE-LICENSE.txt').read_text(encoding='utf-8')+'\n'+(HERE/'vendor/DAGRE-BUNDLE-LICENSE.txt').read_text(encoding='utf-8'))}
+    values={'CSS':(HERE/'style.css').read_text(encoding='utf-8')+'\n'+(HERE/'theme.css').read_text(encoding='utf-8'),'JS':(HERE/'app.js').read_text(encoding='utf-8'),'NAV':nav,'SECTIONS':'\n'.join(sections),'OVERVIEW':overview(),'METRICS':metrics,'BARS':bars,'NODE_DATA':data,'NODE_COUNT':str(stats['nodes']),'EDGE_COUNT':str(stats['edges']),'SOURCE_SHA':source_sha,'LICENSE':H((HERE/'vendor/DAGRE-LICENSE.txt').read_text(encoding='utf-8')+'\n'+(HERE/'vendor/DAGRE-BUNDLE-LICENSE.txt').read_text(encoding='utf-8'))}
     result=(HERE/'template.html').read_text(encoding='utf-8')
     for k,v in values.items():result=result.replace('{{'+k+'}}',v)
     if re.search(r'\{\{[A-Z_]+\}\}',result):raise ValueError('Unresolved template slot')

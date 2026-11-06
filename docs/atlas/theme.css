@@ -1,4 +1,4 @@
-/* Selected visual study 04: terminal. Semantic colors describe node types. */
+/* Semantic colors describe node types. */
 :root {
   --bg:#f5f5ed; --paper:#fcfcf5; --ink:#242a21; --muted:#626958;
   --line:#cbd0be; --accent:#79601e; --soft:#eee8d4;
