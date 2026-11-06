@@ -87,6 +87,25 @@ class RetryGate:
         return True
 
 
+def journal_reporter(journal, stage_id):
+    """Send watchdog events to a timing stage without exposing process details."""
+    try:
+        from . import timing
+    except ImportError:
+        import timing
+    kinds = {
+        'duration_warning': ('warning', 'Превышена ожидаемая длительность'),
+        'no_progress_warning': ('warning', 'Watchdog не видит прогресса'),
+        'access_denied': ('stalled', 'Watchdog обнаружил отказ в доступе'),
+        'stalled_cancel_safe': ('stalled', 'Истёк срок ожидания безопасно прерываемой операции'),
+        'stalled_unsafe': ('stalled', 'Истёк срок ожидания операции, требуется диагностика'),
+    }
+    def report(event):
+        kind, message = kinds[event['kind']]
+        timing.signal(journal, stage_id, kind, message)
+    return report
+
+
 def run_monitored(process, progress_provider, phase, *, on_event=lambda event: None,
                   access_denied_provider=lambda: False, clock=time.monotonic,
                   sleep=time.sleep, poll_seconds=0.25, termination_grace=5):
