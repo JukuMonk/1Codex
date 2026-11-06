@@ -46,7 +46,9 @@ const readURL=async file=>{
     const liveUntil=fn=>p.waitForFunction(fn);
     assert.equal(await p.locator('.branch').count(),12);
     assert.equal(await p.locator('.route-stop').count(),0);
-    checks.push('all chapters visible before work');
+    assert.equal(await p.title(),'Монитор 1Codex');
+    assert.match(await p.locator('.mast .brand').innerText(), /Монитор 1Codex$/);
+    checks.push('all chapters and the monitor name visible before work');
     const check=start('Проверка','platform.lint');
     await liveUntil(()=>document.querySelector('[data-focus="branch:platform"]').dataset.tone==='running');
     await head('platform').click();
