@@ -7,7 +7,7 @@ from pathlib import Path
 
 GRAPH_FILE = Path(__file__).resolve().parents[2] / 'docs' / 'atlas' / 'graph-layout.json'
 CHAPTERS = {
-    'analysis': 'Задача', 'metadata': 'Метаданные', 'knowledge': 'Правила',
+    'analysis': 'Задача', 'expertise': 'Экспертиза задачи', 'metadata': 'Метаданные', 'knowledge': 'Правила',
     'implementation': 'Исходники', 'platform': 'Платформа', 'data': 'Демо-данные',
     'com': 'COM', 'ui': 'Интерфейс', 'evidence': 'Приёмка', 'release': 'Выпуск',
     'learning': 'Замеры', 'delivery': 'Обновление',
@@ -29,7 +29,9 @@ PLAN_PHASES = {
 
 @lru_cache(maxsize=1)
 def atlas():
-    return json.loads(GRAPH_FILE.read_text(encoding='utf-8'))
+    graphs = json.loads(GRAPH_FILE.read_text(encoding='utf-8'))
+    expert = json.loads(Path(__file__).with_name('expertise_graph.json').read_text(encoding='utf-8'))
+    return graphs[:1] + [expert] + graphs[1:]
 
 
 @lru_cache(maxsize=1)
