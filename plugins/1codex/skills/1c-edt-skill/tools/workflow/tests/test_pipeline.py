@@ -151,7 +151,7 @@ class PipelineTests(unittest.TestCase):
 
     def test_all_mappings_resolve_and_export_escapes_script_breakout(self):
         keys = pipeline_model.node_keys()
-        self.assertEqual(12,len(pipeline_model.atlas()))
+        self.assertEqual(set(pipeline_model.CHAPTERS), {g['id'] for g in pipeline_model.atlas()})
         self.assertTrue(set(pipeline_model.RUNNER_NODES.values()) <= keys)
         self.assertTrue(set(pipeline_model.PLAN_PHASES.values()) <= keys)
         with timing.stage(self.journal,'</script><script>alert(1)</script>'):

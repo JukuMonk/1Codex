@@ -113,6 +113,41 @@ def set_revision(path, revision):
         data['revision'] = _text(revision, 'revision')
 
 
+def attach_expertise(path, workspace):
+    """Opt a plan into expertise gates without changing legacy plans."""
+    try:
+        from . import expertise
+    except ImportError:
+        import expertise
+    data = _read(path)
+    workspace = _inside(data['project_root'], workspace)
+    bound = expertise.binding(workspace).get('task_plan')
+    if not bound or Path(bound).resolve() != Path(path).resolve():
+        raise ValueError('Expertise workspace must bind this task plan')
+    with timing.journal(path) as data:
+        if data['status'] != 'running':
+            raise ValueError('Task plan is closed')
+        data['expertise'] = workspace.relative_to(Path(data['project_root'])).as_posix()
+
+
+def _check_expertise(data, point_id):
+    if 'expertise' not in data:
+        return
+    try:
+        from . import expertise
+    except ImportError:
+        import expertise
+    workspace = _inside(data['project_root'], data['expertise'])
+    bound = expertise.binding(workspace).get('task_plan')
+    if not bound or expertise.load(bound).get('task_id') != data['task_id']:
+        raise ValueError('Expertise workspace belongs to another task')
+    states = expertise.readiness(workspace, expertise.latest(workspace))
+    required = [p['id'] for p in data['points']] if point_id == SHARED else [point_id]
+    blocked = {p:states.get(p, 'unreviewed') for p in required if states.get(p) != 'ready'}
+    if blocked:
+        raise ValueError('Expertise does not permit implementation: '+str(blocked))
+
+
 def begin_stage(path, journal, point_id, phase, parent=None, budget_seconds=None, *, node=None, after=None):
     """Create a stage in timing.py's journal, adding task/point/phase metadata."""
     _read(path)
@@ -126,6 +161,8 @@ def begin_stage(path, journal, point_id, phase, parent=None, budget_seconds=None
         if data['status'] != 'running':
             raise ValueError('Task plan is closed')
         _known(data, point_id)
+        if phase == 'implementation':
+            _check_expertise(data, point_id)
         journal_path = _inside(data['project_root'], journal)
         if journal_path == Path(path).resolve():
             raise ValueError('Timing journal must differ from task manifest')
